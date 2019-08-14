@@ -6,6 +6,8 @@
 #include <QMap>
 #include <QTimer>
 #include <QList>
+#include <QElapsedTimer>
+
 
 #include "serialworker.h"
 #include "networkworker.h"
@@ -42,24 +44,23 @@ enum {
     serial, network, none
 };
 
-class colorTheme {
-public:
-    QString back0;
-    QString back1;
-    QString back2;
-    QString back3;
-    QString back4;
-    QString text;
+#define COLOR_BLACK     "black"
+#define COLOR_WHITE     "white"
 
-    colorTheme(){
-        back0 = "#404040";          // the very background
-        back1 = "#202020";          // groupboxes & statusBar
-        back2 = "#505050";          // menuBar
-        back3 = "#101010";
-        back4 = "#050505";          // text background
-        text = "white";             // text
-    }
-};
+#define COLOR_DATA_RX      "DeepSkyBlue"
+#define COLOR_DATA_TX      "lime"
+#define COLOR_ERROR     "Tomato"
+#define COLOR_DATA      "#949494"
+
+#define COLOR_TOPLINE   "#A0A0A0"
+#define COLOR_GRAY0     "#404040"
+#define COLOR_GRAY1     "#202020"
+#define COLOR_GRAY2     "#151515"
+#define COLOR_GRAY3     "#101010"
+#define COLOR_GRAY4     "#050505"
+
+#define MAINWINDOWTITLE "Termik"
+
 
 
 /////////////////////////////////////////////////////////
@@ -84,14 +85,13 @@ private slots:
     void dataArrived();
     void EscPressed();
     void moveCursorToEnd();
-    void changeTheme();
     void showFindUi();
     void hideFindUi();
     void showSaveSettings();
     void hideSaveSettings();
     void terminalInputSetFocus();
 
-
+    void showConnectionSettings();
 
     void clearOutput();
     void focus_1();
@@ -111,12 +111,18 @@ private slots:
     void on_pushButton_save_clicked();
     void saveToFile(QString data);
 
+public slots:
+    void connectVia_serial();
+    void connectVia_network();
 
 private:
     Ui::MainWindow *ui;
     SerialWorker *sw;
     NetworkWorker *nw;
     Dialog_connect* dialog_connect;
+
+    qint64 tick_lastRx;
+    QElapsedTimer tick;
 
     QFile file;
 
@@ -126,19 +132,6 @@ private:
     quint16 history_out_pointer;
 
     void log(logType_t logType, QString data);
-
-//    /* tab port init */
-//    void tab_port_init();
-//    QMap<int,QString> baudRateS;    // create maps
-//    QMap<int,QString> dataBitsS;
-//    QMap<int,QString> parityS;
-//    QMap<int,QString> stopBitsS;
-//    QMap<int,QString> flowControlS;
-//    void fillBaudRate();            // fill maps
-//    void fillDataBits();
-//    void fillParity();
-//    void fillstopBits();
-//    void fillflowControl();
 
     void terminalOutUpdate(terminalData_t, QByteArray);
 
@@ -150,7 +143,7 @@ private:
     void shortcutTable_addItem(QList<QString> element);
 
     void portSet_fillMaps();
-
+    void uiInit();
 
 };
 

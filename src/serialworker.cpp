@@ -74,18 +74,10 @@ bool SerialWorker::write(QByteArray data)
 void SerialWorker::readData()
 {
     QByteArray data = serial->readAll();
-
-
+    Rx_buffer.append(data.data());
     emit dataReceived();
 }
 ///////////////////////////////////////////////////////////////////////////////
-QByteArray SerialWorker::readAllRx()
-{
-    QByteArray data = Rx_buffer.data();
-    Rx_buffer.clear();
-    return data;
-}
-
 
 
 

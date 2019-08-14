@@ -30,7 +30,6 @@ namespace Ui {
 class Dialog_connect;
 }
 
-class colorTheme;
 class SerialWorker;
 class NetworkWorker;
 
@@ -59,7 +58,6 @@ public:
 
 private:
     Ui::Dialog_connect *ui;
-    colorTheme color;
     SerialWorker* sw;
     NetworkWorker* nw;
 

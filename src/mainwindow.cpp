@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("USB terminal");       // set name of this dialog
 
+    tick.start();
 
     sw = new SerialWorker(this);
     connect(sw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
@@ -36,7 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
     nw = new NetworkWorker(this);
     connect(nw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
+    dialog_connect = new Dialog_connect(this);
+//    connect(dialog_connect, SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
+    dialog_connect->setSw(sw);
+    dialog_connect->setNw(nw);
+    dialog_connect->init();
 
+    connect(dialog_connect, SIGNAL(connectVia_serial()), this, SLOT(connectVia_serial()));
+    connect(dialog_connect, SIGNAL(connectVia_network()), this, SLOT(connectVia_network()));
 
 
     /*************************** Shortcuts ****************************/
@@ -45,8 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_T), this, SLOT(changeTheme()));
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(openPortSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
 //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
@@ -60,6 +67,90 @@ MainWindow::MainWindow(QWidget *parent) :
 
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
+
+    uiInit();
+
+}
+//////////////////////////////////////////////////////////////////////
+void MainWindow::connectVia_serial()
+{
+    connectionType = serial;
+
+    if(sw->isOpen()) {
+        sw->close();
+    }
+
+    if (sw->open()) {
+        log(note, "Connected via Serial");
+    } else {
+        log(note, "Failed to connect via Serial");
+    }
+}
+//////////////////////////////////////////////////////////////////////
+void MainWindow::connectVia_network()
+{
+    connectionType = network;
+    if (nw->open()) {
+        log(note, "Connected via Network");
+    } else {
+        log(note, "Failed to connect via Network");
+    }
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::uiInit()
+{
+    setWindowTitle(MAINWINDOWTITLE);
+
+    /*************************** set colors ***************************/
+    /* MainWindow background */
+    this->setStyleSheet(QString("color: %1; background-color: %2")
+                                        .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+
+    ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_GRAY4));
+
+    ui->statusBar->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY1));
+
+    ui->lineEdit_prefix->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_suffix->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->lineEdit_find_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_find_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_find_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->tab_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+    ui->tab_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+    ui->tab_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+
+    ui->textEdit_out_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->textEdit_out_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->textEdit_out_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->lineEdit_in_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_in_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_in_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->checkBox_clearIn_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->checkBox_clearIn_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->checkBox_clearIn_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 
     /*************************** UI setup ****************************/
@@ -86,10 +177,11 @@ MainWindow::MainWindow(QWidget *parent) :
     hideSaveSettings();
     fillShortcutsTable();
     focus_1();
-
-    /* focus to the com port name at the program startup */
-
-
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::showConnectionSettings()
+{
+    dialog_connect->show();
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showSaveSettings()
@@ -404,14 +496,18 @@ void MainWindow::focus_3()
 ///     process the list of received data
 void MainWindow::dataArrived()
 {
+    tick_lastRx = tick.elapsed();
+
      /* get the data from apropriate class */
     switch (connectionType)
     {
     case serial:
-        terminalOutUpdate(usbRx, sw->readAllRx());
+        terminalOutUpdate(usbRx, sw->Rx_buffer.data());
+        sw->Rx_buffer.clear();
         break;
     case network:
-        terminalOutUpdate(usbRx, nw->readAllRx());
+        terminalOutUpdate(usbRx, nw->Rx_buffer.data());
+        nw->Rx_buffer.clear();
         break;
     }
 }
@@ -455,11 +551,11 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
     switch(dataKind)
     {
     case usbRx:
-        color = "DeepSkyBlue";
+        color = COLOR_DATA_RX;
         break;
 
     case usbTx:
-        color = "green";
+        color = COLOR_DATA_TX;
         /* add the Tx data to the history_out */
         if (history_out.isEmpty()) {
             history_out.prepend(data);
@@ -506,7 +602,6 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
     }
     ui->textEdit_out_hex->setTextColor(color);
     ui->textEdit_out_hex->insertPlainText(data_str_hex);       // insert the data
-
     ui->textEdit_out_hex->setTextCursor(prev_cursor);           // set the cursor back
 
 
@@ -525,7 +620,6 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 
     ui->textEdit_out_dec->setTextColor(color);
     ui->textEdit_out_dec->insertPlainText(data_str_dec);       // insert the data
-
     ui->textEdit_out_dec->setTextCursor(prev_cursor);           // set the cursor back
 
     /* put the data into txt file */
@@ -548,14 +642,14 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 /////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile(QString data)
 {
-    QTextStream outStream(&file);
-    if (file.open(QFile::WriteOnly | QFile::Text | QIODevice::Append)) {
-        outStream <<  data;
-        file.flush();
-        file.close();
-    } else {
-       log(error, "Can't open the file.");
-    }
+//    QTextStream outStream(&file);
+//    if (file.open(QFile::WriteOnly | QFile::Text | QIODevice::Append)) {
+//        outStream <<  data;
+//        file.flush();
+//        file.close();
+//    } else {
+//       log(error, "Can't open the file.");
+//    }
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::EscPressed
@@ -591,13 +685,6 @@ void MainWindow::hideWrap()
     ui->groupBox_wrap->hide();
 }
 
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::changeTheme
-/// switch to the next color theme
-void MainWindow::changeTheme()
-{
-    /* todo themes */
-}
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::moveCursorToEnd
 // slot generated by hotkey moves cursor to end of text edit in all tabs

@@ -14,7 +14,7 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui(new Ui::Dialog_connect)
 {
     ui->setupUi(this);
-
+    ui->tabWidget->setCurrentIndex(serial);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -52,28 +52,35 @@ void Dialog_connect::init()
 void Dialog_connect::initColors()
 {
     this->setStyleSheet(QString("color: %1; background-color: %2")
-                        .arg(color.text).arg(color.back1));
+                        .arg(COLOR_WHITE).arg(COLOR_GRAY1));
+
+    ui->tab_serial->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+    ui->tab_network->setStyleSheet(QString("color: %1; background-color: %2")
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
     ui->comboBox_baudRate->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_dataBits->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_flowControl->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_parity->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_portName->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
-
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->spinBox_ipPort_Tx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_ipAddr->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(color.text).arg(color.back4));
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->pushButton_autoconnect->setStyleSheet(QString("color: %1; background-color: %2")
+                                              .arg(COLOR_WHITE).arg(COLOR_GRAY0));
 }
 
 /////////////////////////////////////////////////////////////////
@@ -183,13 +190,13 @@ void Dialog_connect::fillflowControl()
 ///         set default port parameters to the port settings ui
 void Dialog_connect::setDefaultUiParameters()
 {
-    ui->comboBox_baudRate->setCurrentText("38400");
+    ui->comboBox_baudRate->setCurrentText("115200");
     ui->comboBox_dataBits->setCurrentText("8");
     ui->comboBox_parity->setCurrentText("none");
     ui->comboBox_stopBits->setCurrentText("1");
     ui->comboBox_flowControl->setCurrentText("none");
 
-    ui->lineEdit_ipAddr->setText("192.168.203.44");
+    ui->lineEdit_ipAddr->setText("192.168.0.100");
     ui->spinBox_ipPort_Tx->setValue(8480);
     ui->spinBox_ipPort_Rx->setValue(8481);
 

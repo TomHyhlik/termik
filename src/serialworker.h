@@ -40,8 +40,6 @@ public:
 
     QByteArray Rx_buffer;
 
-    QByteArray readAllRx();
-
 private:
 
     QSerialPort* serial;
