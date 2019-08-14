@@ -1,8 +1,6 @@
 # termik
 A terminal for data transmission via serial or network
-
-I made myself terminal for USB communication in Qt, cause similar available tools does not satisfy me.
-The code can be recompiled for any platform that Qt supports.
+I had to make my own, cause none of the available tools does not include all the features I need and also this one can be recompiled for Mac, Linux and Windows.
 
 ## Description
 Everything is done using shortcuts which is shown after pressing F1.
