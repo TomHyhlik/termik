@@ -40,7 +40,7 @@ typedef enum {
 
 
 /* connectionType */
-enum {
+enum connectionType_t {
     serial, network, none
 };
 
@@ -110,6 +110,8 @@ private slots:
 
     void on_pushButton_save_clicked();
     void saveToFile(QString data);
+
+    void on_tabWidget_currentChanged(int index);
 
 public slots:
     void connectVia_serial();

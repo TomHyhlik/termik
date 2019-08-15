@@ -704,3 +704,40 @@ void MainWindow::on_pushButton_save_clicked()
     ui->lineEdit_save->setText(dir);
 }
 /////////////////////////////////////////////////////////////////
+/// \brief MainWindow::on_tabWidget_currentChanged
+/// \param index of data type
+///     switch focus to corresponding lineedit data input
+///     according to selected tabwidget data type
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    switch (index)
+    {
+    case data_ascii:
+        ui->lineEdit_in_ascii->setFocus();
+        break;
+    case data_hex:
+        ui->lineEdit_in_hex->setFocus();
+        break;
+    case data_dec:
+        ui->lineEdit_in_dec->setFocus();
+        break;
+    default:
+        ui->lineEdit_in_ascii->setFocus();
+    }
+}
+/////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
