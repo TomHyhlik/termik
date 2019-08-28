@@ -13,6 +13,10 @@ SerialWorker::SerialWorker(QObject *parent) : QObject(parent)
     serial = new QSerialPort(this);
 
     connect(serial, &QIODevice::readyRead, this, &SerialWorker::readData);
+
+    suffix_enabled = true;
+    prefix_enabled = false;
+    splitFactor_enabled = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

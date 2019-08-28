@@ -298,7 +298,7 @@ void MainWindow::keyEnterPressed()
             sw->write(out);
             terminalOutUpdate(usbTx, out);
 
-            log(note, "Data was sent");
+            log(info, "Data sent");
        } else {
             log(error, "USB port is not opened");
         }
@@ -306,7 +306,6 @@ void MainWindow::keyEnterPressed()
         if(ui->checkBox_clearIn_dec->isChecked())
             ui->lineEdit_in_dec->clear();
     }
-
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::keyUpPressed
@@ -534,7 +533,6 @@ void MainWindow::log(logType_t logType, QString data)
 
     case info:
         timeout = 60*1000;
-        data.prepend("Info: ");
     }
 
     ui->statusBar->showMessage(data, timeout);

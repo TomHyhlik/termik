@@ -5,6 +5,7 @@
 #include <QSerialPort>
 #include <QList>
 
+#define SUFFIX_DEFAULT      "\r\n"
 
 class parameters {
 public:
@@ -28,13 +29,13 @@ public:
     bool close();
     bool isOpen();
 
-    bool suffix_enabled = true;
-    bool prefix_enabled = false;
-    QByteArray suffix = "\r\n";
-    QByteArray prefix = "";
+    bool suffix_enabled;
+    bool prefix_enabled;
+    QByteArray suffix;
+    QByteArray prefix;
 
-    QByteArray splitFactor = "\r\n";
-    bool splitFactor_enabled = false;
+    QByteArray splitFactor;
+    bool splitFactor_enabled;
 
     parameters param;
 
