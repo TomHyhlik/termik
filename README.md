@@ -11,3 +11,4 @@ Transmit data in the terminal is done by pressing Enter.
     prepsat nasledujici funkce, je to moc napraseny
         void MainWindow::keyEnterPressed()
         void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
+    pridat spousteni programu pres cmd s argumenty

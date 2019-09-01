@@ -75,7 +75,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
     ~MainWindow();
 
     int connectionType;
@@ -146,6 +146,7 @@ private:
 
     void portSet_fillMaps();
     void uiInit();
+    void handleAppArguments(QStringList arguments);
 
 };
 

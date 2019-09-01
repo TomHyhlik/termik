@@ -22,7 +22,7 @@
 
 
 /////////////////////////////////////////////////////////////////
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -69,6 +69,19 @@ MainWindow::MainWindow(QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 
     uiInit();
+
+    handleAppArguments(arguments);
+}
+//////////////////////////////////////////////////////////////////////
+void MainWindow::handleAppArguments(QStringList arguments)
+{
+    for (int i = 0; i < arguments.size(); i++) {
+        qDebug() << i << "argument:" << arguments.at(i);
+    }
+    /* the first argument is the cmd of calling the app */
+    arguments.removeFirst();
+
+    /* todo */
 
 }
 //////////////////////////////////////////////////////////////////////
@@ -182,6 +195,7 @@ void MainWindow::uiInit()
 void MainWindow::showConnectionSettings()
 {
     dialog_connect->show();
+    dialog_connect->move(0,0);
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showSaveSettings()
@@ -207,13 +221,13 @@ void MainWindow::terminalInputSetFocus()
 {
     switch (ui->tabWidget->currentIndex())
     {
-    case 0:
+    case data_ascii:
         ui->lineEdit_in_ascii->setFocus();
         break;
-    case 1:
+    case data_hex:
         ui->lineEdit_in_hex->setFocus();
         break;
-    case 2:
+    case data_dec:
         ui->lineEdit_in_dec->setFocus();
         break;
     }
@@ -242,6 +256,7 @@ void MainWindow::keyEnterPressed()
 
         file.setFileName(fileName);
         /*  todo */
+        qDebug() << "TODO";
         fileDataFormat = data_ascii;
 
         hideSaveSettings();
