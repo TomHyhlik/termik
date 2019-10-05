@@ -23,6 +23,7 @@ SOURCES += \
         serialworker.cpp
 
 HEADERS += \
+        handlearguments.h \
         mainwindow.h \
         txtfile.h \
         dialog_connect.h \

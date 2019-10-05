@@ -8,7 +8,12 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
+
     prepsat nasledujici funkce, je to moc napraseny
-        void MainWindow::keyEnterPressed()
         void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
-    pridat spousteni programu pres cmd s argumenty
+        
+    dodelat spousteni programu pres cmd s argumenty
+
+    dale by to chtelo odstranit ten vypis v logu pri otevreni dialog_connect
+
+    doresit suffix and prefix

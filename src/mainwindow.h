@@ -11,6 +11,7 @@
 
 #include "serialworker.h"
 #include "networkworker.h"
+#include "handlearguments.h"
 
 
 #define DIGIT_NUM_HEX   2
@@ -26,7 +27,7 @@ typedef enum {
 } logType_t;
 
 typedef enum {
-     usbRx, usbTx
+     data_Rx, data_Tx
 } terminalData_t;
 
 typedef enum {
@@ -60,7 +61,6 @@ enum connectionType_t {
 #define COLOR_GRAY4     "#050505"
 
 #define MAINWINDOWTITLE "Termik"
-
 
 
 /////////////////////////////////////////////////////////
@@ -113,6 +113,8 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void Tx(QByteArray datarr);
+
 public slots:
     void connectVia_serial();
     void connectVia_network();
@@ -147,6 +149,13 @@ private:
     void portSet_fillMaps();
     void uiInit();
     void handleAppArguments(QStringList arguments);
+    void handleAppArguments_printHelp();
+    void handleAppArguments_printHelp_wrap(QString argData, QString argTitle);
+
+
+    QByteArray conv_strAscii_to_ba(QString data_str);
+    QByteArray conv_strHex_to_ba(QString data_str);
+    QByteArray conv_strDec_to_ba(QString data_str);
 
 };
 

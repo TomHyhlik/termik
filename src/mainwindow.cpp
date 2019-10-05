@@ -14,6 +14,7 @@
 
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QDebug>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -38,7 +39,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(nw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
     dialog_connect = new Dialog_connect(this);
-//    connect(dialog_connect, SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
+    //    connect(dialog_connect, SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
     dialog_connect->init();
@@ -54,7 +55,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
+    //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
@@ -75,15 +76,93 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 //////////////////////////////////////////////////////////////////////
 void MainWindow::handleAppArguments(QStringList arguments)
 {
-    for (int i = 0; i < arguments.size(); i++) {
-        qDebug() << i << "argument:" << arguments.at(i);
-    }
     /* the first argument is the cmd of calling the app */
     arguments.removeFirst();
 
-    /* todo */
+//    /* at first look if there is long argument */
+//    if (arguments.first() == ARG_HELP_LONG) {
+//        handleAppArguments_printHelp();
+//        exit(0);
+//    }
+
+    if (arguments.isEmpty()) {
+        qDebug() << "No arguments passed.";
+    }
+//    qDebug() << "Arguments: " << arguments.size();
+//    /* now look at the pairs of arguments */
+    while (!arguments.isEmpty())
+    {
+        QString command = arguments.at(0);
+        arguments.removeFirst();
+
+        if (!arguments.isEmpty()) {
+            QString passedData = arguments.at(0);
+            arguments.removeFirst();
+
+
+            /* check if it's -x */
+            if (command.at(0) == ARG_PREFIX_SHORT &&
+                    command.size() == 2)
+            {
+                qDebug() << "Setting" << command << " to " << passedData;
+
+
+            }
+
+
+            else
+            {
+                qDebug() << "ERROR: Failed to handle input arguments";
+                handleAppArguments_printHelp();
+//                exit(0);
+            }
+
+
+
+
+        }
+        else
+        {
+
+        }
+
+
+
+    }
+    /* todo: continue here */
 
 }
+
+void MainWindow::handleAppArguments_printHelp()
+{
+    qDebug("");
+    qDebug() << "*** The options are as follows:";
+
+    qDebug() << "\n\t- Parameters for connection via serial: ";
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial port name");
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_BAUDRATE,      "baud rate");
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_DATABITS,      "data bits");
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_PARITY,        "parity");
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_STOPBITS,      "stop bits");
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_FLOWCONTROL,   "flow control");
+
+
+
+    qDebug() << "\n\t- Parameters for connection via network: ";
+    handleAppArguments_printHelp_wrap(ARG_NETWORK_IPADDR,   "IP address");
+    handleAppArguments_printHelp_wrap(ARG_NETWORK_TXPORT,   "Tx port");
+    handleAppArguments_printHelp_wrap(ARG_NETWORK_RXPORT,   "Rx port");
+
+    qDebug("");
+}
+
+void MainWindow::handleAppArguments_printHelp_wrap(QString argData,
+                                                   QString argTitle)
+{
+    // todo: odstranit warning mozna...
+    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() + argData.toLatin1() + "\t" + argTitle.toLatin1());
+}
+
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectVia_serial()
 {
@@ -117,53 +196,53 @@ void MainWindow::uiInit()
     /*************************** set colors ***************************/
     /* MainWindow background */
     this->setStyleSheet(QString("color: %1; background-color: %2")
-                                        .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+                        .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
     ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_GRAY4));
+                                     .arg(COLOR_WHITE).arg(COLOR_GRAY4));
 
     ui->statusBar->setStyleSheet(QString("color: %1; background-color: %2")
                                  .arg(COLOR_WHITE).arg(COLOR_GRAY1));
 
     ui->lineEdit_prefix->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_suffix->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->lineEdit_find_ascii->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_find_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_find_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->tab_ascii->setStyleSheet(QString("color: %1; background-color: %2")
                                  .arg(COLOR_WHITE).arg(COLOR_GRAY3));
     ui->tab_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
     ui->tab_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
     ui->textEdit_out_ascii->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->textEdit_out_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->textEdit_out_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->lineEdit_in_ascii->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_in_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_in_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->checkBox_clearIn_ascii->setStyleSheet(QString("color: %1; background-color: %2")
                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->checkBox_clearIn_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->checkBox_clearIn_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 
     /*************************** UI setup ****************************/
@@ -240,7 +319,34 @@ void MainWindow::clearOutput()
     ui->textEdit_out_dec->clear();
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::keyEnterPressed
+void MainWindow::Tx(QByteArray data)
+{
+    switch (connectionType)
+    {
+    case serial:
+        if (sw->isOpen()) {
+            sw->write(data);
+            terminalOutUpdate(data_Tx, data);
+            log(info, "Data sent via serial");
+        } else {
+            log(error, "Serial port not opened");
+        }
+        break;
+    case network:
+        nw->send(data);
+        terminalOutUpdate(data_Tx, data);
+        log(note, "Data sent via network");
+        break;
+    case none:
+        log(error, "No connection selected");
+        break;
+    default:
+        qDebug() << "Error: 356";
+
+    }
+}
+/////////////////////////////////////////////////////////////////
+/// \brief MainWindow::
 ///     slot callet when Enter or Return key is pressed
 ///
 void MainWindow::keyEnterPressed()
@@ -251,12 +357,12 @@ void MainWindow::keyEnterPressed()
 
         QDateTime dt = QDateTime::currentDateTime();
         QString timeStr = dt.toString( "yyyy-MM-dd_hh:mm:ss" );
-//        ui->textEdit_out_ascii->append(timeStr); to debug
+        //        ui->textEdit_out_ascii->append(timeStr); to debug
         QString fileName = QString("TerminalOutput_%1").arg(timeStr);
 
         file.setFileName(fileName);
         /*  todo */
-        qDebug() << "TODO";
+        qDebug() << "";
         fileDataFormat = data_ascii;
 
         hideSaveSettings();
@@ -264,63 +370,58 @@ void MainWindow::keyEnterPressed()
     }
     ////////////////////////////
     else if (ui->lineEdit_in_ascii->hasFocus()) {
-        if(sw->isOpen()){
-            QString data = ui->lineEdit_in_ascii->text();
-            QByteArray out = data.toUtf8();
-            terminalOutUpdate(usbTx, out);
-            sw->write(out);
-            log(note, "Data was sent");
-       } else {
-            log(error, "USB port is not opened");
-        }
+        QString data_str = ui->lineEdit_in_ascii->text();
+        QByteArray data_ba = conv_strAscii_to_ba(data_str);
+        Tx(data_ba);
         /* clear the line */
         if(ui->checkBox_clearIn_ascii->isChecked())
             ui->lineEdit_in_ascii->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_hex->hasFocus()) {
-        if(sw->isOpen()){
-            QString data = ui->lineEdit_in_hex->text();
-            QByteArray out = data.toUtf8();
-            out = QByteArray::fromHex(out);
-            sw->write(out);
-            terminalOutUpdate(usbTx, out);
-            log(note, "Data was sent");
-       } else {
-            log(error, "USB port is not opened");
-        }
+        QString data_str = ui->lineEdit_in_hex->text();
+        QByteArray data_ba = conv_strHex_to_ba(data_str);
+        Tx(data_ba);
         /* clear the line */
         if(ui->checkBox_clearIn_hex->isChecked())
             ui->lineEdit_in_hex->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_dec->hasFocus()) {
-        if (sw->isOpen()) {
-            QString data = ui->lineEdit_in_dec->text();
-            bool ok;
-            QString element;
-            QByteArray out;
-            for (int i = 0; i <= data.size(); i += DIGIT_NUM_DEC) {
-                element = data.mid(i, DIGIT_NUM_DEC);
-                if (element.size() != 0) {
-                    while (element.size() < DIGIT_NUM_DEC) {
-                        element.append("0");
-                    }
-                    quint32 num = element.toUInt(&ok, 10);
-                    out.append(qint8(num));
-                }
-            }
-            sw->write(out);
-            terminalOutUpdate(usbTx, out);
-
-            log(info, "Data sent");
-       } else {
-            log(error, "USB port is not opened");
-        }
+        QString data_str = ui->lineEdit_in_dec->text();
+        QByteArray data_ba = conv_strDec_to_ba(data_str);
+        Tx(data_ba);
         /* clear the line */
         if(ui->checkBox_clearIn_dec->isChecked())
             ui->lineEdit_in_dec->clear();
+
     }
+}
+/////////////////////////////////////////////////////////////////
+QByteArray MainWindow::conv_strAscii_to_ba(QString data_str)
+{
+    return data_str.toUtf8();
+}
+QByteArray MainWindow::conv_strHex_to_ba(QString sata_str)
+{
+    return QByteArray::fromHex(sata_str.toUtf8());
+}
+QByteArray MainWindow::conv_strDec_to_ba(QString data_str)
+{
+    bool ok;
+    QString element;
+    QByteArray data_ba;
+    for (int i = 0; i <= data_str.size(); i += DIGIT_NUM_DEC) {
+        element = data_str.mid(i, DIGIT_NUM_DEC);
+        if (element.size() != 0) {
+            while (element.size() < DIGIT_NUM_DEC) {
+                element.append("0");
+            }
+            quint32 num = element.toUInt(&ok, 10);
+            data_ba.append(qint8(num));
+        }
+    }
+    return data_ba;
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::keyUpPressed
@@ -335,10 +436,10 @@ void MainWindow::keyUpPressed()
                         QString(history_out.at(history_out_pointer)));
         }
         else if (ui->lineEdit_in_hex->hasFocus()){
-            /* todo */
+            /*  */
         }
         else if (ui->lineEdit_in_dec->hasFocus()){
-            /* todo */
+            /*  */
         }
     }
     if (history_out.size() > history_out_pointer + 1)
@@ -408,8 +509,8 @@ void MainWindow::fillShortcutsTable()
         shortcutTable_addItem(row);
     }
 
-//    ui->tableWidget_shortcuts->resizeColumnToContents(0);
-//    ui->tableWidget_shortcuts->resizeColumnToContents(1);
+    //    ui->tableWidget_shortcuts->resizeColumnToContents(0);
+    //    ui->tableWidget_shortcuts->resizeColumnToContents(1);
 
 }
 ///////////////////////////////////////////////////////////////////////
@@ -512,15 +613,15 @@ void MainWindow::dataArrived()
 {
     tick_lastRx = tick.elapsed();
 
-     /* get the data from apropriate class */
+    /* get the data from apropriate class */
     switch (connectionType)
     {
     case serial:
-        terminalOutUpdate(usbRx, sw->Rx_buffer.data());
+        terminalOutUpdate(data_Rx, sw->Rx_buffer.data());
         sw->Rx_buffer.clear();
         break;
     case network:
-        terminalOutUpdate(usbRx, nw->Rx_buffer.data());
+        terminalOutUpdate(data_Rx, nw->Rx_buffer.data());
         nw->Rx_buffer.clear();
         break;
     }
@@ -563,11 +664,10 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 
     switch(dataKind)
     {
-    case usbRx:
+    case data_Rx:
         color = COLOR_DATA_RX;
         break;
-
-    case usbTx:
+    case data_Tx:
         color = COLOR_DATA_TX;
         /* add the Tx data to the history_out */
         if (history_out.isEmpty()) {
@@ -648,21 +748,21 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
         saveToFile(data_str_dec);
         break;
     case data_bin:
-       /* todo (maybe) */
+        /* todo (maybe) */
         break;
     }
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile(QString data)
 {
-//    QTextStream outStream(&file);
-//    if (file.open(QFile::WriteOnly | QFile::Text | QIODevice::Append)) {
-//        outStream <<  data;
-//        file.flush();
-//        file.close();
-//    } else {
-//       log(error, "Can't open the file.");
-//    }
+    //    QTextStream outStream(&file);
+    //    if (file.open(QFile::WriteOnly | QFile::Text | QIODevice::Append)) {
+    //        outStream <<  data;
+    //        file.flush();
+    //        file.close();
+    //    } else {
+    //       log(error, "Can't open the file.");
+    //    }
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::EscPressed
@@ -711,9 +811,9 @@ void MainWindow::moveCursorToEnd()
 void MainWindow::on_pushButton_save_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                 "/Users/tomashyhlik/Dropbox/program/Workplaces/Qt/projects/USB_terminal",
-                                                 QFileDialog::ShowDirsOnly
-                                                 | QFileDialog::DontResolveSymlinks);
+                                                    "/Users/tomashyhlik/Dropbox/program/Workplaces/Qt/projects/USB_terminal",
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
     ui->lineEdit_save->setText(dir);
 }
 /////////////////////////////////////////////////////////////////
