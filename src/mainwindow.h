@@ -150,7 +150,8 @@ private:
     void uiInit();
     void handleAppArguments(QStringList arguments);
     void handleAppArguments_printHelp();
-    void handleAppArguments_printHelp_wrap(QString argData, QString argTitle);
+    void handleAppArguments_printHelp_wrap(char argData, QString argTitle);
+    void handleAppArguments_setParam(QString command, QString passedData);
 
 
     QByteArray conv_strAscii_to_ba(QString data_str);

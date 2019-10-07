@@ -74,6 +74,11 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     handleAppArguments(arguments);
 }
 //////////////////////////////////////////////////////////////////////
+/// \brief MainWindow::handleAppArguments
+/// \param arguments is the QStringList of terminal passed arguments
+///     This function is called in MainWindow initialization
+///     it controls the syntax of app terminal arguments and calls
+///     handleAppArguments_setParam() to use these parameters
 void MainWindow::handleAppArguments(QStringList arguments)
 {
     /* the first argument is the cmd of calling the app */
@@ -85,52 +90,75 @@ void MainWindow::handleAppArguments(QStringList arguments)
 //        exit(0);
 //    }
 
-    if (arguments.isEmpty()) {
-        qDebug() << "No arguments passed.";
-    }
-//    qDebug() << "Arguments: " << arguments.size();
-//    /* now look at the pairs of arguments */
+    /* now look at the pairs of arguments */
     while (!arguments.isEmpty())
     {
-        QString command = arguments.at(0);
+        QString command, passedData;
+
+        command = arguments.at(0);
         arguments.removeFirst();
 
-        if (!arguments.isEmpty()) {
-            QString passedData = arguments.at(0);
-            arguments.removeFirst();
-
-
-            /* check if it's -x */
+            /* check if the command has syntax like: -x */
             if (command.at(0) == ARG_PREFIX_SHORT &&
-                    command.size() == 2)
-            {
-                qDebug() << "Setting" << command << " to " << passedData;
+                    command.size() == 2) {
+                if (!arguments.isEmpty()) {
+                    passedData = arguments.at(0);
+                    arguments.removeFirst();
 
-
-            }
-
-
-            else
-            {
-                qDebug() << "ERROR: Failed to handle input arguments";
+                    handleAppArguments_setParam(command, passedData);
+                } else {
+                    qDebug() << "ERROR: No passed data for command " << command;
+                    handleAppArguments_printHelp();
+                }
+            } else {
+                qDebug() << "ERROR: Failed to handle input arguments, "
+                            "the command has invalid syntax.";
                 handleAppArguments_printHelp();
-//                exit(0);
             }
-
-
-
-
-        }
-        else
-        {
-
-        }
-
-
-
     }
-    /* todo: continue here */
+}
 
+void MainWindow::handleAppArguments_setParam(QString command, QString passedData)
+{
+    qDebug() << "Setting" << command << " to " << passedData;
+    char cmdChar = command.toUtf8().at(1);
+
+    /* todo: continue here, implement the setting of parameters bellow */
+
+    switch (cmdChar)
+    {
+    case ARG_NETWORK_IPADDR:
+
+        break;
+    case ARG_NETWORK_TXPORT:
+
+        break;
+    case ARG_NETWORK_RXPORT:
+
+        break;
+
+
+    case ARG_SERIAL_PORTNAME:
+
+        break;
+    case ARG_SERIAL_BAUDRATE:
+
+        break;
+    case ARG_SERIAL_DATABITS:
+
+        break;
+    case ARG_SERIAL_PARITY:
+
+        break;
+    case ARG_SERIAL_STOPBITS:
+
+        break;
+    case ARG_SERIAL_FLOWCONTROL:
+
+        break;
+    default:
+        qDebug() << "ERROR: Unknown command -" << command;
+    }
 }
 
 void MainWindow::handleAppArguments_printHelp()
@@ -146,8 +174,6 @@ void MainWindow::handleAppArguments_printHelp()
     handleAppArguments_printHelp_wrap(ARG_SERIAL_STOPBITS,      "stop bits");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_FLOWCONTROL,   "flow control");
 
-
-
     qDebug() << "\n\t- Parameters for connection via network: ";
     handleAppArguments_printHelp_wrap(ARG_NETWORK_IPADDR,   "IP address");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_TXPORT,   "Tx port");
@@ -156,11 +182,11 @@ void MainWindow::handleAppArguments_printHelp()
     qDebug("");
 }
 
-void MainWindow::handleAppArguments_printHelp_wrap(QString argData,
+void MainWindow::handleAppArguments_printHelp_wrap(char cmd,
                                                    QString argTitle)
 {
     // todo: odstranit warning mozna...
-    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() + argData.toLatin1() + "\t" + argTitle.toLatin1());
+    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() + QString(cmd).toLatin1() + "\t" + argTitle.toLatin1());
 }
 
 //////////////////////////////////////////////////////////////////////
