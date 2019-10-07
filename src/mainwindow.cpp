@@ -287,8 +287,7 @@ void MainWindow::uiInit()
 
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
-    ui->lineEdit_prefix->setText(sw->prefix.toHex());
-    ui->lineEdit_suffix->setText(sw->suffix.toHex());
+    ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
 
     hideFindUi();
     hideHelp();
@@ -347,6 +346,11 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx(QByteArray data)
 {
+    if (prefix_tx_enabled)
+        data.prepend(prefix_tx);
+    if (suffix_tx_enabled)
+        data.append(suffix_tx);
+
     switch (connectionType)
     {
     case serial:
@@ -370,6 +374,9 @@ void MainWindow::Tx(QByteArray data)
         qDebug() << "Error: 356";
 
     }
+    /* clear the line */
+    if(ui->checkBox_clearIn_ascii->isChecked())
+        ui->lineEdit_in_ascii->clear();
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::
@@ -387,40 +394,31 @@ void MainWindow::keyEnterPressed()
         QString fileName = QString("TerminalOutput_%1").arg(timeStr);
 
         file.setFileName(fileName);
-        /*  todo */
-        qDebug() << "";
+
+        qDebug() << "todo: 65464138";
         fileDataFormat = data_ascii;
 
         hideSaveSettings();
         log(info, QString("Output saved to: %1%2").arg(fileLocation).arg(fileName));
     }
+
     ////////////////////////////
     else if (ui->lineEdit_in_ascii->hasFocus()) {
         QString data_str = ui->lineEdit_in_ascii->text();
         QByteArray data_ba = conv_strAscii_to_ba(data_str);
         Tx(data_ba);
-        /* clear the line */
-        if(ui->checkBox_clearIn_ascii->isChecked())
-            ui->lineEdit_in_ascii->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_hex->hasFocus()) {
         QString data_str = ui->lineEdit_in_hex->text();
         QByteArray data_ba = conv_strHex_to_ba(data_str);
         Tx(data_ba);
-        /* clear the line */
-        if(ui->checkBox_clearIn_hex->isChecked())
-            ui->lineEdit_in_hex->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_dec->hasFocus()) {
         QString data_str = ui->lineEdit_in_dec->text();
         QByteArray data_ba = conv_strDec_to_ba(data_str);
         Tx(data_ba);
-        /* clear the line */
-        if(ui->checkBox_clearIn_dec->isChecked())
-            ui->lineEdit_in_dec->clear();
-
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -703,12 +701,6 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
             history_out.prepend(data);
         }
         history_out_pointer = 0;
-
-        /* append / prepend */
-        if (ui->checkBox_suffix->isChecked())
-            data.append(sw->suffix);
-        if (ui->checkBox_prefix->isChecked())
-            data.prepend(sw->prefix);
         break;
     }
 
@@ -810,17 +802,6 @@ void MainWindow::showWrap()
 }
 void MainWindow::hideWrap()
 {
-    sw->prefix_enabled = ui->checkBox_prefix->isChecked();
-    sw->suffix_enabled = ui->checkBox_suffix->isChecked();
-
-    QByteArray data;
-    data = ui->lineEdit_prefix->text().toUtf8();
-    sw->prefix = QByteArray::fromHex(data);
-
-    data.clear();
-    data = ui->lineEdit_suffix->text().toUtf8();
-    sw->suffix = QByteArray::fromHex(data);
-
     ui->groupBox_wrap->hide();
 }
 
@@ -837,9 +818,10 @@ void MainWindow::moveCursorToEnd()
 void MainWindow::on_pushButton_save_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    "/Users/tomashyhlik/Dropbox/program/Workplaces/Qt/projects/USB_terminal",
-                                                    QFileDialog::ShowDirsOnly
-                                                    | QFileDialog::DontResolveSymlinks);
+        "/Users/tomashyhlik/Dropbox/program/Workplaces/Qt/projects/USB_terminal",
+        QFileDialog::ShowDirsOnly
+        | QFileDialog::DontResolveSymlinks);
+
     ui->lineEdit_save->setText(dir);
 }
 /////////////////////////////////////////////////////////////////
@@ -865,18 +847,36 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     }
 }
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        prefix_tx_enabled = true;
+        break;
+    case Qt::Unchecked:
+        prefix_tx_enabled = false;
+        break;
+    }
+}
+void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        suffix_tx_enabled = true;
+        break;
+    case Qt::Unchecked:
+        suffix_tx_enabled = false;
+        break;
+    }
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
+{
+    suffix_tx = QByteArray::fromHex(arg1.toUtf8());
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
+{
+    prefix_tx = QByteArray::fromHex(arg1.toUtf8());
+}
+/////////////////////////////////////////////////////////////////

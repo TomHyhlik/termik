@@ -18,6 +18,10 @@
 #define DIGIT_NUM_DEC   3
 #define DIGIT_NUM_BIN   8
 
+
+#define SUFFIX_DEFAULT      "\r\n"
+
+
 typedef enum {
     Dark, Light
 } theme_t;
@@ -115,6 +119,14 @@ private slots:
 
     void Tx(QByteArray datarr);
 
+    void on_checkBox_prefix_stateChanged(int arg1);
+
+    void on_checkBox_suffix_stateChanged(int arg1);
+
+    void on_lineEdit_suffix_textChanged(const QString &arg1);
+
+    void on_lineEdit_prefix_textChanged(const QString &arg1);
+
 public slots:
     void connectVia_serial();
     void connectVia_network();
@@ -157,6 +169,12 @@ private:
     QByteArray conv_strAscii_to_ba(QString data_str);
     QByteArray conv_strHex_to_ba(QString data_str);
     QByteArray conv_strDec_to_ba(QString data_str);
+
+    bool suffix_tx_enabled;
+    bool prefix_tx_enabled;
+    QByteArray suffix_tx;
+    QByteArray prefix_tx;
+
 
 };
 

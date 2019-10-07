@@ -14,6 +14,8 @@ Transmit data in the terminal is done by pressing Enter.
         
     dodelat spousteni programu pres cmd s argumenty
 
+    pridat featuru time logging
+
     dale by to chtelo odstranit ten vypis v logu pri otevreni dialog_connect
 
     doresit suffix and prefix

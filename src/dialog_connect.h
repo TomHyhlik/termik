@@ -97,8 +97,6 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
-    void on_pushButton_autoconnect_clicked();
-
 
 
 signals:

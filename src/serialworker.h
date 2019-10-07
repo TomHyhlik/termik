@@ -5,8 +5,6 @@
 #include <QSerialPort>
 #include <QList>
 
-#define SUFFIX_DEFAULT      "\r\n"
-
 class parameters {
 public:
     QString portName;
@@ -29,10 +27,6 @@ public:
     bool close();
     bool isOpen();
 
-    bool suffix_enabled;
-    bool prefix_enabled;
-    QByteArray suffix;
-    QByteArray prefix;
 
     QByteArray splitFactor;
     bool splitFactor_enabled;

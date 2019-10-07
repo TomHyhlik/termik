@@ -79,8 +79,6 @@ void Dialog_connect::initColors()
     ui->lineEdit_ipAddr->setStyleSheet(QString("color: %1; background-color: %2")
                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->pushButton_autoconnect->setStyleSheet(QString("color: %1; background-color: %2")
-                                              .arg(COLOR_WHITE).arg(COLOR_GRAY0));
 }
 
 /////////////////////////////////////////////////////////////////
@@ -419,37 +417,4 @@ QString Dialog_connect::getSerialPortName(int productIdentifier)
         }
     }
     return nullptr;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-/// \brief Dialog_connect::on_pushButton_autoconnect_clicked
-///     connect to the serial port which info is in the txt file
-void Dialog_connect::on_pushButton_autoconnect_clicked()
-{
-    int productIdentifier = configurationRead();
-    if (productIdentifier != FAILED) {
-        QString portName = getSerialPortName(productIdentifier);
-        if (portName != nullptr) {
-            ui->comboBox_portName->setCurrentText(portName);
-            log(info, QString("Autoconnecting to: %1").arg(portName));
-
-            /* load the  port configuration to the sw class */
-            sw->param.portName = ui->comboBox_portName->currentText();
-            sw->param.baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
-            sw->param.dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
-            sw->param.parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
-            sw->param.stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
-            sw->param.flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
-
-            emit connectVia_serial();
-
-            this->hide();
-        } else {
-            log(info, "The last used serial device is not connected.");
-        }
-    } else {
-        log(info, "The default serial port configuration is not set yet. "
-                  "You must connect manually for the first time.");
-        setDefaultUiParameters();
-    }
 }

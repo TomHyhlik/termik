@@ -14,8 +14,6 @@ SerialWorker::SerialWorker(QObject *parent) : QObject(parent)
 
     connect(serial, &QIODevice::readyRead, this, &SerialWorker::readData);
 
-    suffix_enabled = true;
-    prefix_enabled = false;
     splitFactor_enabled = false;
 }
 
@@ -60,11 +58,6 @@ bool SerialWorker::isOpen(){
 ///////////////////////////////////////////////////////////////////////////////
 bool SerialWorker::write(QByteArray data)
 {
-    if(suffix_enabled)
-        data.append(suffix);
-    if(prefix_enabled)
-        data.prepend(prefix);
-
     serial->write(data);          // send over USB
 //    serial->waitForBytesWritten(50);
 
