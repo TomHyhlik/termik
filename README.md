@@ -8,14 +8,6 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
-
-    prepsat nasledujici funkce, je to moc napraseny
-        void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
-        
     dodelat spousteni programu pres cmd s argumenty
 
     pridat featuru time logging
-
-    dale by to chtelo odstranit ten vypis v logu pri otevreni dialog_connect
-
-    doresit suffix and prefix

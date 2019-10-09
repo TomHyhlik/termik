@@ -150,6 +150,7 @@ private:
     void log(logType_t logType, QString data);
 
     void terminalOutUpdate(terminalData_t, QByteArray);
+    void TxHistory_add(QByteArray data);
 
     int getFirstMapVal(QMap<int,QString> m, QString label);
 
@@ -170,10 +171,19 @@ private:
     QByteArray conv_strHex_to_ba(QString data_str);
     QByteArray conv_strDec_to_ba(QString data_str);
 
+    QString conv_ba_to_strAscii(QByteArray data);
+    QString conv_ba_to_strHex(QByteArray data);
+    QString conv_ba_to_strDec(QByteArray data);
+
+
     bool suffix_tx_enabled;
     bool prefix_tx_enabled;
     QByteArray suffix_tx;
     QByteArray prefix_tx;
+
+
+    void updateTextEdit(QTextEdit *textEdit, QString color, QString data);
+
 
 
 };

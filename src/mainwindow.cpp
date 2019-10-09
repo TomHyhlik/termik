@@ -182,11 +182,11 @@ void MainWindow::handleAppArguments_printHelp()
     qDebug("");
 }
 
-void MainWindow::handleAppArguments_printHelp_wrap(char cmd,
-                                                   QString argTitle)
+void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 {
     // todo: odstranit warning mozna...
-    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() + QString(cmd).toLatin1() + "\t" + argTitle.toLatin1());
+    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() +
+           QString(cmd).toLatin1() + "\t" + argTitle.toLatin1());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -346,6 +346,7 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx(QByteArray data)
 {
+    /* add prefix and suffix */
     if (prefix_tx_enabled)
         data.prepend(prefix_tx);
     if (suffix_tx_enabled)
@@ -370,13 +371,7 @@ void MainWindow::Tx(QByteArray data)
     case none:
         log(error, "No connection selected");
         break;
-    default:
-        qDebug() << "Error: 356";
-
     }
-    /* clear the line */
-    if(ui->checkBox_clearIn_ascii->isChecked())
-        ui->lineEdit_in_ascii->clear();
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::
@@ -407,20 +402,64 @@ void MainWindow::keyEnterPressed()
         QString data_str = ui->lineEdit_in_ascii->text();
         QByteArray data_ba = conv_strAscii_to_ba(data_str);
         Tx(data_ba);
+
+        if (ui->checkBox_clearIn_ascii->isChecked())
+            ui->lineEdit_in_ascii->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_hex->hasFocus()) {
         QString data_str = ui->lineEdit_in_hex->text();
         QByteArray data_ba = conv_strHex_to_ba(data_str);
         Tx(data_ba);
+
+        if (ui->checkBox_clearIn_hex->isChecked())
+            ui->lineEdit_in_hex->clear();
     }
     ////////////////////////////
     else if (ui->lineEdit_in_dec->hasFocus()) {
         QString data_str = ui->lineEdit_in_dec->text();
         QByteArray data_ba = conv_strDec_to_ba(data_str);
         Tx(data_ba);
+
+        if (ui->checkBox_clearIn_dec->isChecked())
+            ui->lineEdit_in_dec->clear();
     }
 }
+
+/////////////////////////////////////////////////////////////////
+QString MainWindow::conv_ba_to_strAscii(QByteArray data)
+{
+    QString out;
+    out = QString(data);
+    return out;
+}
+
+QString MainWindow::conv_ba_to_strHex(QByteArray data)
+{
+    QString out;
+    for(int i = 0; i < data.size(); i++){
+        QString numStr = QString::number(quint8(data.at(i)), 16);
+        while(numStr.size() < 2){
+            numStr.prepend("0");
+        }
+        out.append(QString(" %1").arg(numStr));
+    }
+    return out;
+}
+
+QString MainWindow::conv_ba_to_strDec(QByteArray data)
+{
+    QString out;
+    for(int i = 0; i < data.size(); i++){
+        QString numStr = QString::number(quint8(data.at(i)), 10);
+        while(numStr.size() < 3){
+            numStr.prepend("0");
+        }
+        out.append(QString(" %1").arg(numStr));
+    }
+    return out;
+}
+
 /////////////////////////////////////////////////////////////////
 QByteArray MainWindow::conv_strAscii_to_ba(QString data_str)
 {
@@ -678,7 +717,7 @@ void MainWindow::log(logType_t logType, QString data)
     ui->statusBar->showMessage(data, timeout);
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::terminalOutUpdate
+/// \brief MainWindow::
 /// \param dataKind     to set the color
 /// \param data         to be put to all text edits in corresponding format
 ///
@@ -686,89 +725,67 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 {
     QString color;
 
-    switch(dataKind)
+    switch (dataKind)
     {
     case data_Rx:
         color = COLOR_DATA_RX;
         break;
     case data_Tx:
         color = COLOR_DATA_TX;
-        /* add the Tx data to the history_out */
-        if (history_out.isEmpty()) {
-            history_out.prepend(data);
-        }
-        else if (history_out.at(0) != data) {
-            history_out.prepend(data);
-        }
-        history_out_pointer = 0;
+        TxHistory_add(data);
         break;
     }
 
     /* update all terminal outputs (textEdits) */
 
+    /* ASCII */
+    QString data_str_ascii = conv_ba_to_strAscii(data);
+    updateTextEdit(ui->textEdit_out_ascii, color, data_str_ascii);
+
+    /* HEX */
+    QString data_str_hex = conv_ba_to_strHex(data);
+    updateTextEdit(ui->textEdit_out_hex, color, data_str_hex);
+
+    /* DEC */
+    QString data_str_dec = conv_ba_to_strDec(data);
+    updateTextEdit(ui->textEdit_out_dec, color, data_str_dec);
+
+//    /* todo: put the data into txt file */
+//    switch (fileDataFormat)
+//    {
+//    case data_ascii:
+//        saveToFile(data_str_ascii);
+//        break;
+//    case data_hex:
+//        saveToFile(data_str_hex);
+//        break;
+//    case data_dec:
+//        saveToFile(data_str_dec);
+//        break;
+//    }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::updateTextEdit(QTextEdit *textEdit, QString color, QString data)
+{
     QTextCursor prev_cursor;
+    prev_cursor = textEdit->textCursor();
+    textEdit->moveCursor(QTextCursor::End);
+    textEdit->setTextColor(color);
+    textEdit->insertPlainText(data);
+    textEdit->setTextCursor(prev_cursor);
+}
 
-    /************** ASCII **************/
-    prev_cursor = ui->textEdit_out_ascii->textCursor();
-    ui->textEdit_out_ascii->moveCursor(QTextCursor::End);
-
-    ui->textEdit_out_ascii->setTextColor(color);
-    QString data_str_ascii = QString(data);
-    ui->textEdit_out_ascii->insertPlainText(data_str_ascii);
-
-    ui->textEdit_out_ascii->setTextCursor(prev_cursor);
-
-
-    /************** HEX **************/
-    prev_cursor = ui->textEdit_out_hex->textCursor();
-    ui->textEdit_out_hex->moveCursor(QTextCursor::End);
-    QString data_str_hex;
-
-    for(int i = 0; i < data.size(); i++){
-        QString numStr = QString::number(quint8(data.at(i)), 16);
-        while(numStr.size() < 2){
-            numStr.prepend("0");
-        }
-        data_str_hex.append(QString(" %1").arg(numStr));
+/////////////////////////////////////////////////////////////////
+void MainWindow::TxHistory_add(QByteArray data)
+{
+    if (history_out.isEmpty()) {
+        history_out.prepend(data);
     }
-    ui->textEdit_out_hex->setTextColor(color);
-    ui->textEdit_out_hex->insertPlainText(data_str_hex);       // insert the data
-    ui->textEdit_out_hex->setTextCursor(prev_cursor);           // set the cursor back
-
-
-    /************** DEC **************/
-    prev_cursor = ui->textEdit_out_dec->textCursor();
-    ui->textEdit_out_dec->moveCursor(QTextCursor::End);
-    QString data_str_dec;
-
-    for(int i = 0; i < data.size(); i++){
-        QString numStr = QString::number(quint8(data.at(i)), 10);
-        while(numStr.size() < 3){
-            numStr.prepend("0");
-        }
-        data_str_dec.append(QString(" %1").arg(numStr));
+    else if (history_out.at(0) != data) {
+        history_out.prepend(data);
     }
-
-    ui->textEdit_out_dec->setTextColor(color);
-    ui->textEdit_out_dec->insertPlainText(data_str_dec);       // insert the data
-    ui->textEdit_out_dec->setTextCursor(prev_cursor);           // set the cursor back
-
-    /* put the data into txt file */
-    switch (fileDataFormat)
-    {
-    case data_ascii:
-        saveToFile(data_str_ascii);
-        break;
-    case data_hex:
-        saveToFile(data_str_hex);
-        break;
-    case data_dec:
-        saveToFile(data_str_dec);
-        break;
-    case data_bin:
-        /* todo (maybe) */
-        break;
-    }
+    history_out_pointer = 0;
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile(QString data)
