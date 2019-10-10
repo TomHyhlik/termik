@@ -42,11 +42,25 @@ typedef enum {
     data_ascii, data_hex, data_dec, data_bin
 } dataFormat_t;
 
-
-
 /* connectionType */
-enum connectionType_t {
+typedef enum {
     serial, network, none
+} connectionType_t;
+
+
+class swConfiguration {
+public:
+
+    connectionType_t connectionType;
+
+    bool suffix_tx_enabled;
+    bool prefix_tx_enabled;
+    QByteArray suffix_tx;
+    QByteArray prefix_tx;
+
+    dataFormat_t fileDataFormat;
+
+
 };
 
 #define COLOR_BLACK     "black"
@@ -81,9 +95,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
     ~MainWindow();
-
-    int connectionType;
-
 
 private slots:   
     void dataArrived();
@@ -136,13 +147,12 @@ private:
     SerialWorker *sw;
     NetworkWorker *nw;
     Dialog_connect* dialog_connect;
+    swConfiguration config;
 
     qint64 tick_lastRx;
     QElapsedTimer tick;
 
     QFile file;
-
-    dataFormat_t fileDataFormat;
 
     QList <QByteArray> history_out;
     quint16 history_out_pointer;
@@ -175,11 +185,6 @@ private:
     QString conv_ba_to_strHex(QByteArray data);
     QString conv_ba_to_strDec(QByteArray data);
 
-
-    bool suffix_tx_enabled;
-    bool prefix_tx_enabled;
-    QByteArray suffix_tx;
-    QByteArray prefix_tx;
 
 
     void updateTextEdit(QTextEdit *textEdit, QString color, QString data);

@@ -192,7 +192,7 @@ void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectVia_serial()
 {
-    connectionType = serial;
+    config.connectionType = serial;
 
     if(sw->isOpen()) {
         sw->close();
@@ -207,7 +207,7 @@ void MainWindow::connectVia_serial()
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectVia_network()
 {
-    connectionType = network;
+    config.connectionType = network;
     if (nw->open()) {
         log(note, "Connected via Network");
     } else {
@@ -347,12 +347,12 @@ void MainWindow::clearOutput()
 void MainWindow::Tx(QByteArray data)
 {
     /* add prefix and suffix */
-    if (prefix_tx_enabled)
-        data.prepend(prefix_tx);
-    if (suffix_tx_enabled)
-        data.append(suffix_tx);
+    if (config.prefix_tx_enabled)
+        data.prepend(config.prefix_tx);
+    if (config.suffix_tx_enabled)
+        data.append(config.suffix_tx);
 
-    switch (connectionType)
+    switch (config.connectionType)
     {
     case serial:
         if (sw->isOpen()) {
@@ -381,20 +381,22 @@ void MainWindow::keyEnterPressed()
 {
     ////////////////////////////
     if (ui->lineEdit_save->hasFocus()) {
-        QString fileLocation = ui->lineEdit_save->text();
+            /* todo: start to save the new data into entered file */
+//        QString fileLocation = ui->lineEdit_save->text();
 
-        QDateTime dt = QDateTime::currentDateTime();
-        QString timeStr = dt.toString( "yyyy-MM-dd_hh:mm:ss" );
-        //        ui->textEdit_out_ascii->append(timeStr); to debug
-        QString fileName = QString("TerminalOutput_%1").arg(timeStr);
+//        QDateTime dt = QDateTime::currentDateTime();
+//        QString timeStr = dt.toString( "yyyy-MM-dd_hh:mm:ss" );
+//        //        ui->textEdit_out_ascii->append(timeStr); to debug
+//        QString fileName = QString("TerminalOutput_%1").arg(timeStr);
 
-        file.setFileName(fileName);
+//        file.setFileName(fileName);
 
-        qDebug() << "todo: 65464138";
-        fileDataFormat = data_ascii;
+//        qDebug() << "todo: 65464138";
+//        fileDataFormat = data_ascii;
 
-        hideSaveSettings();
-        log(info, QString("Output saved to: %1%2").arg(fileLocation).arg(fileName));
+//        hideSaveSettings();
+//        log(info, QString("Output saved to: %1%2").arg(fileLocation).arg(fileName));
+
     }
 
     ////////////////////////////
@@ -677,7 +679,7 @@ void MainWindow::dataArrived()
     tick_lastRx = tick.elapsed();
 
     /* get the data from apropriate class */
-    switch (connectionType)
+    switch (config.connectionType)
     {
     case serial:
         terminalOutUpdate(data_Rx, sw->Rx_buffer.data());
@@ -868,10 +870,10 @@ void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
 {
     switch (arg1) {
     case Qt::Checked:
-        prefix_tx_enabled = true;
+        config.prefix_tx_enabled = true;
         break;
     case Qt::Unchecked:
-        prefix_tx_enabled = false;
+        config.prefix_tx_enabled = false;
         break;
     }
 }
@@ -879,21 +881,21 @@ void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
 {
     switch (arg1) {
     case Qt::Checked:
-        suffix_tx_enabled = true;
+        config.suffix_tx_enabled = true;
         break;
     case Qt::Unchecked:
-        suffix_tx_enabled = false;
+        config.suffix_tx_enabled = false;
         break;
     }
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
-    suffix_tx = QByteArray::fromHex(arg1.toUtf8());
+    config.suffix_tx = QByteArray::fromHex(arg1.toUtf8());
 }
 
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
-    prefix_tx = QByteArray::fromHex(arg1.toUtf8());
+    config.prefix_tx = QByteArray::fromHex(arg1.toUtf8());
 }
 /////////////////////////////////////////////////////////////////
