@@ -54,7 +54,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(showConnectionSettings()));
     //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
@@ -548,35 +548,28 @@ void MainWindow::hideHelp()
 ///         fill the table of shortcuts
 void MainWindow::fillShortcutsTable()
 {
-    QList <QString> shortcuts;
+    QList <QList <QString>> shortcuts;
 
-    shortcuts << "CTRL + Q" << "Quit application";
-    shortcuts << "Esc"      << "Hide evrything";
-    shortcuts << "CTRL + L" << "Move cursor to the end of the terminal output";
-    shortcuts << "CTRL + SHIFT + L" << "Clear terminal output";
-    shortcuts << "CTRL + T" << "Change theme (not supported yet)";
-    shortcuts << "CTRL + O" << "Open port settongs";
-    shortcuts << "CTRL + D" << "Connect / Disconnect";
-    shortcuts << "CTRL + 1" << "Set focus to ASCII tab";
-    shortcuts << "CTRL + 2" << "Set focus to Hex tab";
-    shortcuts << "CTRL + 3" << "Set focus to DEC tab";
-    shortcuts << "CTRL + W" << "Show terminal input wrap options";
-    shortcuts << "CTRL + F" << "Find (not supported yet)";
-    shortcuts << "CTRL + S" << "Show save settings";
-    shortcuts << "F1"       << "Open help";
+    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit application"};
+    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
+    shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
+    shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
+    shortcuts <<  QList <QString> { "CTRL + T" , "Change theme (not supported yet)"};
+    shortcuts <<  QList <QString> { "CTRL + ," , "Open settongs"};
+    shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
+    shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
+    shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
+    shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
+    shortcuts <<  QList <QString> { "CTRL + W" , "Show terminal input wrap options"};
+    shortcuts <<  QList <QString> { "CTRL + F" , "Find (not supported yet)"};
+    shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
+    shortcuts <<  QList <QString> { "F1"       , "Open help"};
 
     while (!shortcuts.isEmpty())
     {
-        QList<QString> row;
-        row << shortcuts.at(0) << shortcuts.at(1);
+        shortcutTable_addItem(shortcuts.at(0));
         shortcuts.pop_front();
-        shortcuts.pop_front();
-        shortcutTable_addItem(row);
     }
-
-    //    ui->tableWidget_shortcuts->resizeColumnToContents(0);
-    //    ui->tableWidget_shortcuts->resizeColumnToContents(1);
-
 }
 ///////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::table_addItem

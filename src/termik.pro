@@ -34,3 +34,6 @@ FORMS += \
         mainwindow.ui \
         dialog_connect.ui
 
+RESOURCES += \
+    resources.qrc
+
