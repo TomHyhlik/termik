@@ -28,7 +28,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("USB terminal");       // set name of this dialog
 
     tick.start();
 
@@ -62,14 +61,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(showWrap()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
-
     new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
-
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 
     uiInit();
+    config.connectionType = none;
 
     handleAppArguments(arguments);
 }
@@ -217,9 +215,8 @@ void MainWindow::connectVia_network()
 /////////////////////////////////////////////////////////////////
 void MainWindow::uiInit()
 {
-    setWindowTitle(MAINWINDOWTITLE);
+    /*** set colors ***/
 
-    /*************************** set colors ***************************/
     /* MainWindow background */
     this->setStyleSheet(QString("color: %1; background-color: %2")
                         .arg(COLOR_WHITE).arg(COLOR_GRAY2));
@@ -271,7 +268,9 @@ void MainWindow::uiInit()
                                             .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 
-    /*************************** UI setup ****************************/
+    /*** UI setup ***/
+
+    setWindowTitle(MAINWINDOWTITLE);
 
     /* setup the help table */
     ui->tableWidget_shortcuts->setColumnCount(2);
@@ -280,7 +279,7 @@ void MainWindow::uiInit()
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
     ui->tableWidget_shortcuts->horizontalHeader()->setStretchLastSection(true);  // set column size to widget size
 
-    /*************************** UI show/hide widgets ******************/
+    /*** UI show/hide widgets ***/
     ui->checkBox_clearIn_ascii->setChecked(true);
     ui->checkBox_clearIn_hex->setChecked(true);
     ui->checkBox_clearIn_dec->setChecked(true);
@@ -544,8 +543,6 @@ void MainWindow::hideHelp()
     ui->tableWidget_shortcuts->hide();
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::fillShortcutsTable
-///         fill the table of shortcuts
 void MainWindow::fillShortcutsTable()
 {
     QList <QList <QString>> shortcuts;
