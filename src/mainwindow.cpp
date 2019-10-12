@@ -825,7 +825,7 @@ void MainWindow::moveCursorToEnd()
 void MainWindow::on_pushButton_save_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-        "/Users/tomashyhlik/Dropbox/program/Workplaces/Qt/projects/USB_terminal",
+        "~/Desktop/",
         QFileDialog::ShowDirsOnly
         | QFileDialog::DontResolveSymlinks);
 
