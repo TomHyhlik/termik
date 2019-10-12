@@ -39,7 +39,7 @@ typedef enum {
 } addLine_t;
 
 typedef enum {
-    data_ascii, data_hex, data_dec, data_bin
+    data_ascii, data_hex, data_dec, //data_bin
 } dataFormat_t;
 
 /* connectionType */
@@ -128,7 +128,7 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
-    void Tx(QByteArray datarr);
+    void Tx(dataFormat_t);
 
     void on_checkBox_prefix_stateChanged(int arg1);
 
@@ -161,8 +161,6 @@ private:
 
     void terminalOutUpdate(terminalData_t, QByteArray);
     void TxHistory_add(QByteArray data);
-
-    int getFirstMapVal(QMap<int,QString> m, QString label);
 
     bool stringList_find(QList<QString> list, QString data);
 

@@ -190,25 +190,26 @@ void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectVia_serial()
 {
-    config.connectionType = serial;
-
     if(sw->isOpen()) {
         sw->close();
     }
 
     if (sw->open()) {
+        config.connectionType = serial;
         log(note, "Connected via Serial");
     } else {
+        config.connectionType = none;
         log(note, "Failed to connect via Serial");
     }
 }
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectVia_network()
 {
-    config.connectionType = network;
     if (nw->open()) {
+        config.connectionType = network;
         log(note, "Connected via Network");
     } else {
+        config.connectionType = none;
         log(note, "Failed to connect via Network");
     }
 }
@@ -279,7 +280,9 @@ void MainWindow::uiInit()
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
     ui->tableWidget_shortcuts->horizontalHeader()->setStretchLastSection(true);  // set column size to widget size
 
+
     /*** UI show/hide widgets ***/
+
     ui->checkBox_clearIn_ascii->setChecked(true);
     ui->checkBox_clearIn_hex->setChecked(true);
     ui->checkBox_clearIn_dec->setChecked(true);
@@ -343,24 +346,48 @@ void MainWindow::clearOutput()
     ui->textEdit_out_dec->clear();
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::Tx(QByteArray data)
+void MainWindow::Tx(dataFormat_t inputType)
 {
-    /* add prefix and suffix */
+    QByteArray data;        // to be transmitted
+    QString data_str;       // just a helper for data conversion
+
+    /* read the data from UI */
+    switch (inputType)
+    {
+    case data_ascii:
+        data_str = ui->lineEdit_in_ascii->text();
+        data = conv_strAscii_to_ba(data_str);
+        if (ui->checkBox_clearIn_ascii->isChecked())
+            ui->lineEdit_in_ascii->clear();
+        break;
+    case data_hex:
+        data_str = ui->lineEdit_in_hex->text();
+        data = conv_strHex_to_ba(data_str);
+        if (ui->checkBox_clearIn_hex->isChecked())
+            ui->lineEdit_in_hex->clear();
+        break;
+    case data_dec:
+        QString data_str = ui->lineEdit_in_dec->text();
+        QByteArray data_ba = conv_strDec_to_ba(data_str);
+        if (ui->checkBox_clearIn_dec->isChecked())
+            ui->lineEdit_in_dec->clear();
+        break;
+    }
+
+    /* add prefix and suffix to the data */
     if (config.prefix_tx_enabled)
         data.prepend(config.prefix_tx);
     if (config.suffix_tx_enabled)
         data.append(config.suffix_tx);
 
+
+    /* transmit the data */
     switch (config.connectionType)
     {
     case serial:
-        if (sw->isOpen()) {
-            sw->write(data);
-            terminalOutUpdate(data_Tx, data);
-            log(info, "Data sent via serial");
-        } else {
-            log(error, "Serial port not opened");
-        }
+        sw->write(data);
+        terminalOutUpdate(data_Tx, data);
+        log(info, "Data sent via serial");
         break;
     case network:
         nw->send(data);
@@ -368,7 +395,7 @@ void MainWindow::Tx(QByteArray data)
         log(note, "Data sent via network");
         break;
     case none:
-        log(error, "No connection selected");
+        log(error, "Data can't be sent, no connection selected");
         break;
     }
 }
@@ -400,30 +427,13 @@ void MainWindow::keyEnterPressed()
 
     ////////////////////////////
     else if (ui->lineEdit_in_ascii->hasFocus()) {
-        QString data_str = ui->lineEdit_in_ascii->text();
-        QByteArray data_ba = conv_strAscii_to_ba(data_str);
-        Tx(data_ba);
-
-        if (ui->checkBox_clearIn_ascii->isChecked())
-            ui->lineEdit_in_ascii->clear();
+        Tx(data_ascii);
     }
-    ////////////////////////////
     else if (ui->lineEdit_in_hex->hasFocus()) {
-        QString data_str = ui->lineEdit_in_hex->text();
-        QByteArray data_ba = conv_strHex_to_ba(data_str);
-        Tx(data_ba);
-
-        if (ui->checkBox_clearIn_hex->isChecked())
-            ui->lineEdit_in_hex->clear();
+        Tx(data_hex);
     }
-    ////////////////////////////
     else if (ui->lineEdit_in_dec->hasFocus()) {
-        QString data_str = ui->lineEdit_in_dec->text();
-        QByteArray data_ba = conv_strDec_to_ba(data_str);
-        Tx(data_ba);
-
-        if (ui->checkBox_clearIn_dec->isChecked())
-            ui->lineEdit_in_dec->clear();
+        Tx(data_dec);
     }
 }
 
@@ -489,7 +499,8 @@ QByteArray MainWindow::conv_strDec_to_ba(QString data_str)
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::keyUpPressed
-///     slot called when arrow Up is pressed
+///     for browsing in history of transmitted data
+///     todo: only the ascii input is supported by now
 void MainWindow::keyUpPressed()
 {
     /* handle Tx data history */
@@ -512,7 +523,8 @@ void MainWindow::keyUpPressed()
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::keyDownPressed
-///     slot called when arrow Down is pressed
+///     for browsing in history of transmitted data
+///     todo: only the ascii input is supported by now
 void MainWindow::keyDownPressed()
 {
     /* handle Tx data history */
@@ -590,21 +602,6 @@ void MainWindow::shortcutTable_addItem(QList<QString> element)
 }
 
 /////////////////////////////////////////////////////////////////
-/// \brief dialog_config::getFirstMapVal return the opposite value
-/// of the map
-/// \param m: map
-/// \param label the second value of the map
-/// \return tohe opposite value
-int MainWindow::getFirstMapVal(QMap<int,QString> m, QString label)
-{
-    for(auto e : m.toStdMap())
-    {
-        if(label == e.second)
-            return e.first;
-    }
-    return 0;
-}
-/////////////////////////////////////////////////////////////////
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -659,7 +656,6 @@ void MainWindow::focus_3()
     ui->tabWidget->setCurrentIndex(2);
     ui->lineEdit_in_dec->setFocus();
 }
-/////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::dataArrived
@@ -678,6 +674,8 @@ void MainWindow::dataArrived()
     case network:
         terminalOutUpdate(data_Rx, nw->Rx_buffer.data());
         nw->Rx_buffer.clear();
+        break;
+    case none:
         break;
     }
 }
