@@ -33,7 +33,9 @@ public:
 
     parameters param;
 
-    QByteArray Rx_buffer;
+    QList <QByteArray> RxData;
+
+    QByteArray ReadAllRx();
 
 private:
 

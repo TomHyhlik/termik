@@ -23,8 +23,6 @@ public:
     void send(QString IPaddress, quint16 port, QByteArray data);
     void send(QByteArray data);
 
-    QByteArray Rx_buffer;
-
     void setTargetIpAddress(QString addr);
     void setTargetIpPort_Tx(quint16 port);
     void setTargetIpPort_Rx(quint16 port);
@@ -33,6 +31,10 @@ public:
     void close();
 
     QByteArray readAllRx();
+
+    QByteArray ReadAllRx();
+
+    QList <QByteArray> RxData;
 
 
 signals:

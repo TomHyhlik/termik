@@ -43,14 +43,14 @@ void NetworkWorker::read()
     buffer.resize(int(socket->pendingDatagramSize()));
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    Rx_buffer.append(buffer);
+    RxData.append(buffer);
     QString message = QString(buffer);
 //    qDebug() << "_____________________________________";
 //    qDebug() << "sender: " << sender;
 //    qDebug() << "sender port: " << senderPort;
 //    qDebug() << "message: " << message;
 
-    emit packetArrived(sender.toString(), senderPort, message);
+//    emit packetArrived(sender.toString(), senderPort, message);
     emit dataReceived();
 }
 
@@ -81,13 +81,16 @@ void NetworkWorker::setTargetIpPort_Rx(quint16 port)
 {
     param.port_Rx = port;
 }
+
 //////////////////////////////////////////////////
-QByteArray NetworkWorker::readAllRx()
+QByteArray NetworkWorker::ReadAllRx()
 {
-    QByteArray data = Rx_buffer.data();
-    Rx_buffer.clear();
-    return data;
+    QByteArray out;
+    while (!RxData.isEmpty()) {
+        out.append(RxData.first());
+        RxData.pop_front();
+    }
+    return out;
 }
-//////////////////////////////////////////////////
 //////////////////////////////////////////////////
 //////////////////////////////////////////////////

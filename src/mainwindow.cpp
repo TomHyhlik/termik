@@ -668,12 +668,10 @@ void MainWindow::dataArrived()
     switch (config.connectionType)
     {
     case serial:
-        terminalOutUpdate(data_Rx, sw->Rx_buffer.data());
-        sw->Rx_buffer.clear();
+        terminalOutUpdate(data_Rx, sw->ReadAllRx());
         break;
     case network:
-        terminalOutUpdate(data_Rx, nw->Rx_buffer.data());
-        nw->Rx_buffer.clear();
+        terminalOutUpdate(data_Rx, nw->ReadAllRx());
         break;
     case none:
         break;

@@ -4,7 +4,7 @@
 #include <QSerialPortInfo>
 #include <QThread>
 
-
+#include <QDebug>
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,21 +61,34 @@ bool SerialWorker::write(QByteArray data)
     serial->write(data);          // send over USB
 //    serial->waitForBytesWritten(50);
 
+    qDebug() << "TX: " << data.toHex();
+
+
     if(serial->flush()){          // check if data were send to serial port
         return true;
     } else {
         return false;
-    }
+    }    
 }
 ///////////////////////////////////////////////////////////////////////////////
 void SerialWorker::readData()
 {
     QByteArray data = serial->readAll();
-    Rx_buffer.append(data.data());
+    RxData.append(data.data());
     emit dataReceived();
+
+    qDebug() << "RX: " << data.toHex();
 }
 ///////////////////////////////////////////////////////////////////////////////
-
+QByteArray SerialWorker::ReadAllRx()
+{
+    QByteArray out;
+    while (!RxData.isEmpty()) {
+        out.append(RxData.first());
+        RxData.pop_front();
+    }
+    return out;
+}
 
 
 
