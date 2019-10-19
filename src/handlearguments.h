@@ -18,7 +18,7 @@
 #define ARG_PREFIX_SHORT        "-"
 #define ARG
 #define ARG_HELP               "h"
-#define ARG_HELP_LONG          "--help"
+#define ARG_HELP_LONG          "help"
 
 
 #define ARG_ERROR       "ERROR: Failed to handle arguments."

@@ -74,7 +74,7 @@ bool SerialWorker::write(QByteArray data)
 void SerialWorker::readData()
 {
     QByteArray data = serial->readAll();
-    RxData.append(data.data());
+    RxData.append(data);
     emit dataReceived();
 
     qDebug() << "RX: " << data.toHex();

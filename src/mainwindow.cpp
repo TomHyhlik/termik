@@ -67,10 +67,27 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 
     uiInit();
-    config.connectionType = none;
+    configInit();
 
     handleAppArguments(arguments);
+
+    //////// simulate for debug
+    QByteArray simulatedData;
+    for (int i = 0; i <= 0xFF; i++) {
+        simulatedData.append(char(i));
+    }
+    terminalOutUpdate(data_Rx, simulatedData);
+//    terminalOutUpdate(data_Rx, QByteArray("ahoj"));
+
 }
+
+//////////////////////////////////////////////////////////////////////
+void MainWindow::configInit()
+{
+    config.connectionType = none;
+    config.timeInfoEnabled = false;
+}
+
 //////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::handleAppArguments
 /// \param arguments is the QStringList of terminal passed arguments
@@ -441,19 +458,21 @@ void MainWindow::keyEnterPressed()
 QString MainWindow::conv_ba_to_strAscii(QByteArray data)
 {
     QString out;
-    out = QString(data);
+    for (int i = 0; i < data.size(); i++) {
+        out.append(data.at(i));
+    }
     return out;
 }
 
 QString MainWindow::conv_ba_to_strHex(QByteArray data)
 {
     QString out;
-    for(int i = 0; i < data.size(); i++){
+    for (int i = 0; i < data.size(); i++) {
         QString numStr = QString::number(quint8(data.at(i)), 16);
-        while(numStr.size() < 2){
+        while(numStr.size() < DIGIT_NUM_HEX){
             numStr.prepend("0");
         }
-        out.append(QString(" %1").arg(numStr));
+        out.append(QString("%1 ").arg(numStr));
     }
     return out;
 }
@@ -461,12 +480,12 @@ QString MainWindow::conv_ba_to_strHex(QByteArray data)
 QString MainWindow::conv_ba_to_strDec(QByteArray data)
 {
     QString out;
-    for(int i = 0; i < data.size(); i++){
+    for (int i = 0; i < data.size(); i++) {
         QString numStr = QString::number(quint8(data.at(i)), 10);
-        while(numStr.size() < 3){
+        while(numStr.size() < DIGIT_NUM_DEC){
             numStr.prepend("0");
         }
-        out.append(QString(" %1").arg(numStr));
+        out.append(QString("%1 ").arg(numStr));
     }
     return out;
 }
@@ -662,8 +681,6 @@ void MainWindow::focus_3()
 ///     process the list of received data
 void MainWindow::dataArrived()
 {
-    tick_lastRx = tick.elapsed();
-
     /* get the data from apropriate class */
     switch (config.connectionType)
     {
@@ -756,6 +773,13 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 /////////////////////////////////////////////////////////////////
 void MainWindow::updateTextEdit(QTextEdit *textEdit, QString color, QString data)
 {
+
+    if (tick_lastRx + RXDATAEVENT_TIMEOUT < tick.elapsed()) {
+        textEdit->append("");
+    }
+
+    tick_lastRx = tick.elapsed();
+
     QTextCursor prev_cursor;
     prev_cursor = textEdit->textCursor();
     textEdit->moveCursor(QTextCursor::End);

@@ -18,6 +18,7 @@
 #define DIGIT_NUM_DEC   3
 #define DIGIT_NUM_BIN   8
 
+#define RXDATAEVENT_TIMEOUT 1000
 
 #define SUFFIX_DEFAULT      "\r\n"
 
@@ -60,7 +61,7 @@ public:
 
     dataFormat_t fileDataFormat;
 
-
+    bool timeInfoEnabled;
 };
 
 #define COLOR_BLACK     "black"
@@ -156,6 +157,8 @@ private:
 
     QList <QByteArray> history_out;
     quint16 history_out_pointer;
+
+    void configInit();
 
     void log(logType_t logType, QString data);
 
