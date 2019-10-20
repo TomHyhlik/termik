@@ -53,13 +53,16 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(showConnectionSettings()));
-    //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(showSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
+
+
+//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_W), this, SLOT(showWrap()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
     new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
@@ -71,13 +74,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
     handleAppArguments(arguments);
 
-    //////// simulate for debug
-    QByteArray simulatedData;
-    for (int i = 0; i <= 0xFF; i++) {
-        simulatedData.append(char(i));
-    }
-    terminalOutUpdate(data_Rx, simulatedData);
-//    terminalOutUpdate(data_Rx, QByteArray("ahoj"));
+//    //////// simulate for debug
+//    QByteArray simulatedData;
+//    for (int i = 0; i <= 0xFF; i++) {
+//        simulatedData.append(char(i));
+//    }
+//    terminalOutUpdate(data_Rx, simulatedData);
+////    terminalOutUpdate(data_Rx, QByteArray("ahoj"));
 
 }
 
@@ -318,7 +321,7 @@ void MainWindow::uiInit()
 void MainWindow::showConnectionSettings()
 {
     dialog_connect->show();
-    dialog_connect->move(0,0);
+//    dialog_connect->move(0,0);
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showSaveSettings()
@@ -819,19 +822,16 @@ void MainWindow::EscPressed()
 {
     hideFindUi();
     hideHelp();
-    hideWrap();
     hideSaveSettings();
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::showWrap
-///     Wrap ui is to add prefix and suffix to the data to be send via terminal
-void MainWindow::showWrap()
+void MainWindow::showSettings()
 {
-    ui->groupBox_wrap->show();
-}
-void MainWindow::hideWrap()
-{
-    ui->groupBox_wrap->hide();
+    if (ui->groupBox_wrap->isHidden()) {
+        ui->groupBox_wrap->show();
+    } else {
+        ui->groupBox_wrap->hide();
+    }
 }
 
 /////////////////////////////////////////////////////////////////

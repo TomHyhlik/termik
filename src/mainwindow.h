@@ -115,8 +115,7 @@ private slots:
     void focus_3();
 
 
-    void showWrap();
-    void hideWrap();
+    void showSettings();
     void showHelp();
     void hideHelp();
 
