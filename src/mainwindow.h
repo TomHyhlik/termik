@@ -18,9 +18,12 @@
 #define DIGIT_NUM_DEC   3
 #define DIGIT_NUM_BIN   8
 
-#define RXDATAEVENT_TIMEOUT 1000
+#define RXDATAEVENT_TIMEOUT 200
 
 #define SUFFIX_DEFAULT      "\r\n"
+
+#define TIME_FORMAT "dd.MM.yyyy, hh:mm:ss"
+
 
 
 typedef enum {
@@ -54,8 +57,11 @@ public:
 
     connectionType_t connectionType;
 
+    bool timeLogEnabled;
+
     bool suffix_tx_enabled;
     bool prefix_tx_enabled;
+
     QByteArray suffix_tx;
     QByteArray prefix_tx;
 
@@ -103,8 +109,6 @@ private slots:
     void moveCursorToEnd();
     void showFindUi();
     void hideFindUi();
-    void showSaveSettings();
-    void hideSaveSettings();
     void terminalInputSetFocus();
 
     void showConnectionSettings();
@@ -139,6 +143,8 @@ private slots:
     void on_lineEdit_prefix_textChanged(const QString &arg1);
 
     void historyTxUpdate();
+
+    void on_checkBox_timeLog_stateChanged(int arg1);
 
 public slots:
     void connectVia_serial();

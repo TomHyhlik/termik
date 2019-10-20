@@ -44,6 +44,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(dialog_connect, SIGNAL(connectVia_serial()), this, SLOT(connectVia_serial()));
     connect(dialog_connect, SIGNAL(connectVia_network()), this, SLOT(connectVia_network()));
 
+    tick_lastRx = 0;
 
     setupShortcuts();
     uiInit();
@@ -65,6 +66,7 @@ void MainWindow::configInit()
 {
     config.connectionType = none;
     config.timeInfoEnabled = false;
+    config.timeLogEnabled = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -256,6 +258,8 @@ void MainWindow::uiInit()
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_in_dec->setStyleSheet(QString("color: %1; background-color: %2")
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
+                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->checkBox_clearIn_ascii->setStyleSheet(QString("color: %1; background-color: %2")
                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
@@ -289,7 +293,6 @@ void MainWindow::uiInit()
 
     hideFindUi();
     hideHelp();
-    hideSaveSettings();
     fillShortcutsTable();
     toggleShowSettings();
     focus_1();
@@ -300,25 +303,7 @@ void MainWindow::showConnectionSettings()
     dialog_connect->show();
 //    dialog_connect->move(0,0);
 }
-/////////////////////////////////////////////////////////////////
-void MainWindow::showSaveSettings()
-{
-    ui->lineEdit_save->show();
-    ui->label_save->show();
-    ui->pushButton_save->show();
-    ui->groupBox_save->show();
-    ui->lineEdit_save->setFocus();
-    on_pushButton_save_clicked();
-}
-/////////////////////////////////////////////////////////////////
-void MainWindow::hideSaveSettings()
-{
-    ui->lineEdit_save->hide();
-    ui->label_save->hide();
-    ui->pushButton_save->hide();
-    ui->groupBox_save->hide();
-    terminalInputSetFocus();
-}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::terminalInputSetFocus()
 {
@@ -377,18 +362,19 @@ void MainWindow::Tx(dataFormat_t inputType)
     if (config.suffix_tx_enabled)
         data.append(config.suffix_tx);
 
-
     /* transmit the data */
     switch (config.connectionType)
     {
     case serial:
         sw->write(data);
         terminalOutUpdate(data_Tx, data);
+        TxHistory_add(data);
         log(info, "Data sent via serial");
         break;
     case network:
         nw->send(data);
         terminalOutUpdate(data_Tx, data);
+        TxHistory_add(data);
         log(note, "Data sent via network");
         break;
     case none:
@@ -709,7 +695,6 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
         break;
     case data_Tx:
         color = COLOR_DATA_TX;
-        TxHistory_add(data);
         break;
     }
 
@@ -726,6 +711,8 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
     /* DEC */
     QString data_str_dec = conv_ba_to_strDec(data);
     updateTextEdit(ui->textEdit_out_dec, color, data_str_dec);
+
+    tick_lastRx = tick.elapsed();
 
 //    /* todo: put the data into txt file */
 //    switch (fileDataFormat)
@@ -745,18 +732,27 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 /////////////////////////////////////////////////////////////////
 void MainWindow::updateTextEdit(QTextEdit *textEdit, QString color, QString data)
 {
-
-    if (tick_lastRx + RXDATAEVENT_TIMEOUT < tick.elapsed()) {
-        textEdit->append("");
-    }
-
-    tick_lastRx = tick.elapsed();
-
     QTextCursor prev_cursor;
     prev_cursor = textEdit->textCursor();
     textEdit->moveCursor(QTextCursor::End);
     textEdit->setTextColor(color);
+    /////////////
+
+    if ((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) {
+        textEdit->append("");
+        if (config.timeLogEnabled) {
+            QDateTime dt = QDateTime::currentDateTime();
+            QString timeStr = dt.toString(TIME_FORMAT);
+            textEdit->setTextColor(COLOR_DATA);
+            textEdit->insertPlainText(timeStr);
+            textEdit->append("");
+        }
+    }
+
+    textEdit->setTextColor(color);
     textEdit->insertPlainText(data);
+
+    /////////////
     textEdit->setTextCursor(prev_cursor);
 }
 
@@ -791,7 +787,6 @@ void MainWindow::EscPressed()
 {
     hideFindUi();
     hideHelp();
-    hideSaveSettings();
     toggleShowSettings();
 }
 /////////////////////////////////////////////////////////////////
@@ -799,10 +794,10 @@ void MainWindow::EscPressed()
 ///     toggle show / hide
 void MainWindow::toggleShowSettings()
 {
-    if (ui->groupBox_wrap->isHidden()) {
-        ui->groupBox_wrap->show();
+    if (ui->groupBox_settings->isHidden()) {
+        ui->groupBox_settings->show();
     } else {
-        ui->groupBox_wrap->hide();
+        ui->groupBox_settings->hide();
     }
 }
 
@@ -871,6 +866,18 @@ void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
     }
 }
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        config.timeLogEnabled = true;
+        break;
+    case Qt::Unchecked:
+        config.timeLogEnabled = false;
+        break;
+    }
+}
+/////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
     config.suffix_tx = conv_strHex_to_ba(arg1);
@@ -896,7 +903,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
+//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
     new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
