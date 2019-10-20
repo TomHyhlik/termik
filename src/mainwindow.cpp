@@ -38,40 +38,16 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(nw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
     dialog_connect = new Dialog_connect(this);
-    //    connect(dialog_connect, SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
     dialog_connect->init();
-
     connect(dialog_connect, SIGNAL(connectVia_serial()), this, SLOT(connectVia_serial()));
     connect(dialog_connect, SIGNAL(connectVia_network()), this, SLOT(connectVia_network()));
 
 
-    /*************************** Shortcuts ****************************/
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFindUi()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(showSettings()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
-
-
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
-    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
-    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
-
+    setupShortcuts();
     uiInit();
     configInit();
-
     handleAppArguments(arguments);
 
 //    //////// simulate for debug
@@ -296,7 +272,7 @@ void MainWindow::uiInit()
     /* setup the help table */
     ui->tableWidget_shortcuts->setColumnCount(2);
     QStringList titles;
-    titles << "Shortcut" << "description";
+    titles << "Shortcut" << "Description";
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
     ui->tableWidget_shortcuts->horizontalHeader()->setStretchLastSection(true);  // set column size to widget size
 
@@ -315,6 +291,7 @@ void MainWindow::uiInit()
     hideHelp();
     hideSaveSettings();
     fillShortcutsTable();
+    toggleShowSettings();
     focus_1();
 }
 /////////////////////////////////////////////////////////////////
@@ -520,52 +497,44 @@ QByteArray MainWindow::conv_strDec_to_ba(QString data_str)
     return data_ba;
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::keyUpPressed
-///     for browsing in history of transmitted data
-///     todo: only the ascii input is supported by now
 void MainWindow::keyUpPressed()
 {
-    /* handle Tx data history */
-    if (history_out.size() > history_out_pointer)
-    {
-        if (ui->lineEdit_in_ascii->hasFocus()){
-            ui->lineEdit_in_ascii->setText(
-                        QString(history_out.at(history_out_pointer)));
-        }
-        else if (ui->lineEdit_in_hex->hasFocus()){
-            /*  */
-        }
-        else if (ui->lineEdit_in_dec->hasFocus()){
-            /*  */
-        }
-    }
-    if (history_out.size() > history_out_pointer + 1)
-        history_out_pointer++;
+    historyTxUpdate();
+
+    if (history_out.size() > history_out_ptr + 1)
+        history_out_ptr++;
 
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::keyDownPressed
-///     for browsing in history of transmitted data
-///     todo: only the ascii input is supported by now
 void MainWindow::keyDownPressed()
 {
-    /* handle Tx data history */
-    if (history_out.size() > history_out_pointer)
+    historyTxUpdate();
+
+    if (history_out_ptr > 0) {
+        history_out_ptr--;
+    }
+}
+/////////////////////////////////////////////////////////////////
+/// \brief MainWindow::historyTxUpdate
+///     update all lineedits of Tx data
+///     based on current state of history_out_ptr
+void MainWindow::historyTxUpdate()
+{
+    if (history_out.size() > history_out_ptr)
     {
-        if (ui->lineEdit_in_ascii->hasFocus()){
+        if (ui->lineEdit_in_ascii->hasFocus()) {
             ui->lineEdit_in_ascii->setText(
-                        QString(history_out.at(history_out_pointer)));
+                conv_ba_to_strAscii(history_out.at(history_out_ptr)));
         }
-        else if (ui->lineEdit_in_hex->hasFocus()){
-            /* todo */
+        else if (ui->lineEdit_in_hex->hasFocus()) {
+            ui->lineEdit_in_hex->setText(
+                conv_ba_to_strHex(history_out.at(history_out_ptr)));
         }
-        else if (ui->lineEdit_in_dec->hasFocus()){
-            /* todo */
+        else if (ui->lineEdit_in_dec->hasFocus()) {
+            ui->lineEdit_in_dec->setText(
+                conv_ba_to_strDec(history_out.at(history_out_ptr)));
         }
     }
-    if (history_out_pointer > 0)
-        history_out_pointer--;
-
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showHelp()
@@ -800,7 +769,7 @@ void MainWindow::TxHistory_add(QByteArray data)
     else if (history_out.at(0) != data) {
         history_out.prepend(data);
     }
-    history_out_pointer = 0;
+    history_out_ptr = 0;
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile(QString data)
@@ -823,9 +792,12 @@ void MainWindow::EscPressed()
     hideFindUi();
     hideHelp();
     hideSaveSettings();
+    toggleShowSettings();
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::showSettings()
+/// \brief MainWindow::showSettings
+///     toggle show / hide
+void MainWindow::toggleShowSettings()
 {
     if (ui->groupBox_wrap->isHidden()) {
         ui->groupBox_wrap->show();
@@ -901,11 +873,33 @@ void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
-    config.suffix_tx = QByteArray::fromHex(arg1.toUtf8());
+    config.suffix_tx = conv_strHex_to_ba(arg1);
 }
-
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
-    config.prefix_tx = QByteArray::fromHex(arg1.toUtf8());
+    config.prefix_tx = conv_strHex_to_ba(arg1);
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::setupShortcuts()
+{
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFindUi()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
+
+//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
+    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
+    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
+    new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
+    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
+    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
 /////////////////////////////////////////////////////////////////

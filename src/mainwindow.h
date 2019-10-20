@@ -115,7 +115,7 @@ private slots:
     void focus_3();
 
 
-    void showSettings();
+    void toggleShowSettings();
     void showHelp();
     void hideHelp();
 
@@ -138,6 +138,8 @@ private slots:
 
     void on_lineEdit_prefix_textChanged(const QString &arg1);
 
+    void historyTxUpdate();
+
 public slots:
     void connectVia_serial();
     void connectVia_network();
@@ -155,7 +157,7 @@ private:
     QFile file;
 
     QList <QByteArray> history_out;
-    quint16 history_out_pointer;
+    int history_out_ptr;
 
     void configInit();
 
@@ -189,7 +191,7 @@ private:
 
     void updateTextEdit(QTextEdit *textEdit, QString color, QString data);
 
-
+    void setupShortcuts();
 
 };
 
