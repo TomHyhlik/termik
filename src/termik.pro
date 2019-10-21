@@ -15,6 +15,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        dataconverter.cpp \
         main.cpp \
         mainwindow.cpp \
         txtfile.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
         serialworker.cpp
 
 HEADERS += \
+        dataconverter.h \
         handlearguments.h \
         mainwindow.h \
         txtfile.h \

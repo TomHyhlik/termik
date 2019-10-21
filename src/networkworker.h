@@ -10,15 +10,18 @@ class NetworkWorker : public QObject
     Q_OBJECT
     QUdpSocket *socket;
 
+public:
+    explicit NetworkWorker(QObject *parent = nullptr);
+
+
     class parameters {
     public:
         QHostAddress targetIpAddr;
         quint16 port_Tx;
         quint16 port_Rx;
-    }param;
+    } param;
 
-public:
-    explicit NetworkWorker(QObject *parent = nullptr);
+
     QString getMyLocalIpAddress();
     void send(QString IPaddress, quint16 port, QByteArray data);
     void send(QByteArray data);

@@ -86,6 +86,13 @@
            </item>
           </layout>
          </item>
+         <item>
+          <widget class="QCheckBox" name="checkBox_clearOutputLine">
+           <property name="text">
+            <string>Clear output line automatically</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -97,7 +104,7 @@
        <enum>QTabWidget::Triangular</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_ascii">
        <attribute name="title">
@@ -129,13 +136,6 @@
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QLineEdit" name="lineEdit_in_ascii"/>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_clearIn_ascii">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
               </item>
              </layout>
             </item>
@@ -176,13 +176,6 @@
               <item>
                <widget class="QLineEdit" name="lineEdit_in_hex"/>
               </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_clearIn_hex">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
              </layout>
             </item>
            </layout>
@@ -221,13 +214,6 @@
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QLineEdit" name="lineEdit_in_dec"/>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="checkBox_clearIn_dec">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
               </item>
              </layout>
             </item>

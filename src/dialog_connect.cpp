@@ -291,10 +291,10 @@ void Dialog_connect::on_buttonBox_accepted()
     switch (ui->tabWidget->currentIndex())
     {
     case serial:
-        emit connectVia_serial();
+        emit tryConnect(serial);
         break;
     case network:
-        emit connectVia_network();
+        emit tryConnect(network);
         break;
     }
 }

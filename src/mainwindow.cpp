@@ -20,6 +20,7 @@
 #include "ui_mainwindow.h"
 #include "string.h"
 #include "dialog_connect.h"
+#include "dataconverter.h"
 
 
 /////////////////////////////////////////////////////////////////
@@ -28,8 +29,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    tick.start();
 
     sw = new SerialWorker(this);
     connect(sw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
@@ -41,23 +40,15 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
     dialog_connect->init();
-    connect(dialog_connect, SIGNAL(connectVia_serial()), this, SLOT(connectVia_serial()));
-    connect(dialog_connect, SIGNAL(connectVia_network()), this, SLOT(connectVia_network()));
+    connect(dialog_connect, SIGNAL(tryConnect(connectionType_t)), this, SLOT(tryConnectDevice(connectionType_t)));
 
+    tick.start();
     tick_lastRx = 0;
 
     setupShortcuts();
     uiInit();
     configInit();
     handleAppArguments(arguments);
-
-//    //////// simulate for debug
-//    QByteArray simulatedData;
-//    for (int i = 0; i <= 0xFF; i++) {
-//        simulatedData.append(char(i));
-//    }
-//    terminalOutUpdate(data_Rx, simulatedData);
-////    terminalOutUpdate(data_Rx, QByteArray("ahoj"));
 
 }
 
@@ -67,6 +58,7 @@ void MainWindow::configInit()
     config.connectionType = none;
     config.timeInfoEnabled = false;
     config.timeLogEnabled = false;
+    config.clearOutputLine = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -186,31 +178,36 @@ void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::connectVia_serial()
+void MainWindow::tryConnectDevice(connectionType_t connectionType)
 {
-    if(sw->isOpen()) {
-        sw->close();
+    bool connectedSuccessfully;
+    QString deviceName;
+
+    switch (connectionType)
+    {
+    case serial:
+        connectedSuccessfully = sw->open();
+        deviceName = sw->param.portName;
+        break;
+    case network:
+        connectedSuccessfully = nw->open();
+        deviceName = nw->param.targetIpAddr.toString();
+        break;
+    case none:
+        connectedSuccessfully = false;
+        break;
     }
 
-    if (sw->open()) {
-        config.connectionType = serial;
-        log(note, "Connected via Serial");
+    if (connectedSuccessfully) {
+        config.connectionType = connectionType;
+        log(note, QString("Connected to: %1").arg(deviceName));
+        ui->lineEdit_in_ascii->setFocus();
     } else {
-        config.connectionType = none;
-        log(note, "Failed to connect via Serial");
+        log(error, QString("Failed to connect to: %1").arg(deviceName));
+        dialog_connect->show();
     }
 }
-//////////////////////////////////////////////////////////////////////
-void MainWindow::connectVia_network()
-{
-    if (nw->open()) {
-        config.connectionType = network;
-        log(note, "Connected via Network");
-    } else {
-        config.connectionType = none;
-        log(note, "Failed to connect via Network");
-    }
-}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::uiInit()
 {
@@ -261,13 +258,15 @@ void MainWindow::uiInit()
     ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->checkBox_clearIn_ascii->setStyleSheet(QString("color: %1; background-color: %2")
-                                              .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->checkBox_clearIn_hex->setStyleSheet(QString("color: %1; background-color: %2")
-                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->checkBox_clearIn_dec->setStyleSheet(QString("color: %1; background-color: %2")
-                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
+    /* pushbuttons*/
+    ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
+                                     .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    ui->pushButton_fnd_dec->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    ui->pushButton_fnd_hex->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    ui->pushButton_fnd_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+                                            .arg(COLOR_WHITE).arg(COLOR_GRAY0));
 
     /*** UI setup ***/
 
@@ -283,12 +282,9 @@ void MainWindow::uiInit()
 
     /*** UI show/hide widgets ***/
 
-    ui->checkBox_clearIn_ascii->setChecked(true);
-    ui->checkBox_clearIn_hex->setChecked(true);
-    ui->checkBox_clearIn_dec->setChecked(true);
-
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
+    ui->checkBox_clearOutputLine->setChecked(true);
     ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
 
     hideFindUi();
@@ -330,56 +326,53 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx(dataFormat_t inputType)
 {
-    QByteArray data;        // to be transmitted
-    QString data_str;       // just a helper for data conversion
+    QByteArray txData;        // to be transmitted
+    dataConverter dataConv;
 
     /* read the data from UI */
     switch (inputType)
     {
     case data_ascii:
-        data_str = ui->lineEdit_in_ascii->text();
-        data = conv_strAscii_to_ba(data_str);
-        if (ui->checkBox_clearIn_ascii->isChecked())
-            ui->lineEdit_in_ascii->clear();
+        dataConv.setStrAscii(ui->lineEdit_in_ascii->text());
         break;
     case data_hex:
-        data_str = ui->lineEdit_in_hex->text();
-        data = conv_strHex_to_ba(data_str);
-        if (ui->checkBox_clearIn_hex->isChecked())
-            ui->lineEdit_in_hex->clear();
+        dataConv.setStrHex(ui->lineEdit_in_hex->text());
         break;
     case data_dec:
-        QString data_str = ui->lineEdit_in_dec->text();
-        QByteArray data_ba = conv_strDec_to_ba(data_str);
-        if (ui->checkBox_clearIn_dec->isChecked())
-            ui->lineEdit_in_dec->clear();
+        dataConv.setStrDec(ui->lineEdit_in_dec->text());
         break;
     }
 
+    txData = dataConv.getByteArray();
+
     /* add prefix and suffix to the data */
     if (config.prefix_tx_enabled)
-        data.prepend(config.prefix_tx);
+        txData.prepend(config.prefix_tx);
     if (config.suffix_tx_enabled)
-        data.append(config.suffix_tx);
+        txData.append(config.suffix_tx);
 
     /* transmit the data */
     switch (config.connectionType)
     {
     case serial:
-        sw->write(data);
-        terminalOutUpdate(data_Tx, data);
-        TxHistory_add(data);
-        log(info, "Data sent via serial");
+        sw->write(txData);
+        terminalOutUpdate(data_Tx, txData);
+        TxHistory_add(txData);
         break;
     case network:
-        nw->send(data);
-        terminalOutUpdate(data_Tx, data);
-        TxHistory_add(data);
-        log(note, "Data sent via network");
+        nw->send(txData);
+        terminalOutUpdate(data_Tx, txData);
+        TxHistory_add(txData);
         break;
     case none:
-        log(error, "Data can't be sent, no connection selected");
-        break;
+        log(error, "No connection established.");
+        return;
+    }
+
+    if (config.clearOutputLine) {
+        ui->lineEdit_in_ascii->clear();
+        ui->lineEdit_in_hex->clear();
+        ui->lineEdit_in_dec->clear();
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -421,74 +414,13 @@ void MainWindow::keyEnterPressed()
 }
 
 /////////////////////////////////////////////////////////////////
-QString MainWindow::conv_ba_to_strAscii(QByteArray data)
-{
-    QString out;
-    for (int i = 0; i < data.size(); i++) {
-        out.append(data.at(i));
-    }
-    return out;
-}
-
-QString MainWindow::conv_ba_to_strHex(QByteArray data)
-{
-    QString out;
-    for (int i = 0; i < data.size(); i++) {
-        QString numStr = QString::number(quint8(data.at(i)), 16);
-        while(numStr.size() < DIGIT_NUM_HEX){
-            numStr.prepend("0");
-        }
-        out.append(QString("%1 ").arg(numStr));
-    }
-    return out;
-}
-
-QString MainWindow::conv_ba_to_strDec(QByteArray data)
-{
-    QString out;
-    for (int i = 0; i < data.size(); i++) {
-        QString numStr = QString::number(quint8(data.at(i)), 10);
-        while(numStr.size() < DIGIT_NUM_DEC){
-            numStr.prepend("0");
-        }
-        out.append(QString("%1 ").arg(numStr));
-    }
-    return out;
-}
-
-/////////////////////////////////////////////////////////////////
-QByteArray MainWindow::conv_strAscii_to_ba(QString data_str)
-{
-    return data_str.toUtf8();
-}
-QByteArray MainWindow::conv_strHex_to_ba(QString sata_str)
-{
-    return QByteArray::fromHex(sata_str.toUtf8());
-}
-QByteArray MainWindow::conv_strDec_to_ba(QString data_str)
-{
-    bool ok;
-    QString element;
-    QByteArray data_ba;
-    for (int i = 0; i <= data_str.size(); i += DIGIT_NUM_DEC) {
-        element = data_str.mid(i, DIGIT_NUM_DEC);
-        if (element.size() != 0) {
-            while (element.size() < DIGIT_NUM_DEC) {
-                element.append("0");
-            }
-            quint32 num = element.toUInt(&ok, 10);
-            data_ba.append(qint8(num));
-        }
-    }
-    return data_ba;
-}
-/////////////////////////////////////////////////////////////////
 void MainWindow::keyUpPressed()
 {
     historyTxUpdate();
 
-    if (history_out.size() > history_out_ptr + 1)
+    if (history_out.size() > history_out_ptr + 1) {
         history_out_ptr++;
+    }
 
 }
 /////////////////////////////////////////////////////////////////
@@ -508,18 +440,12 @@ void MainWindow::historyTxUpdate()
 {
     if (history_out.size() > history_out_ptr)
     {
-        if (ui->lineEdit_in_ascii->hasFocus()) {
-            ui->lineEdit_in_ascii->setText(
-                conv_ba_to_strAscii(history_out.at(history_out_ptr)));
-        }
-        else if (ui->lineEdit_in_hex->hasFocus()) {
-            ui->lineEdit_in_hex->setText(
-                conv_ba_to_strHex(history_out.at(history_out_ptr)));
-        }
-        else if (ui->lineEdit_in_dec->hasFocus()) {
-            ui->lineEdit_in_dec->setText(
-                conv_ba_to_strDec(history_out.at(history_out_ptr)));
-        }
+        dataConverter dataConv;
+        dataConv.setByteArray(history_out.at(history_out_ptr));
+
+        ui->lineEdit_in_ascii->setText(dataConv.getStrAscii());
+        ui->lineEdit_in_hex->setText(dataConv.getStrHex());
+        ui->lineEdit_in_dec->setText(dataConv.getStrDec());
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -541,7 +467,7 @@ void MainWindow::fillShortcutsTable()
     shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
     shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
     shortcuts <<  QList <QString> { "CTRL + T" , "Change theme (not supported yet)"};
-    shortcuts <<  QList <QString> { "CTRL + ," , "Open settongs"};
+    shortcuts <<  QList <QString> { "CTRL + ," , "Show settongs"};
     shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
     shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
     shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
@@ -664,17 +590,17 @@ void MainWindow::log(logType_t logType, QString data)
     switch(logType)
     {
     case error:
-        timeout = 300*1000;
+        timeout = LOGTIMEOUT_ERROR;
         data.prepend("Error: ");
         break;
 
     case note:
-        timeout = 50*1000;
+        timeout = LOGTIMEOUT_NOTE;
         data.prepend("Note: ");
         break;
 
     case info:
-        timeout = 60*1000;
+        timeout = LOGTIMEOUT_INFO;
     }
 
     ui->statusBar->showMessage(data, timeout);
@@ -699,18 +625,12 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
     }
 
     /* update all terminal outputs (textEdits) */
+    dataConverter dataConv;
+    dataConv.setByteArray(data);
 
-    /* ASCII */
-    QString data_str_ascii = conv_ba_to_strAscii(data);
-    updateTextEdit(ui->textEdit_out_ascii, color, data_str_ascii);
-
-    /* HEX */
-    QString data_str_hex = conv_ba_to_strHex(data);
-    updateTextEdit(ui->textEdit_out_hex, color, data_str_hex);
-
-    /* DEC */
-    QString data_str_dec = conv_ba_to_strDec(data);
-    updateTextEdit(ui->textEdit_out_dec, color, data_str_dec);
+    updateTextEdit(ui->textEdit_out_ascii,  color, dataConv.getStrAscii());
+    updateTextEdit(ui->textEdit_out_hex,    color, dataConv.getStrHex());
+    updateTextEdit(ui->textEdit_out_dec,    color, dataConv.getStrDec());
 
     tick_lastRx = tick.elapsed();
 
@@ -815,8 +735,7 @@ void MainWindow::on_pushButton_save_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
         "~/Desktop/",
-        QFileDialog::ShowDirsOnly
-        | QFileDialog::DontResolveSymlinks);
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     ui->lineEdit_save->setText(dir);
 }
@@ -865,7 +784,6 @@ void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
         break;
     }
 }
-/////////////////////////////////////////////////////////////////
 void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
 {
     switch (arg1) {
@@ -877,15 +795,32 @@ void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
         break;
     }
 }
+void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        config.clearOutputLine = true;
+        break;
+    case Qt::Unchecked:
+        config.clearOutputLine = false;
+        break;
+    }
+}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
-    config.suffix_tx = conv_strHex_to_ba(arg1);
+    dataConverter dataConv;
+    dataConv.setStrHex(arg1);
+    config.prefix_tx = dataConv.getByteArray();
 }
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
-    config.prefix_tx = conv_strHex_to_ba(arg1);
+    dataConverter dataConv;
+    dataConv.setStrHex(arg1);
+    config.prefix_tx = dataConv.getByteArray();
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::setupShortcuts()
 {

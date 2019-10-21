@@ -20,6 +20,10 @@ SerialWorker::SerialWorker(QObject *parent) : QObject(parent)
 ///////////////////////////////////////////////////////////////////////////////
 bool SerialWorker::open()
 {
+    if (serial->isOpen()) {
+        serial->close();
+    }
+
     serial->setPortName(param.portName);
     serial->setBaudRate(QSerialPort::BaudRate(param.baudRate));
     serial->setFlowControl(QSerialPort::FlowControl(param.flowControl));

@@ -18,7 +18,7 @@
 #define DIGIT_NUM_DEC   3
 #define DIGIT_NUM_BIN   8
 
-#define RXDATAEVENT_TIMEOUT 200
+#define RXDATAEVENT_TIMEOUT 100
 
 #define SUFFIX_DEFAULT      "\r\n"
 
@@ -68,6 +68,7 @@ public:
     dataFormat_t fileDataFormat;
 
     bool timeInfoEnabled;
+    bool clearOutputLine;
 };
 
 #define COLOR_BLACK     "black"
@@ -87,6 +88,9 @@ public:
 
 #define MAINWINDOWTITLE "Termik"
 
+#define LOGTIMEOUT_ERROR    300*1000
+#define LOGTIMEOUT_NOTE     60*1000
+#define LOGTIMEOUT_INFO     30*1000
 
 /////////////////////////////////////////////////////////
 namespace Ui {
@@ -135,20 +139,18 @@ private slots:
     void Tx(dataFormat_t);
 
     void on_checkBox_prefix_stateChanged(int arg1);
-
     void on_checkBox_suffix_stateChanged(int arg1);
-
     void on_lineEdit_suffix_textChanged(const QString &arg1);
-
     void on_lineEdit_prefix_textChanged(const QString &arg1);
+    void on_checkBox_timeLog_stateChanged(int arg1);
 
     void historyTxUpdate();
 
-    void on_checkBox_timeLog_stateChanged(int arg1);
+
+    void on_checkBox_clearOutputLine_stateChanged(int arg1);
 
 public slots:
-    void connectVia_serial();
-    void connectVia_network();
+    void tryConnectDevice(connectionType_t);
 
 private:
     Ui::MainWindow *ui;
@@ -183,17 +185,6 @@ private:
     void handleAppArguments_printHelp();
     void handleAppArguments_printHelp_wrap(char argData, QString argTitle);
     void handleAppArguments_setParam(QString command, QString passedData);
-
-
-    QByteArray conv_strAscii_to_ba(QString data_str);
-    QByteArray conv_strHex_to_ba(QString data_str);
-    QByteArray conv_strDec_to_ba(QString data_str);
-
-    QString conv_ba_to_strAscii(QByteArray data);
-    QString conv_ba_to_strHex(QByteArray data);
-    QString conv_ba_to_strDec(QByteArray data);
-
-
 
     void updateTextEdit(QTextEdit *textEdit, QString color, QString data);
 

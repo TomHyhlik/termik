@@ -100,9 +100,9 @@ private slots:
 
 
 signals:
-    void connectVia_serial();
+
     void connectVia_serial(QString serialPortName);
-    void connectVia_network();
+    void tryConnect(connectionType_t);
     void log(int, QString);
 };
 
