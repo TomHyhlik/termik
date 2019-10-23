@@ -7,6 +7,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QTimer>
+//#include <QShowEvent> rm later
 
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
@@ -15,6 +16,30 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(serial);
+
+}
+
+/////////////////////////////////////////////////////////////////
+/// \brief Dialog_connect::showEvent
+/// called when the dialog is shown
+void Dialog_connect::showEvent( QShowEvent* event ) {
+    QWidget::showEvent( event );
+
+    refreshParameters();
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::refreshParameters()
+{
+    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, sw->param.baudRate));
+    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, sw->param.dataBits));
+    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, sw->param.parity));
+    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, sw->param.stopBits));
+    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, sw->param.flowControl));
+
+    ui->lineEdit_ipAddr->setText(nw->param.targetIpAddr.toString());
+    ui->spinBox_ipPort_Tx->setValue(nw->param.port_Tx);
+    ui->spinBox_ipPort_Rx->setValue(nw->param.port_Tx);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -183,38 +208,26 @@ void Dialog_connect::fillflowControl()
     flowControlS.insert(QSerialPort::SoftwareControl , "SW");
 }
 
-///////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::setDefaultPortParameters
-///         set default port parameters to the port settings ui
-void Dialog_connect::setDefaultUiParameters()
-{
-    ui->comboBox_baudRate->setCurrentText("115200");
-    ui->comboBox_dataBits->setCurrentText("8");
-    ui->comboBox_parity->setCurrentText("none");
-    ui->comboBox_stopBits->setCurrentText("1");
-    ui->comboBox_flowControl->setCurrentText("none");
-
-    ui->lineEdit_ipAddr->setText("192.168.0.100");
-    ui->spinBox_ipPort_Tx->setValue(8480);
-    ui->spinBox_ipPort_Rx->setValue(8481);
-
-}
 /////////////////////////////////////////////////////////////////
-/// \brief dialog_config::getFirstMapVal return the opposite value
-/// of the map
-/// \param m: map
-/// \param label the second value of the map
-/// \return tohe opposite value
 int Dialog_connect::getFirstMapVal(QMap<int,QString> m, QString label)
 {
-    for(auto e : m.toStdMap())
+    for (auto e : m.toStdMap())
     {
-        if(label == e.second)
+        if (label == e.second)
             return e.first;
     }
     return 0;
 }
-
+/////////////////////////////////////////////////////////////////
+QString Dialog_connect::getSecondMapVal(QMap<int,QString> m, int val)
+{
+    for (auto e : m.toStdMap())
+    {
+        if (val == e.first)
+            return e.second;
+    }
+    return nullptr;
+}
 ///////////////////////////////////////////////////////////////////////
 Dialog_connect::~Dialog_connect()
 {
@@ -225,15 +238,8 @@ void Dialog_connect::on_tabWidget_currentChanged(int index)
 {
     currentTab = index;
 }
+
 ///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
 /// \brief Read information about selected port and put it to the QLabels
 ///         and update the port name in SerialWorker class
 /// \param arg1: the port name from the combobox
@@ -376,7 +382,6 @@ int Dialog_connect::configurationRead()
         QString ipPort_Rx = QString(file.readLine());
         ui->spinBox_ipPort_Rx->setValue(ipPort_Rx.toInt(nullptr, 10));
 
-
         file.close();
 
         /* convert the string to number */
@@ -386,13 +391,12 @@ int Dialog_connect::configurationRead()
             return productIdentifier;
         } else {
             log(error, "Failed to read the saved connection configuration");
+            return FAILED;
         }
 
     } else {
-//        log(info, "The default connection configuration is not set yet.");
-        setDefaultUiParameters();
+        return FAILED;
     }
-    return FAILED;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -418,3 +422,5 @@ QString Dialog_connect::getSerialPortName(int productIdentifier)
     }
     return nullptr;
 }
+
+//////////////////////////////////////////////////////////////////////////////

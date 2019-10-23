@@ -1,8 +1,3 @@
-/*
- * colors set from this source:
- * https://en.wikipedia.org/wiki/Web_colors
- */
-
 #include <QShortcut>
 #include <QSerialPortInfo>
 #include <QTimer>
@@ -40,7 +35,8 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
     dialog_connect->init();
-    connect(dialog_connect, SIGNAL(tryConnect(connectionType_t)), this, SLOT(tryConnectDevice(connectionType_t)));
+    connect(dialog_connect, SIGNAL(tryConnect(connectionType_t)), this,
+            SLOT(tryConnectDevice(connectionType_t)));
 
     tick.start();
     tick_lastRx = 0;
@@ -49,7 +45,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     uiInit();
     configInit();
     handleAppArguments(arguments);
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -258,7 +253,7 @@ void MainWindow::uiInit()
     ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    /* pushbuttons*/
+    /* pushbuttons */
     ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
                                      .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->pushButton_fnd_dec->setStyleSheet(QString("color: %1; background-color: %2")
@@ -738,6 +733,7 @@ void MainWindow::on_pushButton_save_clicked()
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     ui->lineEdit_save->setText(dir);
+    log(error,"TODO");
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::on_tabWidget_currentChanged
@@ -829,16 +825,14 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
-
 //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(showSaveSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(on_pushButton_save_clicked()));
     new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));

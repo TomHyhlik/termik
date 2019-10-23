@@ -11,12 +11,19 @@
 SerialWorker::SerialWorker(QObject *parent) : QObject(parent)
 {
     serial = new QSerialPort(this);
-
     connect(serial, &QIODevice::readyRead, this, &SerialWorker::readData);
 
-    splitFactor_enabled = false;
+    setDefaultParameters();
 }
-
+///////////////////////////////////////////////////////////////////////////////
+void SerialWorker::setDefaultParameters()
+{
+    param.baudRate = QSerialPort::Baud115200;
+    param.dataBits = QSerialPort::Data8;
+    param.parity = QSerialPort::NoParity;
+    param.stopBits = QSerialPort::OneStop;
+    param.flowControl = QSerialPort::NoFlowControl;
+}
 ///////////////////////////////////////////////////////////////////////////////
 bool SerialWorker::open()
 {
@@ -26,10 +33,10 @@ bool SerialWorker::open()
 
     serial->setPortName(param.portName);
     serial->setBaudRate(QSerialPort::BaudRate(param.baudRate));
-    serial->setFlowControl(QSerialPort::FlowControl(param.flowControl));
     serial->setDataBits(QSerialPort::DataBits(param.dataBits));
-    serial->setStopBits(QSerialPort::StopBits(param.stopBits));
     serial->setParity(QSerialPort::Parity(param.parity));
+    serial->setStopBits(QSerialPort::StopBits(param.stopBits));
+    serial->setFlowControl(QSerialPort::FlowControl(param.flowControl));
 
     serial->open(QIODevice::ReadWrite);
 

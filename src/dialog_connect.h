@@ -66,6 +66,8 @@ private:
     void initColors();
 
     int getFirstMapVal(QMap<int,QString> m, QString label);
+    QString getSecondMapVal(QMap<int,QString> m, int val);
+
     void blockAllsignals(bool state);
 
     /* tab port init */
@@ -80,7 +82,6 @@ private:
     void fillParity();
     void fillstopBits();
     void fillflowControl();
-    void setDefaultUiParameters();
 
     QTimer *timer_updatePorts;
 
@@ -98,12 +99,19 @@ private slots:
     void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
 
+public slots:
+    void refreshParameters();
+
 
 signals:
 
     void connectVia_serial(QString serialPortName);
     void tryConnect(connectionType_t);
     void log(int, QString);
+
+protected:
+    void showEvent(QShowEvent *ev);
+
 };
 
 #endif // DIALOG_CONNECT_H

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>311</height>
+    <height>366</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,6 +111,12 @@
                 </item>
                 <item>
                  <widget class="QComboBox" name="comboBox_baudRate">
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="editable">
                    <bool>false</bool>
                   </property>

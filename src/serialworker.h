@@ -27,10 +27,6 @@ public:
     bool close();
     bool isOpen();
 
-
-    QByteArray splitFactor;
-    bool splitFactor_enabled;
-
     parameters param;
 
     QList <QByteArray> RxData;
@@ -41,6 +37,7 @@ private:
 
     QSerialPort* serial;
     QByteArray buffer;
+    void setDefaultParameters();
 
 public slots:
     void readData();
