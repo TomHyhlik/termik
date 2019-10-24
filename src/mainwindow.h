@@ -12,6 +12,7 @@
 #include "serialworker.h"
 #include "networkworker.h"
 #include "handlearguments.h"
+#include "logfile.h"
 
 
 #define DIGIT_NUM_HEX   2
@@ -65,10 +66,10 @@ public:
     QByteArray suffix_tx;
     QByteArray prefix_tx;
 
-    dataFormat_t fileDataFormat;
-
     bool timeInfoEnabled;
     bool clearOutputLine;
+
+    bool saveTerminalOutput;
 };
 
 #define COLOR_BLACK     "black"
@@ -132,7 +133,6 @@ private slots:
     void keyEnterPressed();
 
     void on_pushButton_save_clicked();
-    void saveToFile(QString data);
 
     void on_tabWidget_currentChanged(int index);
 
@@ -149,6 +149,8 @@ private slots:
 
     void on_checkBox_clearOutputLine_stateChanged(int arg1);
 
+    void on_checkBox_outputSave_stateChanged(int arg1);
+
 public slots:
     void tryConnectDevice(connectionType_t);
 
@@ -157,12 +159,12 @@ private:
     SerialWorker *sw;
     NetworkWorker *nw;
     Dialog_connect* dialog_connect;
+    LogFile* logFile;
     swConfiguration config;
 
     qint64 tick_lastRx;
     QElapsedTimer tick;
 
-    QFile file;
 
     QList <QByteArray> history_out;
     int history_out_ptr;
@@ -184,11 +186,14 @@ private:
     void handleAppArguments(QStringList arguments);
     void handleAppArguments_printHelp();
     void handleAppArguments_printHelp_wrap(char argData, QString argTitle);
-    void handleAppArguments_setParam(QString command, QString passedData);
+    bool handleAppArguments_setParam(QString command, QString passedData);
 
     void updateTextEdit(QTextEdit *textEdit, QString color, QString data);
 
     void setupShortcuts();
+
+    void saveToFile_init();
+
 
 };
 

@@ -72,7 +72,7 @@ bool SerialWorker::write(QByteArray data)
     serial->write(data);          // send over USB
 //    serial->waitForBytesWritten(50);
 
-    qDebug() << "TX: " << data.toHex();
+//    qDebug() << "TX: " << data.toHex();
 
 
     if(serial->flush()){          // check if data were send to serial port
@@ -88,7 +88,7 @@ void SerialWorker::readData()
     RxData.append(data);
     emit dataReceived();
 
-    qDebug() << "RX: " << data.toHex();
+//    qDebug() << "RX: " << data.toHex();
 }
 ///////////////////////////////////////////////////////////////////////////////
 QByteArray SerialWorker::ReadAllRx()

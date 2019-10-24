@@ -8,7 +8,10 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
-    dodelat spousteni programu pres cmd s argumenty
-    pridat featuru time logging
-    dodelat featuru save output to txt file
-    
+
+
+	
+    upravit featuru save to txt file, opravit bug time log aby byl i v tom textaku
+
+    new features:
+    	run script of data (single run/repeat mode)

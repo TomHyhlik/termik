@@ -2,7 +2,7 @@
 #define HANDLEARGUMENTS_H
 
 
-
+#define ARG_CONNECTIONTYPE      'c'
 
 #define ARG_NETWORK_IPADDR      'a'
 #define ARG_NETWORK_TXPORT      't'

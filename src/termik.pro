@@ -16,9 +16,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         dataconverter.cpp \
+        logfile.cpp \
         main.cpp \
         mainwindow.cpp \
-        txtfile.cpp \
         dialog_connect.cpp \
         networkworker.cpp \
         serialworker.cpp
@@ -26,8 +26,8 @@ SOURCES += \
 HEADERS += \
         dataconverter.h \
         handlearguments.h \
+        logfile.h \
         mainwindow.h \
-        txtfile.h \
         dialog_connect.h \
         networkworker.h \
         serialworker.h

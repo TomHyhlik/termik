@@ -38,13 +38,26 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(dialog_connect, SIGNAL(tryConnect(connectionType_t)), this,
             SLOT(tryConnectDevice(connectionType_t)));
 
-    tick.start();
+    logFile = new LogFile(this);
+
     tick_lastRx = 0;
+    tick.start();
 
     setupShortcuts();
     uiInit();
     configInit();
     handleAppArguments(arguments);
+}
+//////////////////////////////////////////////////////////////////////
+void MainWindow::saveToFile_init()
+{
+    ui->checkBox_outputSave->setCheckState(Qt::Checked);
+    QString fileLocation = ui->lineEdit_save->text();
+
+    logFile->init(fileLocation);
+    QString message = QString("Output saved in %1").arg(fileLocation);
+    log(info, message);
+    qDebug() << message;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -54,6 +67,7 @@ void MainWindow::configInit()
     config.timeInfoEnabled = false;
     config.timeLogEnabled = false;
     config.clearOutputLine = true;
+    config.saveTerminalOutput = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -66,12 +80,6 @@ void MainWindow::handleAppArguments(QStringList arguments)
 {
     /* the first argument is the cmd of calling the app */
     arguments.removeFirst();
-
-//    /* at first look if there is long argument */
-//    if (arguments.first() == ARG_HELP_LONG) {
-//        handleAppArguments_printHelp();
-//        exit(0);
-//    }
 
     /* now look at the pairs of arguments */
     while (!arguments.isEmpty())
@@ -88,7 +96,9 @@ void MainWindow::handleAppArguments(QStringList arguments)
                     passedData = arguments.at(0);
                     arguments.removeFirst();
 
-                    handleAppArguments_setParam(command, passedData);
+                    if (!handleAppArguments_setParam(command, passedData)) {
+                        return;
+                    }
                 } else {
                     qDebug() << "ERROR: No passed data for command " << command;
                     handleAppArguments_printHelp();
@@ -99,55 +109,82 @@ void MainWindow::handleAppArguments(QStringList arguments)
                 handleAppArguments_printHelp();
             }
     }
+
+    if (config.connectionType != none) {
+        tryConnectDevice(config.connectionType);
+    }
 }
 
-void MainWindow::handleAppArguments_setParam(QString command, QString passedData)
+bool MainWindow::handleAppArguments_setParam(QString command, QString passedData)
 {
-    qDebug() << "Setting" << command << " to " << passedData;
     char cmdChar = command.toUtf8().at(1);
-
-    /* todo: continue here, implement the setting of parameters bellow */
+    bool ok = true;
 
     switch (cmdChar)
     {
     case ARG_NETWORK_IPADDR:
-
+        nw->param.targetIpAddr = QHostAddress(passedData);
+        if (nw->param.targetIpAddr.isNull())
+            ok = false;
         break;
     case ARG_NETWORK_TXPORT:
-
+        nw->param.port_Tx = quint16(passedData.toInt(&ok, 10));
         break;
     case ARG_NETWORK_RXPORT:
-
+        nw->param.port_Rx = quint16(passedData.toInt(&ok, 10));
         break;
-
 
     case ARG_SERIAL_PORTNAME:
-
+        sw->param.portName = passedData;
         break;
     case ARG_SERIAL_BAUDRATE:
-
+        sw->param.baudRate = passedData.toInt(&ok, 10);
         break;
     case ARG_SERIAL_DATABITS:
-
+        sw->param.dataBits = passedData.toInt(&ok, 10);
         break;
     case ARG_SERIAL_PARITY:
-
+        sw->param.parity= passedData.toInt(&ok, 10);
         break;
     case ARG_SERIAL_STOPBITS:
-
+        sw->param.stopBits= passedData.toInt(&ok, 10);
         break;
     case ARG_SERIAL_FLOWCONTROL:
+        sw->param.flowControl = passedData.toInt(&ok, 10);
+        break;
 
+    case ARG_CONNECTIONTYPE:
+        if (passedData == "serial") {
+            config.connectionType = serial;
+        }
+        else if (passedData == "network") {
+            config.connectionType = network;
+        }
+        else {
+            ok = false;
+        }
         break;
     default:
         qDebug() << "ERROR: Unknown command -" << command;
     }
+
+    if (!ok) {
+        qDebug() << "Failed to handle arguments: " << command << " " << passedData;
+    } else {
+        qDebug() << "Setting" << command << " to " << passedData;
+    }
+
+    return ok;
 }
 
 void MainWindow::handleAppArguments_printHelp()
 {
     qDebug("");
     qDebug() << "*** The options are as follows:";
+
+    qDebug() << "\n\t- Select connection type to connect automatically: ";
+    handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial or network");
+
 
     qDebug() << "\n\t- Parameters for connection via serial: ";
     handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial port name");
@@ -198,6 +235,7 @@ void MainWindow::tryConnectDevice(connectionType_t connectionType)
         log(note, QString("Connected to: %1").arg(deviceName));
         ui->lineEdit_in_ascii->setFocus();
     } else {
+        config.connectionType = none;
         log(error, QString("Failed to connect to: %1").arg(deviceName));
         dialog_connect->show();
     }
@@ -377,27 +415,7 @@ void MainWindow::Tx(dataFormat_t inputType)
 void MainWindow::keyEnterPressed()
 {
     ////////////////////////////
-    if (ui->lineEdit_save->hasFocus()) {
-            /* todo: start to save the new data into entered file */
-//        QString fileLocation = ui->lineEdit_save->text();
-
-//        QDateTime dt = QDateTime::currentDateTime();
-//        QString timeStr = dt.toString( "yyyy-MM-dd_hh:mm:ss" );
-//        //        ui->textEdit_out_ascii->append(timeStr); to debug
-//        QString fileName = QString("TerminalOutput_%1").arg(timeStr);
-
-//        file.setFileName(fileName);
-
-//        qDebug() << "todo: 65464138";
-//        fileDataFormat = data_ascii;
-
-//        hideSaveSettings();
-//        log(info, QString("Output saved to: %1%2").arg(fileLocation).arg(fileName));
-
-    }
-
-    ////////////////////////////
-    else if (ui->lineEdit_in_ascii->hasFocus()) {
+    if (ui->lineEdit_in_ascii->hasFocus()) {
         Tx(data_ascii);
     }
     else if (ui->lineEdit_in_hex->hasFocus()) {
@@ -626,22 +644,11 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
     updateTextEdit(ui->textEdit_out_ascii,  color, dataConv.getStrAscii());
     updateTextEdit(ui->textEdit_out_hex,    color, dataConv.getStrHex());
     updateTextEdit(ui->textEdit_out_dec,    color, dataConv.getStrDec());
-
     tick_lastRx = tick.elapsed();
 
-//    /* todo: put the data into txt file */
-//    switch (fileDataFormat)
-//    {
-//    case data_ascii:
-//        saveToFile(data_str_ascii);
-//        break;
-//    case data_hex:
-//        saveToFile(data_str_hex);
-//        break;
-//    case data_dec:
-//        saveToFile(data_str_dec);
-//        break;
-//    }
+    logFile->writeData_ascii(dataConv.getStrAscii());
+    logFile->writeData_hex(dataConv.getStrHex());
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -682,18 +689,7 @@ void MainWindow::TxHistory_add(QByteArray data)
     }
     history_out_ptr = 0;
 }
-/////////////////////////////////////////////////////////////////
-void MainWindow::saveToFile(QString data)
-{
-    //    QTextStream outStream(&file);
-    //    if (file.open(QFile::WriteOnly | QFile::Text | QIODevice::Append)) {
-    //        outStream <<  data;
-    //        file.flush();
-    //        file.close();
-    //    } else {
-    //       log(error, "Can't open the file.");
-    //    }
-}
+
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::EscPressed
 ///     slot emited when ESC key is pressed
@@ -733,7 +729,7 @@ void MainWindow::on_pushButton_save_clicked()
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     ui->lineEdit_save->setText(dir);
-    log(error,"TODO");
+    saveToFile_init();
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::on_tabWidget_currentChanged
@@ -802,13 +798,25 @@ void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
         break;
     }
 }
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        config.saveTerminalOutput = true;
+        break;
+    case Qt::Unchecked:
+        config.saveTerminalOutput = false;
+        break;
+    }
+}
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
     dataConverter dataConv;
     dataConv.setStrHex(arg1);
-    config.prefix_tx = dataConv.getByteArray();
+    config.suffix_tx = dataConv.getByteArray();
 }
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
@@ -838,4 +846,3 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
-/////////////////////////////////////////////////////////////////
