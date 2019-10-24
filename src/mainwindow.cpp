@@ -65,9 +65,9 @@ void MainWindow::configInit()
 {
     config.connectionType = none;
     config.timeInfoEnabled = false;
-    config.timeLogEnabled = false;
+    config.timeLogEnabled = true;
     config.clearOutputLine = true;
-    config.saveTerminalOutput = false;
+    config.saveTerminalOutToFile = false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -89,25 +89,25 @@ void MainWindow::handleAppArguments(QStringList arguments)
         command = arguments.at(0);
         arguments.removeFirst();
 
-            /* check if the command has syntax like: -x */
-            if (command.at(0) == ARG_PREFIX_SHORT &&
-                    command.size() == 2) {
-                if (!arguments.isEmpty()) {
-                    passedData = arguments.at(0);
-                    arguments.removeFirst();
+        /* check if the command has syntax like: -x */
+        if (command.at(0) == ARG_PREFIX_SHORT &&
+                command.size() == 2) {
+            if (!arguments.isEmpty()) {
+                passedData = arguments.at(0);
+                arguments.removeFirst();
 
-                    if (!handleAppArguments_setParam(command, passedData)) {
-                        return;
-                    }
-                } else {
-                    qDebug() << "ERROR: No passed data for command " << command;
-                    handleAppArguments_printHelp();
+                if (!handleAppArguments_setParam(command, passedData)) {
+                    return;
                 }
             } else {
-                qDebug() << "ERROR: Failed to handle input arguments, "
-                            "the command has invalid syntax.";
+                qDebug() << "ERROR: No passed data for command " << command;
                 handleAppArguments_printHelp();
             }
+        } else {
+            qDebug() << "ERROR: Failed to handle input arguments, "
+                        "the command has invalid syntax.";
+            handleAppArguments_printHelp();
+        }
     }
 
     if (config.connectionType != none) {
@@ -293,7 +293,7 @@ void MainWindow::uiInit()
 
     /* pushbuttons */
     ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
-                                     .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->pushButton_fnd_dec->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->pushButton_fnd_hex->setStyleSheet(QString("color: %1; background-color: %2")
@@ -315,6 +315,7 @@ void MainWindow::uiInit()
 
     /*** UI show/hide widgets ***/
 
+    ui->checkBox_timeLog->setChecked(true);
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
     ui->checkBox_clearOutputLine->setChecked(true);
@@ -330,7 +331,7 @@ void MainWindow::uiInit()
 void MainWindow::showConnectionSettings()
 {
     dialog_connect->show();
-//    dialog_connect->move(0,0);
+    //    dialog_connect->move(0,0);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -620,13 +621,52 @@ void MainWindow::log(logType_t logType, QString data)
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::
-/// \param dataKind     to set the color
-/// \param data         to be put to all text edits in corresponding format
+/// \param dataKind depends how the data will be logged
+/// \param data to be logged
 ///
 void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
 {
-    QString color;
+    if (config.timeLogEnabled &&
+            (((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) ||
+             (config.lastTerminalData != dataKind)))
+    {
+        config.lastTerminalData = dataKind;
 
+        /* get the time */
+        QDateTime dt = QDateTime::currentDateTime();
+        QString preamble;
+        preamble.append("\n");
+        preamble.append(dt.toString(TIME_FORMAT));
+        switch (dataKind) {
+        case data_Rx:
+            preamble.append(" [Rx] - ");
+            break;
+        case data_Tx:
+            preamble.append(" [Tx] - ");
+            break;
+        }
+
+        /* put the preamble into text edits */
+        writeToTextedit(ui->textEdit_out_ascii, COLOR_DATA, preamble);
+        writeToTextedit(ui->textEdit_out_hex, COLOR_DATA, preamble);
+        writeToTextedit(ui->textEdit_out_dec, COLOR_DATA, preamble);
+
+        /* put the preamble into text file */
+        if (config.saveTerminalOutToFile) {
+            logFile->writeData_ascii(preamble);
+            logFile->writeData_hex(preamble);
+        }
+
+    }
+
+    /* refresh */
+    tick_lastRx = tick.elapsed();
+
+    dataConverter dataConv;
+    dataConv.setByteArray(data);
+
+    /* update terminal output logs - textEdits */
+    QString color;
     switch (dataKind)
     {
     case data_Rx:
@@ -637,44 +677,31 @@ void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
         break;
     }
 
-    /* update all terminal outputs (textEdits) */
-    dataConverter dataConv;
-    dataConv.setByteArray(data);
+    writeToTextedit(ui->textEdit_out_ascii,  color, dataConv.getStrAscii());
+    writeToTextedit(ui->textEdit_out_hex,    color, dataConv.getStrHex());
+    writeToTextedit(ui->textEdit_out_dec,    color, dataConv.getStrDec());
 
-    updateTextEdit(ui->textEdit_out_ascii,  color, dataConv.getStrAscii());
-    updateTextEdit(ui->textEdit_out_hex,    color, dataConv.getStrHex());
-    updateTextEdit(ui->textEdit_out_dec,    color, dataConv.getStrDec());
-    tick_lastRx = tick.elapsed();
-
-    logFile->writeData_ascii(dataConv.getStrAscii());
-    logFile->writeData_hex(dataConv.getStrHex());
-
+    /* update terminal output logs - files */
+    if (config.saveTerminalOutToFile) {
+        logFile->writeData_ascii(dataConv.getStrAscii());
+        logFile->writeData_hex(dataConv.getStrHex());
+    }
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::updateTextEdit(QTextEdit *textEdit, QString color, QString data)
+void MainWindow::writeToTextedit(QTextEdit *textEdit, QString color, QString data)
 {
+    /* get to end of textedit */
     QTextCursor prev_cursor;
     prev_cursor = textEdit->textCursor();
     textEdit->moveCursor(QTextCursor::End);
     textEdit->setTextColor(color);
-    /////////////
 
-    if ((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) {
-        textEdit->append("");
-        if (config.timeLogEnabled) {
-            QDateTime dt = QDateTime::currentDateTime();
-            QString timeStr = dt.toString(TIME_FORMAT);
-            textEdit->setTextColor(COLOR_DATA);
-            textEdit->insertPlainText(timeStr);
-            textEdit->append("");
-        }
-    }
-
+    /* write data to textedit */
     textEdit->setTextColor(color);
     textEdit->insertPlainText(data);
 
-    /////////////
+    /* return cursor where it was */
     textEdit->setTextCursor(prev_cursor);
 }
 
@@ -699,6 +726,12 @@ void MainWindow::EscPressed()
     hideFindUi();
     hideHelp();
     toggleShowSettings();
+    moveCursorToTerminalInputLine();
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::moveCursorToTerminalInputLine()
+{
+//#error todo
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::showSettings
@@ -725,11 +758,12 @@ void MainWindow::moveCursorToEnd()
 void MainWindow::on_pushButton_save_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-        "~/Desktop/",
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-    ui->lineEdit_save->setText(dir);
-    saveToFile_init();
+                                                    "~/Desktop/",
+                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (!dir.isEmpty()) {
+        ui->lineEdit_save->setText(dir);
+        saveToFile_init();
+    }
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::on_tabWidget_currentChanged
@@ -803,10 +837,10 @@ void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 {
     switch (arg1) {
     case Qt::Checked:
-        config.saveTerminalOutput = true;
+        config.saveTerminalOutToFile = true;
         break;
     case Qt::Unchecked:
-        config.saveTerminalOutput = false;
+        config.saveTerminalOutToFile = false;
         break;
     }
 }
@@ -835,7 +869,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
+    //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
@@ -846,3 +880,4 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
+/////////////////////////////////////////////////////////////////

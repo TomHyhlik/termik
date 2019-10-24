@@ -15,9 +15,11 @@ class LogFile : public QObject
 {
     Q_OBJECT
 
+
     QString fileName;
     QString fileDirectory;
     bool initialized;
+    bool writeDataToFile(QString fileName, QString data);
 
 public:
     explicit LogFile(QObject *parent = nullptr);

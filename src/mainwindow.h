@@ -69,7 +69,9 @@ public:
     bool timeInfoEnabled;
     bool clearOutputLine;
 
-    bool saveTerminalOutput;
+    bool saveTerminalOutToFile;
+
+    terminalData_t lastTerminalData;
 };
 
 #define COLOR_BLACK     "black"
@@ -151,6 +153,8 @@ private slots:
 
     void on_checkBox_outputSave_stateChanged(int arg1);
 
+    void moveCursorToTerminalInputLine();
+
 public slots:
     void tryConnectDevice(connectionType_t);
 
@@ -188,7 +192,7 @@ private:
     void handleAppArguments_printHelp_wrap(char argData, QString argTitle);
     bool handleAppArguments_setParam(QString command, QString passedData);
 
-    void updateTextEdit(QTextEdit *textEdit, QString color, QString data);
+    void writeToTextedit(QTextEdit *textEdit, QString color, QString data);
 
     void setupShortcuts();
 
