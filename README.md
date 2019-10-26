@@ -22,3 +22,6 @@ Transmit data in the terminal is done by pressing Enter.
 
     new features:
     	run script of data (single run/repeat mode)
+    	save last network connection to a file and read it at startup as it does with serial
+    	scan all ip addresses in network and show it in the dialog_config
+    	

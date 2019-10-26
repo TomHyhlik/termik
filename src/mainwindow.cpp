@@ -47,6 +47,17 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     uiInit();
     configInit();
     handleAppArguments(arguments);
+
+
+}
+
+//////////////////////////////////////////////////////////////////////
+void MainWindow::selectScript()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "~/");
+
+
+    qDebug() << fileName;
 }
 //////////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile_init()
@@ -323,6 +334,7 @@ void MainWindow::uiInit()
 
     hideFindUi();
     hideHelp();
+    hideScriptUi();
     fillShortcutsTable();
     toggleShowSettings();
     focus_1();
@@ -547,6 +559,22 @@ void MainWindow::hideFindUi()
     ui->lineEdit_find_dec->hide();
     ui->lineEdit_find_hex->hide();
     ui->lineEdit_find_ascii->hide();
+}
+void MainWindow::showScriptUi()
+{
+    ui->label_script->show();
+    ui->lineEdit_script->show();
+    ui->comboBox_script_dataType->show();
+    ui->comboBox_script_repeat->show();
+    ui->pushButton_script_run->show();
+}
+void MainWindow::hideScriptUi()
+{
+    ui->label_script->hide();
+    ui->lineEdit_script->hide();
+    ui->comboBox_script_dataType->hide();
+    ui->comboBox_script_repeat->hide();
+    ui->pushButton_script_run->hide();
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::focus_1
@@ -869,6 +897,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(selectScript()));
     //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));

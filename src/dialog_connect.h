@@ -90,7 +90,6 @@ private:
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
 
-
 private slots:
     void serialPort_nameRefresh();
     void on_comboBox_portName_currentTextChanged(const QString &arg1);
@@ -98,6 +97,10 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
+
+    void focus_1();
+    void focus_2();
+
 
 public slots:
     void refreshParameters();

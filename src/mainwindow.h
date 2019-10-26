@@ -130,6 +130,9 @@ private slots:
     void showHelp();
     void hideHelp();
 
+    void showScriptUi();
+    void hideScriptUi();
+
     void keyUpPressed();
     void keyDownPressed();
     void keyEnterPressed();
@@ -148,11 +151,10 @@ private slots:
 
     void historyTxUpdate();
 
+    void selectScript();
 
     void on_checkBox_clearOutputLine_stateChanged(int arg1);
-
     void on_checkBox_outputSave_stateChanged(int arg1);
-
     void moveCursorToTerminalInputLine();
 
 public slots:

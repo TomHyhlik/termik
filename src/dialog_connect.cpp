@@ -7,8 +7,7 @@
 #include <QSerialPort>
 #include <QSerialPortInfo>
 #include <QTimer>
-//#include <QShowEvent> rm later
-
+#include <QShortcut>
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
     QDialog(parent),
@@ -16,6 +15,9 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(serial);
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
 
 }
 
@@ -423,4 +425,14 @@ QString Dialog_connect::getSerialPortName(int productIdentifier)
     return nullptr;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::focus_1()
+{
+    ui->tabWidget->setCurrentIndex(0);
+}
+//////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::focus_2()
+{
+    ui->tabWidget->setCurrentIndex(1);
+}
 //////////////////////////////////////////////////////////////////////////////
