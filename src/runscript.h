@@ -26,7 +26,7 @@ class runScript : public QObject
 {
     Q_OBJECT
     ScriptConfig config;
-    QTimer  timer;
+    QTimer*  timer;
 
 
     void readFile();
@@ -38,9 +38,18 @@ public:
     void setFile(QString arg) {
         config.fileName = arg;
     }
+    QString getfile() {
+        return config.fileName;
+    }
+    void setRepeat(bool state) {
+        config.repeat = state;
+    }
 
+    void setDataFormat(int format);
     void setTimeout(int);
     void start();
+    void stop();
+    bool isRunning();
 
 signals:
 

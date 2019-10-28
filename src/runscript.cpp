@@ -7,16 +7,30 @@
 /////////////////////////////////////////////////////////////////
 runScript::runScript(QObject *parent) : QObject(parent)
 {
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &runScript::timeouted);
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(timeouted()));
 
+    setDataFormat(data_ascii);
+
+
+}
+bool runScript::isRunning()
+{
+    return timer->isActive();
 }
 
 /////////////////////////////////////////////////////////////////
 void runScript::start()
 {
+    log(note, QString("Starting script: %1").arg(getfile()));
     readFile();
-    timer.start();
+    timer->start(config.timeout);
+}
+
+void runScript::stop()
+{
+    timer->stop();
+    config.fileLines.clear();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +40,9 @@ void runScript::timeouted()
         Tx(config.fileLines.at(0));
         config.fileLines.removeFirst();
     } else {
-        timer.stop();
+        timer->stop();
         if (config.repeat) {
+            qDebug() << "Repeating script";
             start();
         }
     }
@@ -38,15 +53,22 @@ void runScript::readFile()
 {
     config.fileLines.clear();
 
+    qDebug() << "reading file" << config.fileName;
+
     QFile file(config.fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        log(error, "Unable to open script file");
+        QString e = "Unable to open script file";
+        log(error, e);
+        qDebug() << e;
         return;
     }
 
+    QTextStream textStream(&file);
+
+
     while (1) {
-        QString line = QString(file.readLine());
-        if (line.isNull()) {
+        QString line = QString(textStream.readLine());
+        if (line.isEmpty()) {
             break;
         } else {
             dataConverter dataConv;
@@ -58,12 +80,13 @@ void runScript::readFile()
                 dataConv.setStrHex(line);
                 break;
             default:
+                qDebug() << "ERROR: unitialized data format for the script";
                 return;
             }
             config.fileLines.append(dataConv.getByteArray());
         }
-    }
 
+    }
     file.close();
 }
 /////////////////////////////////////////////////////////////////
@@ -71,10 +94,20 @@ void runScript::setTimeout(int msecs)
 {
     config.timeout = msecs;
 
-    if (timer.isActive()) {
-        timer.stop();
-        timer.start(config.timeout);
+    if (timer->isActive()) {
+        timer->stop();
+        timer->start(config.timeout);
     }
 }
 
+/////////////////////////////////////////////////////////////////
+void runScript::setDataFormat(int format) {
+    if (format == data_ascii || format == data_hex) {
+        config.dataFormat = format;
+    } else {
+        qDebug() << "Invalid data format";
+    }
+}
+
+/////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////

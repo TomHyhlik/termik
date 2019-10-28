@@ -175,6 +175,10 @@ private slots:
 
     void on_pushButton_script_run_clicked();
 
+    void on_comboBox_script_dataType_editTextChanged(const QString &arg1);
+
+    void on_checkBox_script_repeat_stateChanged(int arg1);
+
 public slots:
     void tryConnectDevice(int);
 

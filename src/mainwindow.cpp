@@ -62,6 +62,7 @@ void MainWindow::selectScript()
     if (!scriptFileName.isEmpty()) {
         showScriptUi();
         ui->lineEdit_script->setText(scriptFileName);
+        ui->pushButton_script_run->setFocus();
     }
 
 }
@@ -128,6 +129,7 @@ void MainWindow::handleAppArguments(QStringList arguments)
     }
 
     if (config.connectionType != none) {
+        qDebug() << "Trying to connect automatically";
         tryConnectDevice(config.connectionType);
     }
 }
@@ -178,6 +180,7 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
             config.connectionType = network;
         }
         else {
+            qDebug() << "Invalid paramerer";
             ok = false;
         }
         break;
@@ -346,6 +349,7 @@ void MainWindow::uiInit()
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
     ui->checkBox_clearOutputLine->setChecked(true);
+    ui->checkBox_script_repeat->setChecked(true);
     ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
 
     hideFindUi();
@@ -913,6 +917,19 @@ void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 }
 
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
+{
+    switch (arg1) {
+    case Qt::Checked:
+        script->setRepeat(true);
+        break;
+    case Qt::Unchecked:
+        script->setRepeat(false);
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
     dataConverter dataConv;
@@ -938,7 +955,15 @@ void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
 
 void MainWindow::on_pushButton_script_run_clicked()
 {
-    script->start();
+    if (script->isRunning()) {
+        script->stop();
+        ui->pushButton_script_run->setText("Run");
+        pushButton_runScript_setColor_green();
+    } else {
+        ui->pushButton_script_run->setText("Stop");
+        pushButton_runScript_setColor_red();
+        script->start();
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -964,5 +989,17 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1)
+{
+    if (arg1 == TITLE_DATA_HEX) {
+        script->setDataFormat(data_hex);
+    }
+    else if (arg1 == TITLE_DATA_ASCII) {
+        script->setDataFormat(data_ascii);
+    }
+}
+/////////////////////////////////////////////////////////////////
+
+
 
 
