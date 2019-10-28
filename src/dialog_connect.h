@@ -109,7 +109,7 @@ public slots:
 signals:
 
     void connectVia_serial(QString serialPortName);
-    void tryConnect(connectionType_t);
+    void tryConnect(int);
     void log(int, QString);
 
 protected:

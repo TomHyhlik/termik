@@ -35,10 +35,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
     dialog_connect->init();
-    connect(dialog_connect, SIGNAL(tryConnect(connectionType_t)), this,
-            SLOT(tryConnectDevice(connectionType_t)));
+    connect(dialog_connect, SIGNAL(tryConnect(int)), this,
+            SLOT(tryConnectDevice(int)));
+
 
     logFile = new LogFile(this);
+    script = new runScript(this);
+    connect(script, SIGNAL(Tx(QByteArray)), this, SLOT(Tx(QByteArray)));
 
     tick_lastRx = 0;
     tick.start();
@@ -54,10 +57,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 //////////////////////////////////////////////////////////////////////
 void MainWindow::selectScript()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "~/");
+    QString scriptFileName = QFileDialog::getOpenFileName(this, "~/");
 
+    if (!scriptFileName.isEmpty()) {
+        showScriptUi();
+        ui->lineEdit_script->setText(scriptFileName);
+    }
 
-    qDebug() << fileName;
 }
 //////////////////////////////////////////////////////////////////////
 void MainWindow::saveToFile_init()
@@ -221,7 +227,7 @@ void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::tryConnectDevice(connectionType_t connectionType)
+void MainWindow::tryConnectDevice(int connectionType)
 {
     bool connectedSuccessfully;
     QString deviceName;
@@ -302,6 +308,12 @@ void MainWindow::uiInit()
     ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->lineEdit_script->setStyleSheet(QString("color: %1; background-color: %2")
+                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_script_dataType->setStyleSheet(QString("color: %1; background-color: %2")
+                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+
     /* pushbuttons */
     ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
                                        .arg(COLOR_WHITE).arg(COLOR_GRAY0));
@@ -311,6 +323,7 @@ void MainWindow::uiInit()
                                           .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->pushButton_fnd_ascii->setStyleSheet(QString("color: %1; background-color: %2")
                                             .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    pushButton_runScript_setColor_green();
 
     /*** UI setup ***/
 
@@ -323,6 +336,9 @@ void MainWindow::uiInit()
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
     ui->tableWidget_shortcuts->horizontalHeader()->setStretchLastSection(true);  // set column size to widget size
 
+    ui->comboBox_script_dataType->addItem(TITLE_DATA_ASCII);
+    ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
+    ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
 
     /*** UI show/hide widgets ***/
 
@@ -338,6 +354,18 @@ void MainWindow::uiInit()
     fillShortcutsTable();
     toggleShowSettings();
     focus_1();
+}
+
+void MainWindow::pushButton_runScript_setColor_green()
+{
+    ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
+                                            .arg(COLOR_WHITE).arg(COLOR_GREEN));
+}
+
+void MainWindow::pushButton_runScript_setColor_red()
+{
+    ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
+                                            .arg(COLOR_WHITE).arg(COLOR_RED));
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showConnectionSettings()
@@ -370,7 +398,7 @@ void MainWindow::clearOutput()
     ui->textEdit_out_dec->clear();
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::Tx(dataFormat_t inputType)
+void MainWindow::Tx_fromDataInput(int inputType)
 {
     QByteArray txData;        // to be transmitted
     dataConverter dataConv;
@@ -390,7 +418,11 @@ void MainWindow::Tx(dataFormat_t inputType)
     }
 
     txData = dataConv.getByteArray();
-
+    Tx(txData);
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::Tx(QByteArray txData)
+{
     /* add prefix and suffix to the data */
     if (config.prefix_tx_enabled)
         txData.prepend(config.prefix_tx);
@@ -424,38 +456,39 @@ void MainWindow::Tx(dataFormat_t inputType)
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::
 ///     slot callet when Enter or Return key is pressed
-///
 void MainWindow::keyEnterPressed()
 {
-    ////////////////////////////
     if (ui->lineEdit_in_ascii->hasFocus()) {
-        Tx(data_ascii);
+        Tx_fromDataInput(data_ascii);
     }
     else if (ui->lineEdit_in_hex->hasFocus()) {
-        Tx(data_hex);
+        Tx_fromDataInput(data_hex);
     }
     else if (ui->lineEdit_in_dec->hasFocus()) {
-        Tx(data_dec);
+        Tx_fromDataInput(data_dec);
     }
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::keyUpPressed()
 {
-    historyTxUpdate();
+    if (!history_out.isEmpty()) {
+        historyTxUpdate();
 
-    if (history_out.size() > history_out_ptr + 1) {
-        history_out_ptr++;
+        if (history_out.size() > history_out_ptr + 1) {
+            history_out_ptr++;
+        }
     }
-
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::keyDownPressed()
 {
-    historyTxUpdate();
+    if (!history_out.isEmpty()) {
+        historyTxUpdate();
 
-    if (history_out_ptr > 0) {
-        history_out_ptr--;
+        if (history_out_ptr > 0) {
+            history_out_ptr--;
+        }
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -565,16 +598,18 @@ void MainWindow::showScriptUi()
     ui->label_script->show();
     ui->lineEdit_script->show();
     ui->comboBox_script_dataType->show();
-    ui->comboBox_script_repeat->show();
+    ui->checkBox_script_repeat->show();
     ui->pushButton_script_run->show();
+    ui->spinBox_script_period->show();
 }
 void MainWindow::hideScriptUi()
 {
     ui->label_script->hide();
     ui->lineEdit_script->hide();
     ui->comboBox_script_dataType->hide();
-    ui->comboBox_script_repeat->hide();
+    ui->checkBox_script_repeat->hide();
     ui->pushButton_script_run->hide();
+    ui->spinBox_script_period->hide();
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::focus_1
@@ -625,7 +660,7 @@ void MainWindow::dataArrived()
 ///         display event in the statusBar
 /// \param logType  depending on this is set timeout
 /// \param data     to be displayed
-void MainWindow::log(logType_t logType, QString data)
+void MainWindow::log(int logType, QString data)
 {   
     int timeout;
 
@@ -643,6 +678,9 @@ void MainWindow::log(logType_t logType, QString data)
 
     case info:
         timeout = LOGTIMEOUT_INFO;
+        break;
+    default:
+        timeout = 100000;
     }
 
     ui->statusBar->showMessage(data, timeout);
@@ -652,7 +690,7 @@ void MainWindow::log(logType_t logType, QString data)
 /// \param dataKind depends how the data will be logged
 /// \param data to be logged
 ///
-void MainWindow::terminalOutUpdate(terminalData_t dataKind, QByteArray data)
+void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
 {
     if (config.timeLogEnabled &&
             (((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) ||
@@ -755,6 +793,7 @@ void MainWindow::EscPressed()
     hideHelp();
     toggleShowSettings();
     moveCursorToTerminalInputLine();
+    hideScriptUi();
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::moveCursorToTerminalInputLine()
@@ -886,6 +925,21 @@ void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
     dataConv.setStrHex(arg1);
     config.prefix_tx = dataConv.getByteArray();
 }
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
+{
+    script->setFile(arg1);
+}
+
+void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
+{
+    script->setTimeout(arg1);
+}
+
+void MainWindow::on_pushButton_script_run_clicked()
+{
+    script->start();
+}
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::setupShortcuts()
@@ -910,3 +964,5 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
 /////////////////////////////////////////////////////////////////
+
+

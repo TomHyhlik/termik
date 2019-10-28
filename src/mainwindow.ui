@@ -237,7 +237,18 @@
        <widget class="QComboBox" name="comboBox_script_dataType"/>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox_script_repeat"/>
+       <widget class="QCheckBox" name="checkBox_script_repeat">
+        <property name="text">
+         <string>repeat</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBox_script_period">
+        <property name="maximum">
+         <number>99999</number>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="pushButton_script_run">

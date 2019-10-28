@@ -13,6 +13,8 @@
 #include "networkworker.h"
 #include "handlearguments.h"
 #include "logfile.h"
+#include "runscript.h"
+
 
 
 #define DIGIT_NUM_HEX   2
@@ -27,36 +29,37 @@
 
 
 
-typedef enum {
+enum {
     Dark, Light
-} theme_t;
+} theme;
 
-typedef enum {
+enum logType {
     error, note, info
-} logType_t;
+};
 
-typedef enum {
+enum terminalData {
      data_Rx, data_Tx
-} terminalData_t;
+};
 
-typedef enum {
+enum addLine{
     before, after, beforeAndAfter
-} addLine_t;
+};
 
-typedef enum {
+enum dataFormat {
     data_ascii, data_hex, data_dec, //data_bin
-} dataFormat_t;
+};
 
 /* connectionType */
-typedef enum {
+enum connectionType {
     serial, network, none
-} connectionType_t;
+};
 
 
-class swConfiguration {
+
+class appConfiguration {
 public:
 
-    connectionType_t connectionType;
+    int connectionType;
 
     bool timeLogEnabled;
 
@@ -71,7 +74,8 @@ public:
 
     bool saveTerminalOutToFile;
 
-    terminalData_t lastTerminalData;
+    int lastTerminalData;
+
 };
 
 #define COLOR_BLACK     "black"
@@ -81,6 +85,10 @@ public:
 #define COLOR_DATA_TX      "lime"
 #define COLOR_ERROR     "Tomato"
 #define COLOR_DATA      "#949494"
+
+#define COLOR_GREEN     "green"
+#define COLOR_RED     "red"
+
 
 #define COLOR_TOPLINE   "#A0A0A0"
 #define COLOR_GRAY0     "#404040"
@@ -94,6 +102,9 @@ public:
 #define LOGTIMEOUT_ERROR    300*1000
 #define LOGTIMEOUT_NOTE     60*1000
 #define LOGTIMEOUT_INFO     30*1000
+
+#define TITLE_DATA_ASCII    "ASCII"
+#define TITLE_DATA_HEX      "HEX"
 
 /////////////////////////////////////////////////////////
 namespace Ui {
@@ -141,7 +152,8 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
-    void Tx(dataFormat_t);
+    void Tx(QByteArray);
+    void Tx_fromDataInput(int);
 
     void on_checkBox_prefix_stateChanged(int arg1);
     void on_checkBox_suffix_stateChanged(int arg1);
@@ -157,8 +169,14 @@ private slots:
     void on_checkBox_outputSave_stateChanged(int arg1);
     void moveCursorToTerminalInputLine();
 
+    void on_lineEdit_script_textChanged(const QString &arg1);
+
+    void on_spinBox_script_period_valueChanged(int arg1);
+
+    void on_pushButton_script_run_clicked();
+
 public slots:
-    void tryConnectDevice(connectionType_t);
+    void tryConnectDevice(int);
 
 private:
     Ui::MainWindow *ui;
@@ -166,7 +184,8 @@ private:
     NetworkWorker *nw;
     Dialog_connect* dialog_connect;
     LogFile* logFile;
-    swConfiguration config;
+    appConfiguration config;
+    runScript* script;
 
     qint64 tick_lastRx;
     QElapsedTimer tick;
@@ -177,9 +196,9 @@ private:
 
     void configInit();
 
-    void log(logType_t logType, QString data);
+    void log(int logType, QString data);
 
-    void terminalOutUpdate(terminalData_t, QByteArray);
+    void terminalOutUpdate(int, QByteArray);
     void TxHistory_add(QByteArray data);
 
     bool stringList_find(QList<QString> list, QString data);
@@ -200,6 +219,9 @@ private:
 
     void saveToFile_init();
 
+
+    void pushButton_runScript_setColor_green();
+    void pushButton_runScript_setColor_red();
 
 };
 

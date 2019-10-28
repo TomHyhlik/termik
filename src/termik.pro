@@ -21,6 +21,7 @@ SOURCES += \
         mainwindow.cpp \
         dialog_connect.cpp \
         networkworker.cpp \
+        runscript.cpp \
         serialworker.cpp
 
 HEADERS += \
@@ -30,6 +31,7 @@ HEADERS += \
         mainwindow.h \
         dialog_connect.h \
         networkworker.h \
+        runscript.h \
         serialworker.h
 
 FORMS += \
