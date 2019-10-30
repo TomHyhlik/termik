@@ -22,6 +22,7 @@ SOURCES += \
         dialog_connect.cpp \
         networkworker.cpp \
         runscript.cpp \
+        saveconfiguration.cpp \
         serialworker.cpp
 
 HEADERS += \
@@ -32,6 +33,7 @@ HEADERS += \
         dialog_connect.h \
         networkworker.h \
         runscript.h \
+        saveconfiguration.h \
         serialworker.h
 
 FORMS += \

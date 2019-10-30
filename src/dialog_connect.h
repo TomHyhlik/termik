@@ -19,10 +19,6 @@
 
 #define SERIALPORT_REFRESH_PERIOD   100 // ms
 
-#define FILE_savedPortInfo "connectionConfiguration.txt"
-
-
-#define FAILED -1
 
 
 

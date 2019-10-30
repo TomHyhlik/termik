@@ -18,6 +18,8 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
 
 }
 
@@ -73,7 +75,7 @@ void Dialog_connect::init()
     timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
     ui->comboBox_portName->setFocus();
     currentTab = ui->tabWidget->currentIndex();
-    configurationRead();
+//    configurationRead(); << todo
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
@@ -292,8 +294,8 @@ void Dialog_connect::on_buttonBox_accepted()
     nw->setTargetIpPort_Tx(quint16(ui->spinBox_ipPort_Tx->value()));
     nw->setTargetIpPort_Rx(quint16(ui->spinBox_ipPort_Rx->value()));
 
-    /* save the configuration to txt file */
-    configurationSave();
+//    /* save the configuration to txt file */
+//    configurationSave();
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
@@ -306,99 +308,64 @@ void Dialog_connect::on_buttonBox_accepted()
         break;
     }
 }
-//////////////////////////////////////////////////////////////////////////////
-/// \brief Dialog_connect::configurationSave
-///     save the the connection information to a txt file
-void Dialog_connect::configurationSave()
-{
-    /* open the file */
-    QFile file(FILE_savedPortInfo);
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)){
-        log(error, "Unable to open txt file to save connection configuration");
-        return;
-    }
-    /* clear the file content */
-    file.resize(0);
-    /* convert the data */
-    QTextStream data(&file);
 
-    /* save serial port ID */
-    int pID = getProductIdentifier(sw->param.portName);
-    if (pID != -1) {
-        data << QString::number(pID) << "\n";
-    } else {
-        data << "\n";
-    }
-    /* save serial port parameters */
-    data << ui->comboBox_baudRate->currentText() << "\n";
-    data << ui->comboBox_dataBits->currentText() << "\n";
-    data << ui->comboBox_parity->currentText() << "\n";
-    data << ui->comboBox_stopBits->currentText() << "\n";
-    data << ui->comboBox_flowControl->currentText() << "\n";
 
-    /* save network parameters */
-    data << ui->lineEdit_ipAddr->text() << "\n";
-    data << ui->spinBox_ipPort_Tx->text() << "\n";
-    data << ui->spinBox_ipPort_Rx->text() << "\n";
 
-    file.flush();
-    file.close();
-}
+//        /* save serial port ID */
+//        int pID = getProductIdentifier(sw->param.portName);
+//        if (pID != -1) {
+//            data << QString::number(pID) << "\n";
+//        } else {
+//            data << "\n";
+//        }
+//        /* save serial port parameters */
+//        data << ui->comboBox_baudRate->currentText() << "\n";
+//        data << ui->comboBox_dataBits->currentText() << "\n";
+//        data << ui->comboBox_parity->currentText() << "\n";
+//        data << ui->comboBox_stopBits->currentText() << "\n";
+//        data << ui->comboBox_flowControl->currentText() << "\n";
+
+//        /* save network parameters */
+//        data << ui->lineEdit_ipAddr->text() << "\n";
+//        data << ui->spinBox_ipPort_Tx->text() << "\n";
+//        data << ui->spinBox_ipPort_Rx->text() << "\n";
+
+
 ///////////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::configurationRead
 /// \return product identifier of the saved port in the txt fileconnectVia_serial
 int Dialog_connect::configurationRead()
 {
-    if (QFile::exists(FILE_savedPortInfo)) {
-        /* open the file */
-        QFile file(FILE_savedPortInfo);
-        if (!file.open(QIODevice::ReadWrite | QIODevice::Text)){
-            log(error, "Unable to open txt file to read connection configuration");
-            return FAILED;
-        }
-        /* read productIdentifier_str from the txt file on the first line */
-        QString productIdentifier_str = QString(file.readLine());
+//        /* read productIdentifier_str from the txt file on the first line */
+//        QString productIdentifier_str = QString(file.readLine());
 
-        /* read the parameters from the file */
-        QString baudRate = QString(file.readLine());
-        ui->comboBox_baudRate->setCurrentText(QString(baudRate.remove(baudRate.size()-1, 1)));
+//        /* read the parameters from the file */
+//        QString baudRate = QString(file.readLine());
+//        ui->comboBox_baudRate->setCurrentText(QString(baudRate.remove(baudRate.size()-1, 1)));
 
-        QString dataBits = QString(file.readLine());
-        ui->comboBox_dataBits->setCurrentText(QString(dataBits.remove(dataBits.size()-1, 1)));
+//        QString dataBits = QString(file.readLine());
+//        ui->comboBox_dataBits->setCurrentText(QString(dataBits.remove(dataBits.size()-1, 1)));
 
-        QString parity = QString(file.readLine());
-        ui->comboBox_parity->setCurrentText(QString(parity.remove(parity.size()-1, 1)));
+//        QString parity = QString(file.readLine());
+//        ui->comboBox_parity->setCurrentText(QString(parity.remove(parity.size()-1, 1)));
 
-        QString stopBits = QString(file.readLine());
-        ui->comboBox_stopBits->setCurrentText(QString(stopBits.remove(stopBits.size()-1, 1)));
+//        QString stopBits = QString(file.readLine());
+//        ui->comboBox_stopBits->setCurrentText(QString(stopBits.remove(stopBits.size()-1, 1)));
 
-        QString flowControl = QString(file.readLine());
-        ui->comboBox_flowControl->setCurrentText(QString(flowControl.remove(flowControl.size()-1, 1)));
+//        QString flowControl = QString(file.readLine());
+//        ui->comboBox_flowControl->setCurrentText(QString(flowControl.remove(flowControl.size()-1, 1)));
 
-        QString ipAddr = QString(file.readLine());
-        ui->lineEdit_ipAddr->setText(QString(ipAddr.remove(ipAddr.size()-1, 1)));
+//        QString ipAddr = QString(file.readLine());
+//        ui->lineEdit_ipAddr->setText(QString(ipAddr.remove(ipAddr.size()-1, 1)));
 
-        QString ipPort_Tx = QString(file.readLine());
-        ui->spinBox_ipPort_Tx->setValue(ipPort_Tx.toInt(nullptr, 10));
+//        QString ipPort_Tx = QString(file.readLine());
+//        ui->spinBox_ipPort_Tx->setValue(ipPort_Tx.toInt(nullptr, 10));
 
-        QString ipPort_Rx = QString(file.readLine());
-        ui->spinBox_ipPort_Rx->setValue(ipPort_Rx.toInt(nullptr, 10));
+//        QString ipPort_Rx = QString(file.readLine());
+//        ui->spinBox_ipPort_Rx->setValue(ipPort_Rx.toInt(nullptr, 10));
 
-        file.close();
 
-        /* convert the string to number */
-        bool ok;
-        int productIdentifier = productIdentifier_str.toInt(&ok, 10);
-        if (ok) {
-            return productIdentifier;
-        } else {
-            log(error, "Failed to read the saved connection configuration");
-            return FAILED;
-        }
 
-    } else {
-        return FAILED;
-    }
 }
 
 /////////////////////////////////////////////////////////////////////
