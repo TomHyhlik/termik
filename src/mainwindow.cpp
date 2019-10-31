@@ -52,7 +52,18 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     configInit();
 
     currentAppConfig_load();
-    handleAppArguments(arguments);    
+    handleAppArguments(arguments);
+}
+//////////////////////////////////////////////////////////////////////
+/// \brief MainWindow::closeEvent
+/// \param event
+///     function called when the MainWindow is being closed
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    currentAppConfig_save();
+
+    qDebug() << "\n" << "Closing" << MAINWINDOWTITLE << "\n";
+    event->accept();
 }
 //////////////////////////////////////////////////////////////////////
 void MainWindow::currentAppConfig_save()
@@ -71,6 +82,9 @@ void MainWindow::currentAppConfig_save()
     saveCfg.data.network.port_Rx = nw->param.port_Rx;
 
     saveCfg.data.app = config;
+
+    saveCfg.data.script = script->getWholeConfig();
+    saveCfg.data.LogFileDir = logFile->getFileDirectory();
 
     saveCfg.write();
 }
@@ -92,11 +106,38 @@ void MainWindow::currentAppConfig_load()
     nw->param.port_Rx = saveCfg.data.network.port_Rx;
 
 
+    if (!saveCfg.data.script.fileName.isEmpty()) {
+        ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+    }
+    if (!saveCfg.data.LogFileDir.isEmpty()) {
+        ui->lineEdit_save->setText(saveCfg.data.LogFileDir);
+    }
+    ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
+    ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
+
+    switch (saveCfg.data.script.dataFormat) {
+    case data_ascii:
+    case data_hex:
+            script->setDataFormat(saveCfg.data.script.dataFormat);
+    }
+
+
+    /* todo: continue here, load the saveCfg.data.app to ui */
+
+
 }
 //////////////////////////////////////////////////////////////////////
 void MainWindow::selectScript()
 {
-    QString scriptFileName = QFileDialog::getOpenFileName(this, "~/");
+    QString openLocation;
+
+    if (!script->getfile().isEmpty()) {
+        openLocation = script->getfile().isEmpty();
+    } else {
+        openLocation = LOCATION_DEFAULT;
+    }
+
+    QString scriptFileName = QFileDialog::getOpenFileName(this, openLocation);
 
     if (!scriptFileName.isEmpty()) {
         showScriptUi();
@@ -867,14 +908,24 @@ void MainWindow::moveCursorToEnd()
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_pushButton_save_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    "~/Desktop/",
-                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString openLocation;
+
+    if (!logFile->getFileDirectory().isEmpty()) {
+        openLocation = logFile->getFileDirectory();
+    } else {
+        openLocation = LOCATION_DEFAULT;
+    }
+
+    QString dir = QFileDialog::getExistingDirectory(
+                this, tr("Open Directory"),
+                openLocation,
+                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
         ui->lineEdit_save->setText(dir);
         saveToFile_init();
     }
 }
+
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::on_tabWidget_currentChanged
 /// \param index of data type
@@ -1014,6 +1065,12 @@ void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1
     else if (arg1 == TITLE_DATA_ASCII) {
         script->setDataFormat(data_ascii);
     }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
+{
+    logFile->setFileDirectory(arg1);
 }
 
 /////////////////////////////////////////////////////////////////

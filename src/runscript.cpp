@@ -30,15 +30,15 @@ void runScript::start()
 void runScript::stop()
 {
     timer->stop();
-    config.fileLines.clear();
+    fileContent.clear();
 }
 
 /////////////////////////////////////////////////////////////////
 void runScript::timeouted()
 {
-    if (!config.fileLines.isEmpty()) {
-        Tx(config.fileLines.at(0));
-        config.fileLines.removeFirst();
+    if (!fileContent.isEmpty()) {
+        Tx(fileContent.at(0));
+        fileContent.removeFirst();
     } else {
         timer->stop();
         if (config.repeat) {
@@ -51,7 +51,7 @@ void runScript::timeouted()
 /////////////////////////////////////////////////////////////////
 void runScript::readFile()
 {
-    config.fileLines.clear();
+    fileContent.clear();
 
     qDebug() << "reading file" << config.fileName;
 
@@ -83,7 +83,7 @@ void runScript::readFile()
                 qDebug() << "ERROR: unitialized data format for the script";
                 return;
             }
-            config.fileLines.append(dataConv.getByteArray());
+            fileContent.append(dataConv.getByteArray());
         }
 
     }
@@ -99,6 +99,10 @@ void runScript::setTimeout(int msecs)
         timer->start(config.timeout);
     }
 }
+int runScript::getTimeout()
+{
+    return config.timeout;
+}
 
 /////////////////////////////////////////////////////////////////
 void runScript::setDataFormat(int format) {
@@ -108,6 +112,9 @@ void runScript::setDataFormat(int format) {
         qDebug() << "Invalid data format";
     }
 }
-
+int runScript::getDataFormat()
+{
+    return config.dataFormat;
+}
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////

@@ -84,10 +84,14 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         data.app.timeInfoEnabled = jObj_app.value(QString(JSONTITLE_APP_TIMEINFOENABLED)).toBool();
         data.app.saveTerminalOutToFile = jObj_app.value(QString(JSONTITLE_APP_SAVEOUTPUTTOFILE)).toBool();
 
+        data.LogFileDir = jObj.value(QString(JSONTITLE_LOG_DIRECTORY)).toString();
 
-        /*
-            todo: more data to come
-        */
+        QJsonObject jObj_script;
+        data.script.fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
+
+        data.script.repeat = jObj_script.value(JSONTITLE_SCRIPT_REPEAT).toBool();
+        data.script.timeout = jObj_script.value(JSONTITLE_SCRIPT_TIMEOUT).toInt();
+        data.script.dataFormat = jObj_script.value(JSONTITLE_SCRIPT_DATAFORMAT).toInt();
 
         return true;
     } else {
@@ -114,7 +118,7 @@ QByteArray SaveConfiguration::jsonData_make()
                        QJsonValue::fromVariant(data.serial.stopBits));
     jObj_serial.insert(JSONTITLE_SERIAL_FLOWCONTROL ,
                        QJsonValue::fromVariant(data.serial.flowControl));
-    jObj.insert(QString(JSONTITLE_SERIAL), jObj_serial);
+    jObj.insert(JSONTITLE_SERIAL, jObj_serial);
 
     QJsonObject jObj_network;
     jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS ,
@@ -123,7 +127,7 @@ QByteArray SaveConfiguration::jsonData_make()
                         QJsonValue::fromVariant(data.network.port_Tx));
     jObj_network.insert(JSONTITLE_NETWORK_PORTRX ,
                         QJsonValue::fromVariant(data.network.port_Rx));
-    jObj.insert(QString(JSONTITLE_NETWORK), jObj_network);
+    jObj.insert(JSONTITLE_NETWORK, jObj_network);
 
     QJsonObject jObj_app;
     jObj_app.insert(JSONTITLE_APP_CONNECTIONTYPE ,
@@ -142,12 +146,21 @@ QByteArray SaveConfiguration::jsonData_make()
                     QJsonValue::fromVariant(data.app.prefix_tx_enabled));
     jObj_app.insert(JSONTITLE_APP_SAVEOUTPUTTOFILE ,
                     QJsonValue::fromVariant(data.app.saveTerminalOutToFile));
-    jObj.insert(QString(JSONTITLE_APP), jObj_app);
+    jObj.insert(JSONTITLE_APP, jObj_app);
 
+    jObj.insert(QString(JSONTITLE_LOG_DIRECTORY),
+                QJsonValue::fromVariant(data.LogFileDir));
 
-    /*
-        todo: more data to come
-    */
+    QJsonObject jObj_script;
+    jObj_script.insert(JSONTITLE_SCRIPT_FILENAME ,
+                       QJsonValue::fromVariant(data.script.fileName));
+    jObj_script.insert(JSONTITLE_SCRIPT_REPEAT ,
+                       QJsonValue::fromVariant(data.script.repeat));
+    jObj_script.insert(JSONTITLE_SCRIPT_TIMEOUT ,
+                       QJsonValue::fromVariant(data.script.timeout));
+    jObj_script.insert(JSONTITLE_SCRIPT_DATAFORMAT ,
+                       QJsonValue::fromVariant(data.script.dataFormat));
+    jObj.insert(JSONTITLE_SCRIPT, jObj_script);
 
     QJsonDocument doc(jObj);
     QByteArray jsonEncodedData = doc.toJson();

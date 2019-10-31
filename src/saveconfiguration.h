@@ -5,9 +5,11 @@
 #include "serialworker.h"
 #include "networkworker.h"
 #include "mainwindow.h"
+#include "logfile.h"
+
+
 
 #define SAVECFG_FILENAME "./termik_cfg.json"
-
 
 #define JSONTITLE_SERIAL                "Serial"
 #define JSONTITLE_SERIAL_PORTNAME       "Port name"
@@ -32,6 +34,15 @@
 #define JSONTITLE_APP_TIMEINFOENABLED   "Time info enabled"
 #define JSONTITLE_APP_SAVEOUTPUTTOFILE  "Save terminal output to file"
 
+#define JSONTITLE_LOG_DIRECTORY         "Log files directory"
+
+#define JSONTITLE_SCRIPT                "Script"
+#define JSONTITLE_SCRIPT_FILENAME       "File name"
+#define JSONTITLE_SCRIPT_REPEAT         "Repeat"
+#define JSONTITLE_SCRIPT_TIMEOUT        "Timeout"
+#define JSONTITLE_SCRIPT_DATAFORMAT     "Data format"
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 class SaveConfigurationData {
@@ -39,6 +50,8 @@ public:
     SerialWorkerParameters serial;
     NetworkWorkerParameters network;
     appConfiguration app;
+    QString LogFileDir;
+    ScriptConfig script;
 
 };
 

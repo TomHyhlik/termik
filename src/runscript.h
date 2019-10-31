@@ -14,7 +14,6 @@ class ScriptConfig {
 public:
     QString fileName;
 
-    QList <QByteArray> fileLines;
     bool repeat;
     int timeout;
     int dataFormat;
@@ -28,12 +27,23 @@ class runScript : public QObject
     ScriptConfig config;
     QTimer*  timer;
 
+    QList <QByteArray> fileContent; // each ByteArray is line
+
 
     void readFile();
 
 
 public:
     explicit runScript(QObject *parent = nullptr);
+
+    void setWholeConfig(ScriptConfig val) {
+        config = val;
+    }
+
+    ScriptConfig getWholeConfig() {
+        return config;
+    }
+
 
     void setFile(QString arg) {
         config.fileName = arg;
@@ -44,9 +54,16 @@ public:
     void setRepeat(bool state) {
         config.repeat = state;
     }
+    bool getRepeat() {
+        return config.repeat;
+    }
 
     void setDataFormat(int format);
+    int getDataFormat();
+
     void setTimeout(int);
+    int getTimeout();
+
     void start();
     void stop();
     bool isRunning();

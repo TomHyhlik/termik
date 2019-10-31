@@ -1,8 +1,10 @@
+#include <QTextStream>
+#include <QDateTime>
+
+
 #include "logfile.h"
 #include "mainwindow.h"
 
-#include <QTextStream>
-#include <QDateTime>
 
 /////////////////////////////////////////////////////////////////
 LogFile::LogFile(QObject *parent) : QObject(parent)
@@ -17,7 +19,7 @@ void LogFile::writeData_ascii(QString data)
     fileName_ascii = QString("%1/%2_ascii%3")
             .arg(fileDirectory)
             .arg(fileName)
-            .arg(FILE_EXTENSION);
+            .arg(LOGFILE_EXTENSION);
 
     writeDataToFile(fileName_ascii, data);
 }
@@ -29,7 +31,7 @@ void LogFile::writeData_hex(QString data)
     fileName_hex = QString("%1/%2_hex%3")
             .arg(fileDirectory)
             .arg(fileName)
-            .arg(FILE_EXTENSION);
+            .arg(LOGFILE_EXTENSION);
 
     writeDataToFile(fileName_hex, data);
 }

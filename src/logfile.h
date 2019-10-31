@@ -2,12 +2,12 @@
 #define LOGFILE_H
 
 #include <QObject>
-
 #include <QFile>
 
 
 
-#define  FILE_EXTENSION         ".txt"
+#define  LOGFILE_EXTENSION         ".txt"
+
 
 
 
@@ -15,14 +15,24 @@ class LogFile : public QObject
 {
     Q_OBJECT
 
+    QString fileDirectory;
 
     QString fileName;
-    QString fileDirectory;
     bool initialized;
     bool writeDataToFile(QString fileName, QString data);
 
 public:
     explicit LogFile(QObject *parent = nullptr);
+
+    void setFileDirectory(QString val) {
+        fileDirectory = val;
+    }
+
+    QString getFileDirectory() {
+        return fileDirectory;
+    }
+
+
 
 signals:
 

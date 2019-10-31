@@ -44,7 +44,6 @@ enum dataFormat {
     data_ascii, data_hex, data_dec, //data_bin
 };
 
-/* connectionType */
 enum connectionType {
     serial, network, none
 };
@@ -103,6 +102,8 @@ public:
 #define TITLE_BUTTON_SCRIPT_RUN "Run"
 #define TITLE_BUTTON_SCRIPT_STOP "Stop"
 
+#define LOCATION_DEFAULT    "~/"
+
 /////////////////////////////////////////////////////////
 namespace Ui {
 class MainWindow;
@@ -114,6 +115,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
     int lastTerminalData;
+
+    void closeEvent(QCloseEvent *event);
+
 
 public:
     explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
@@ -174,6 +178,8 @@ private slots:
     void currentAppConfig_save();
     void currentAppConfig_load();
 
+
+    void on_lineEdit_save_textChanged(const QString &arg1);
 
 public slots:
     void tryConnectDevice(int);
