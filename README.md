@@ -9,12 +9,13 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## features
-* Communication via serial and network
-* Terminal input and output supported in ASCII, HEX and DEC data formats
+* Communication via serial or network
+* Terminal input and output is supported in ASCII, HEX and DEC data formats
 * Option of of app runing from CLI with configuration arguments and possible auto connection to a device
 * Logging into txt file
 * Logging time of events
-* Option of preffix or suffix adding to the Tx data
+* Option of prefix and suffix added to every transmitted data
+* Script of Tx data supported, where each line of a file is transmitted with adjustable period in repetitive or single shot mode
 
 
 
