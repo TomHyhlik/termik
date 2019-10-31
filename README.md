@@ -22,6 +22,5 @@ Transmit data in the terminal is done by pressing Enter.
 ## todo:
 
     new features:
-    	save last network connection to a file and read it at startup as it does with serial
     	scan all ip addresses in network and show it in the dialog_config
     	add button disconnect to the dialog_connect
