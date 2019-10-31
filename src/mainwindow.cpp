@@ -16,6 +16,7 @@
 #include "string.h"
 #include "dialog_connect.h"
 #include "dataconverter.h"
+#include "saveconfiguration.h"
 
 
 /////////////////////////////////////////////////////////////////
@@ -49,11 +50,49 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     setupShortcuts();
     uiInit();
     configInit();
-    handleAppArguments(arguments);
+
+    currentAppConfig_load();
+    handleAppArguments(arguments);    
+}
+//////////////////////////////////////////////////////////////////////
+void MainWindow::currentAppConfig_save()
+{
+    SaveConfiguration saveCfg;
+
+    saveCfg.data.serial.portName = sw->param.portName;
+    saveCfg.data.serial.baudRate = sw->param.baudRate;
+    saveCfg.data.serial.dataBits = sw->param.dataBits;
+    saveCfg.data.serial.parity = sw->param.parity;
+    saveCfg.data.serial.stopBits = sw->param.stopBits;
+    saveCfg.data.serial.flowControl = sw->param.flowControl;
+
+    saveCfg.data.network.targetIpAddr = nw->param.targetIpAddr;
+    saveCfg.data.network.port_Tx = nw->param.port_Tx;
+    saveCfg.data.network.port_Rx = nw->param.port_Rx;
+
+    saveCfg.data.app = config;
+
+    saveCfg.write();
+}
+
+void MainWindow::currentAppConfig_load()
+{
+    SaveConfiguration saveCfg;
+    saveCfg.read();
+
+    sw->param.portName = saveCfg.data.serial.portName;
+    sw->param.baudRate = saveCfg.data.serial.baudRate;
+    sw->param.dataBits = saveCfg.data.serial.dataBits;
+    sw->param.parity = saveCfg.data.serial.parity;
+    sw->param.stopBits = saveCfg.data.serial.stopBits;
+    sw->param.flowControl = saveCfg.data.serial.flowControl;
+
+    nw->param.targetIpAddr = saveCfg.data.network.targetIpAddr;
+    nw->param.port_Tx = saveCfg.data.network.port_Tx;
+    nw->param.port_Rx = saveCfg.data.network.port_Rx;
 
 
 }
-
 //////////////////////////////////////////////////////////////////////
 void MainWindow::selectScript()
 {
@@ -232,7 +271,7 @@ void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
 //////////////////////////////////////////////////////////////////////
 void MainWindow::tryConnectDevice(int connectionType)
 {
-    bool connectedSuccessfully;
+    bool connectedSuccessfully = false;
     QString deviceName;
 
     switch (connectionType)
@@ -246,7 +285,6 @@ void MainWindow::tryConnectDevice(int connectionType)
         deviceName = nw->param.targetIpAddr.toString();
         break;
     case none:
-        connectedSuccessfully = false;
         break;
     }
 
@@ -254,6 +292,7 @@ void MainWindow::tryConnectDevice(int connectionType)
         config.connectionType = connectionType;
         log(note, QString("Connected to: %1").arg(deviceName));
         ui->lineEdit_in_ascii->setFocus();
+        currentAppConfig_save();
     } else {
         config.connectionType = none;
         log(error, QString("Failed to connect to: %1").arg(deviceName));
@@ -312,9 +351,9 @@ void MainWindow::uiInit()
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->lineEdit_script->setStyleSheet(QString("color: %1; background-color: %2")
-                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_script_dataType->setStyleSheet(QString("color: %1; background-color: %2")
-                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 
     /* pushbuttons */
@@ -363,13 +402,13 @@ void MainWindow::uiInit()
 void MainWindow::pushButton_runScript_setColor_green()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
-                                            .arg(COLOR_WHITE).arg(COLOR_GREEN));
+                                             .arg(COLOR_WHITE).arg(COLOR_GREEN));
 }
 
 void MainWindow::pushButton_runScript_setColor_red()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
-                                            .arg(COLOR_WHITE).arg(COLOR_RED));
+                                             .arg(COLOR_WHITE).arg(COLOR_RED));
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showConnectionSettings()
@@ -684,7 +723,7 @@ void MainWindow::log(int logType, QString data)
         timeout = LOGTIMEOUT_INFO;
         break;
     default:
-        timeout = 100000;
+        timeout = LOGTIMEOUT_ERROR;
     }
 
     ui->statusBar->showMessage(data, timeout);
@@ -698,9 +737,9 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
 {
     if (config.timeLogEnabled &&
             (((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) ||
-             (config.lastTerminalData != dataKind)))
+             (lastTerminalData != dataKind)))
     {
-        config.lastTerminalData = dataKind;
+        lastTerminalData = dataKind;
 
         /* get the time */
         QDateTime dt = QDateTime::currentDateTime();
@@ -802,7 +841,7 @@ void MainWindow::EscPressed()
 /////////////////////////////////////////////////////////////////
 void MainWindow::moveCursorToTerminalInputLine()
 {
-//#error todo
+    //#error todo
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::showSettings
@@ -957,12 +996,23 @@ void MainWindow::on_pushButton_script_run_clicked()
 {
     if (script->isRunning()) {
         script->stop();
-        ui->pushButton_script_run->setText("Run");
+        ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_RUN);
         pushButton_runScript_setColor_green();
     } else {
-        ui->pushButton_script_run->setText("Stop");
+        ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_STOP);
         pushButton_runScript_setColor_red();
         script->start();
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1)
+{
+    if (arg1 == TITLE_DATA_HEX) {
+        script->setDataFormat(data_hex);
+    }
+    else if (arg1 == TITLE_DATA_ASCII) {
+        script->setDataFormat(data_ascii);
     }
 }
 
@@ -992,17 +1042,4 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1)
-{
-    if (arg1 == TITLE_DATA_HEX) {
-        script->setDataFormat(data_hex);
-    }
-    else if (arg1 == TITLE_DATA_ASCII) {
-        script->setDataFormat(data_ascii);
-    }
-}
-/////////////////////////////////////////////////////////////////
-
-
-
 

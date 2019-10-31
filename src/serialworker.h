@@ -5,7 +5,7 @@
 #include <QSerialPort>
 #include <QList>
 
-class parameters {
+class SerialWorkerParameters {
 public:
     QString portName;
     qint32 baudRate;
@@ -27,7 +27,7 @@ public:
     bool close();
     bool isOpen();
 
-    parameters param;
+    SerialWorkerParameters param;
 
     QList <QByteArray> RxData;
 

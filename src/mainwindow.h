@@ -28,11 +28,6 @@
 #define TIME_FORMAT "dd.MM.yyyy, hh:mm:ss"
 
 
-
-enum {
-    Dark, Light
-} theme;
-
 enum logType {
     error, note, info
 };
@@ -74,7 +69,6 @@ public:
 
     bool saveTerminalOutToFile;
 
-    int lastTerminalData;
 
 };
 
@@ -106,6 +100,9 @@ public:
 #define TITLE_DATA_ASCII    "ASCII"
 #define TITLE_DATA_HEX      "HEX"
 
+#define TITLE_BUTTON_SCRIPT_RUN "Run"
+#define TITLE_BUTTON_SCRIPT_STOP "Stop"
+
 /////////////////////////////////////////////////////////
 namespace Ui {
 class MainWindow;
@@ -116,6 +113,7 @@ class Dialog_connect;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+    int lastTerminalData;
 
 public:
     explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
@@ -148,36 +146,34 @@ private slots:
     void keyDownPressed();
     void keyEnterPressed();
 
-    void on_pushButton_save_clicked();
-
-    void on_tabWidget_currentChanged(int index);
-
     void Tx(QByteArray);
     void Tx_fromDataInput(int);
+
+
+    void historyTxUpdate();
+    void selectScript();
 
     void on_checkBox_prefix_stateChanged(int arg1);
     void on_checkBox_suffix_stateChanged(int arg1);
     void on_lineEdit_suffix_textChanged(const QString &arg1);
     void on_lineEdit_prefix_textChanged(const QString &arg1);
-    void on_checkBox_timeLog_stateChanged(int arg1);
-
-    void historyTxUpdate();
-
-    void selectScript();
-
+    void on_checkBox_timeLog_stateChanged(int arg1);    
     void on_checkBox_clearOutputLine_stateChanged(int arg1);
     void on_checkBox_outputSave_stateChanged(int arg1);
+    void on_lineEdit_script_textChanged(const QString &arg1);
+    void on_spinBox_script_period_valueChanged(int arg1);
+    void on_pushButton_script_run_clicked();
+    void on_comboBox_script_dataType_editTextChanged(const QString &arg1);
+    void on_checkBox_script_repeat_stateChanged(int arg1);
+    void on_pushButton_save_clicked();
+    void on_tabWidget_currentChanged(int index);
+
     void moveCursorToTerminalInputLine();
 
-    void on_lineEdit_script_textChanged(const QString &arg1);
 
-    void on_spinBox_script_period_valueChanged(int arg1);
+    void currentAppConfig_save();
+    void currentAppConfig_load();
 
-    void on_pushButton_script_run_clicked();
-
-    void on_comboBox_script_dataType_editTextChanged(const QString &arg1);
-
-    void on_checkBox_script_repeat_stateChanged(int arg1);
 
 public slots:
     void tryConnectDevice(int);

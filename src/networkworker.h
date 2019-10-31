@@ -5,6 +5,15 @@
 #include <QUdpSocket>
 #include <QNetworkInterface>
 
+
+class NetworkWorkerParameters {
+public:
+    QHostAddress targetIpAddr;
+    quint16 port_Tx;
+    quint16 port_Rx;
+};
+
+
 class NetworkWorker : public QObject
 {
     Q_OBJECT
@@ -14,13 +23,7 @@ public:
     explicit NetworkWorker(QObject *parent = nullptr);
 
 
-    class parameters {
-    public:
-        QHostAddress targetIpAddr;
-        quint16 port_Tx;
-        quint16 port_Rx;
-    } param;
-
+    NetworkWorkerParameters param;
 
     QString getMyLocalIpAddress();
     void send(QString IPaddress, quint16 port, QByteArray data);

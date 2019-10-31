@@ -43,7 +43,7 @@ void Dialog_connect::refreshParameters()
 
     ui->lineEdit_ipAddr->setText(nw->param.targetIpAddr.toString());
     ui->spinBox_ipPort_Tx->setValue(nw->param.port_Tx);
-    ui->spinBox_ipPort_Rx->setValue(nw->param.port_Tx);
+    ui->spinBox_ipPort_Rx->setValue(nw->param.port_Rx);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -293,9 +293,6 @@ void Dialog_connect::on_buttonBox_accepted()
     nw->setTargetIpAddress(ui->lineEdit_ipAddr->text());
     nw->setTargetIpPort_Tx(quint16(ui->spinBox_ipPort_Tx->value()));
     nw->setTargetIpPort_Rx(quint16(ui->spinBox_ipPort_Rx->value()));
-
-//    /* save the configuration to txt file */
-//    configurationSave();
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
