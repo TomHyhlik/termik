@@ -171,15 +171,16 @@ private slots:
     void on_checkBox_script_repeat_stateChanged(int arg1);
     void on_pushButton_save_clicked();
     void on_tabWidget_currentChanged(int index);
+    void on_lineEdit_save_textChanged(const QString &arg1);
 
     void moveCursorToTerminalInputLine();
-
 
     void currentAppConfig_save();
     void currentAppConfig_load();
 
 
-    void on_lineEdit_save_textChanged(const QString &arg1);
+
+    void connectOrDisconnect();
 
 public slots:
     void tryConnectDevice(int);

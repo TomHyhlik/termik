@@ -55,6 +55,26 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     handleAppArguments(arguments);
 }
 //////////////////////////////////////////////////////////////////////
+void MainWindow::connectOrDisconnect()
+{
+    switch (config.connectionType)
+    {
+    case serial:
+        sw->close();
+        config.connectionType = none;
+        break;
+    case network:
+        nw->close();
+        config.connectionType = none;
+        break;
+    case none:
+        showConnectionSettings();
+        break;
+    default:
+        config.connectionType = none;
+    }
+}
+//////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::closeEvent
 /// \param event
 ///     function called when the MainWindow is being closed
@@ -1084,7 +1104,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(selectScript()));
-    //    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(on_pushButton_connect_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(connectOrDisconnect()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
