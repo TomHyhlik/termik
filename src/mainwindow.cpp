@@ -86,6 +86,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 //////////////////////////////////////////////////////////////////////
+/// \brief MainWindow::currentAppConfig_save
+///     write app configuration to json file at app shutdown
 void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
@@ -108,12 +110,14 @@ void MainWindow::currentAppConfig_save()
 
     saveCfg.write();
 }
-
+//////////////////////////////////////////////////////////////////////
+/// \brief MainWindow::currentAppConfig_load
+///     load app configuration from json file at app startup
 void MainWindow::currentAppConfig_load()
 {
     SaveConfiguration saveCfg;
     saveCfg.read();
-
+    /* load serialworker parameters */
     sw->param.portName = saveCfg.data.serial.portName;
     sw->param.baudRate = saveCfg.data.serial.baudRate;
     sw->param.dataBits = saveCfg.data.serial.dataBits;
@@ -121,11 +125,12 @@ void MainWindow::currentAppConfig_load()
     sw->param.stopBits = saveCfg.data.serial.stopBits;
     sw->param.flowControl = saveCfg.data.serial.flowControl;
 
+    /* load networkworker parameters */
     nw->param.targetIpAddr = saveCfg.data.network.targetIpAddr;
     nw->param.port_Tx = saveCfg.data.network.port_Tx;
     nw->param.port_Rx = saveCfg.data.network.port_Rx;
 
-
+    /* load script parameters */
     if (!saveCfg.data.script.fileName.isEmpty()) {
         ui->lineEdit_script->setText(saveCfg.data.script.fileName);
     }
@@ -625,18 +630,17 @@ void MainWindow::fillShortcutsTable()
 {
     QList <QList <QString>> shortcuts;
 
-    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit application"};
+    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
     shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
     shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
     shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
-    shortcuts <<  QList <QString> { "CTRL + T" , "Change theme (not supported yet)"};
-    shortcuts <<  QList <QString> { "CTRL + ," , "Show settongs"};
+    shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
+    shortcuts <<  QList <QString> { "CTRL + P" , "Show connection settongs"};
+    shortcuts <<  QList <QString> { "CTRL + O" , "Open script"};
     shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
     shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
     shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
     shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
-    shortcuts <<  QList <QString> { "CTRL + W" , "Show terminal input wrap options"};
-    shortcuts <<  QList <QString> { "CTRL + F" , "Find (not supported yet)"};
     shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
     shortcuts <<  QList <QString> { "F1"       , "Open help"};
 
@@ -1111,12 +1115,12 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), this, SLOT(focus_3()));
-    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(on_pushButton_save_clicked()));
     new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
+    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
 }
 /////////////////////////////////////////////////////////////////
 
