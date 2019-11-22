@@ -54,6 +54,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     currentAppConfig_load();
     handleAppArguments(arguments);
 }
+
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectOrDisconnect()
 {
@@ -99,7 +100,7 @@ void MainWindow::currentAppConfig_save()
     saveCfg.data.serial.stopBits = sw->param.stopBits;
     saveCfg.data.serial.flowControl = sw->param.flowControl;
 
-    saveCfg.data.network.targetIpAddr = nw->param.targetIpAddr;
+    saveCfg.data.network.IpAddr_Tx = nw->param.IpAddr_Tx;
     saveCfg.data.network.port_Tx = nw->param.port_Tx;
     saveCfg.data.network.port_Rx = nw->param.port_Rx;
 
@@ -126,7 +127,7 @@ void MainWindow::currentAppConfig_load()
     sw->param.flowControl = saveCfg.data.serial.flowControl;
 
     /* load networkworker parameters */
-    nw->param.targetIpAddr = saveCfg.data.network.targetIpAddr;
+    nw->param.IpAddr_Tx = saveCfg.data.network.IpAddr_Tx;
     nw->param.port_Tx = saveCfg.data.network.port_Tx;
     nw->param.port_Rx = saveCfg.data.network.port_Rx;
 
@@ -247,8 +248,8 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
     switch (cmdChar)
     {
     case ARG_NETWORK_IPADDR:
-        nw->param.targetIpAddr = QHostAddress(passedData);
-        if (nw->param.targetIpAddr.isNull())
+        nw->param.IpAddr_Tx = QHostAddress(passedData);
+        if (nw->param.IpAddr_Tx.isNull())
             ok = false;
         break;
     case ARG_NETWORK_TXPORT:
@@ -348,7 +349,7 @@ void MainWindow::tryConnectDevice(int connectionType)
         break;
     case network:
         connectedSuccessfully = nw->open();
-        deviceName = nw->param.targetIpAddr.toString();
+        deviceName = nw->param.IpAddr_Tx.toString();
         break;
     case none:
         break;
@@ -625,31 +626,7 @@ void MainWindow::hideHelp()
 {
     ui->tableWidget_shortcuts->hide();
 }
-/////////////////////////////////////////////////////////////////
-void MainWindow::fillShortcutsTable()
-{
-    QList <QList <QString>> shortcuts;
 
-    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
-    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
-    shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
-    shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
-    shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
-    shortcuts <<  QList <QString> { "CTRL + P" , "Show connection settongs"};
-    shortcuts <<  QList <QString> { "CTRL + O" , "Open script"};
-    shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
-    shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
-    shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
-    shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
-    shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
-    shortcuts <<  QList <QString> { "F1"       , "Open help"};
-
-    while (!shortcuts.isEmpty())
-    {
-        shortcutTable_addItem(shortcuts.at(0));
-        shortcuts.pop_front();
-    }
-}
 ///////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::table_addItem
 ///     creates new row in the table and puts data into the row
@@ -1096,7 +1073,31 @@ void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 {
     logFile->setFileDirectory(arg1);
 }
+/////////////////////////////////////////////////////////////////
+void MainWindow::fillShortcutsTable()
+{
+    QList <QList <QString>> shortcuts;
 
+    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
+    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
+    shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
+    shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
+    shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
+    shortcuts <<  QList <QString> { "CTRL + P" , "Show connection settongs"};
+    shortcuts <<  QList <QString> { "CTRL + O" , "Open script"};
+    shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
+    shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
+    shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
+    shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
+    shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
+    shortcuts <<  QList <QString> { "F1"       , "Open help"};
+
+    while (!shortcuts.isEmpty())
+    {
+        shortcutTable_addItem(shortcuts.at(0));
+        shortcuts.pop_front();
+    }
+}
 /////////////////////////////////////////////////////////////////
 void MainWindow::setupShortcuts()
 {

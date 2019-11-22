@@ -20,7 +20,5 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
-
-    new features:
-    	scan all ip addresses in network and show it in the dialog_config
-    	add button disconnect to the dialog_connect
+	* scan all ip addresses in network and show it in the dialog_config
+	* implement TCP connection

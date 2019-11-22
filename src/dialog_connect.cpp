@@ -41,7 +41,15 @@ void Dialog_connect::refreshParameters()
     ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, sw->param.stopBits));
     ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, sw->param.flowControl));
 
-    ui->lineEdit_ipAddr->setText(nw->param.targetIpAddr.toString());
+    QStringList ipAddrs_rx = nw->getAll_iPaddr_rx();
+    for (int i = 0; i < ipAddrs_rx.size(); i++)
+        ui->comboBox_ipAddr_rx->addItem(ipAddrs_rx.at(i));
+
+    if (!nw->param.IpAddr_Rx.toString().isEmpty())
+        ui->comboBox_ipAddr_rx->setCurrentText(nw->param.IpAddr_Rx.toString());
+    if (!nw->param.IpAddr_Tx.toString().isEmpty())
+        ui->comboBox_ipAddr_tx->setCurrentText(nw->param.IpAddr_Tx.toString());
+
     ui->spinBox_ipPort_Tx->setValue(nw->param.port_Tx);
     ui->spinBox_ipPort_Rx->setValue(nw->param.port_Rx);
 }
@@ -62,11 +70,13 @@ void Dialog_connect::init()
     setWindowTitle(TITLE_THIS_WINDOW);
     ui->tabWidget->setTabText(serial, TITLE_TAB_SERIAL);
     ui->tabWidget->setTabText(network, TITLE_TAB_NETWORK);
-    ui->spinBox_ipPort_Tx->setMaximum(UDP_PORT_RANGE);
-    ui->spinBox_ipPort_Rx->setMaximum(UDP_PORT_RANGE);
+    ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
+    ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
+
+    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_UDP);
+    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_TCP);
 
     initColors();
-
     tab_port_init();
 
     timer_updatePorts = new QTimer(this);
@@ -105,7 +115,9 @@ void Dialog_connect::initColors()
                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_ipAddr->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_ipAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
+                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_ipAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
@@ -290,9 +302,10 @@ void Dialog_connect::on_buttonBox_accepted()
     sw->param.stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
     sw->param.flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
 
-    nw->setTargetIpAddress(ui->lineEdit_ipAddr->text());
-    nw->setTargetIpPort_Tx(quint16(ui->spinBox_ipPort_Tx->value()));
-    nw->setTargetIpPort_Rx(quint16(ui->spinBox_ipPort_Rx->value()));
+    nw->param.IpAddr_Rx = QHostAddress(ui->comboBox_ipAddr_rx->currentText());
+    nw->param.IpAddr_Tx = QHostAddress(ui->comboBox_ipAddr_tx->currentText());
+    nw->param.port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
+    nw->param.port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
@@ -306,64 +319,6 @@ void Dialog_connect::on_buttonBox_accepted()
     }
 }
 
-
-
-//        /* save serial port ID */
-//        int pID = getProductIdentifier(sw->param.portName);
-//        if (pID != -1) {
-//            data << QString::number(pID) << "\n";
-//        } else {
-//            data << "\n";
-//        }
-//        /* save serial port parameters */
-//        data << ui->comboBox_baudRate->currentText() << "\n";
-//        data << ui->comboBox_dataBits->currentText() << "\n";
-//        data << ui->comboBox_parity->currentText() << "\n";
-//        data << ui->comboBox_stopBits->currentText() << "\n";
-//        data << ui->comboBox_flowControl->currentText() << "\n";
-
-//        /* save network parameters */
-//        data << ui->lineEdit_ipAddr->text() << "\n";
-//        data << ui->spinBox_ipPort_Tx->text() << "\n";
-//        data << ui->spinBox_ipPort_Rx->text() << "\n";
-
-
-///////////////////////////////////////////////////////////////////////
-/// \brief Dialog_connect::configurationRead
-/// \return product identifier of the saved port in the txt fileconnectVia_serial
-int Dialog_connect::configurationRead()
-{
-//        /* read productIdentifier_str from the txt file on the first line */
-//        QString productIdentifier_str = QString(file.readLine());
-
-//        /* read the parameters from the file */
-//        QString baudRate = QString(file.readLine());
-//        ui->comboBox_baudRate->setCurrentText(QString(baudRate.remove(baudRate.size()-1, 1)));
-
-//        QString dataBits = QString(file.readLine());
-//        ui->comboBox_dataBits->setCurrentText(QString(dataBits.remove(dataBits.size()-1, 1)));
-
-//        QString parity = QString(file.readLine());
-//        ui->comboBox_parity->setCurrentText(QString(parity.remove(parity.size()-1, 1)));
-
-//        QString stopBits = QString(file.readLine());
-//        ui->comboBox_stopBits->setCurrentText(QString(stopBits.remove(stopBits.size()-1, 1)));
-
-//        QString flowControl = QString(file.readLine());
-//        ui->comboBox_flowControl->setCurrentText(QString(flowControl.remove(flowControl.size()-1, 1)));
-
-//        QString ipAddr = QString(file.readLine());
-//        ui->lineEdit_ipAddr->setText(QString(ipAddr.remove(ipAddr.size()-1, 1)));
-
-//        QString ipPort_Tx = QString(file.readLine());
-//        ui->spinBox_ipPort_Tx->setValue(ipPort_Tx.toInt(nullptr, 10));
-
-//        QString ipPort_Rx = QString(file.readLine());
-//        ui->spinBox_ipPort_Rx->setValue(ipPort_Rx.toInt(nullptr, 10));
-
-
-
-}
 
 /////////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::getProductIdentifier

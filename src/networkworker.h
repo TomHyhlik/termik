@@ -8,7 +8,9 @@
 
 class NetworkWorkerParameters {
 public:
-    QHostAddress targetIpAddr;
+    QHostAddress IpAddr_Tx;
+    QHostAddress IpAddr_Rx;
+
     quint16 port_Tx;
     quint16 port_Rx;
 };
@@ -25,13 +27,11 @@ public:
 
     NetworkWorkerParameters param;
 
-    QString getMyLocalIpAddress();
+    QList <QString> getAll_iPaddr_rx();
+    QList <QString> getAll_iPaddr_tx();
+
     void send(QString IPaddress, quint16 port, QByteArray data);
     void send(QByteArray data);
-
-    void setTargetIpAddress(QString addr);
-    void setTargetIpPort_Tx(quint16 port);
-    void setTargetIpPort_Rx(quint16 port);
 
     bool open();
     void close();

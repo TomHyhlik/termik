@@ -5,14 +5,13 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
     socket = new QUdpSocket(this);
 
     connect(socket, SIGNAL(readyRead()),this, SLOT(read()));
-
 }
+
 //////////////////////////////////////////////////
 bool NetworkWorker::open()
 {
     socket->close();
-
-    return socket->bind(QHostAddress(getMyLocalIpAddress()), param.port_Rx);
+    return socket->bind(param.IpAddr_Rx, param.port_Rx);
 }
 //////////////////////////////////////////////////
 void  NetworkWorker::close()
@@ -22,7 +21,7 @@ void  NetworkWorker::close()
 //////////////////////////////////////////////////
 void NetworkWorker::send(QByteArray data)
 {
-    socket->writeDatagram(data, param.targetIpAddr, param.port_Tx);
+    socket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
     // socket->writeDatagram(data, QHostAddress::LocalHost, 11999);
 }
 
@@ -55,31 +54,15 @@ void NetworkWorker::read()
 }
 
 //////////////////////////////////////////////////
-QString NetworkWorker::getMyLocalIpAddress()
+QList <QString> NetworkWorker::getAll_iPaddr_rx()
 {
-    QString myIPaddress;
+    QList <QString> myIPaddresses;
     foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
-                            address != QHostAddress(QHostAddress::LocalHost))
-            myIPaddress = address.toString();
+        if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+            myIPaddresses.append(address.toString());
+        }
     }
-    return myIPaddress;
-}
-//////////////////////////////////////////////////
-void NetworkWorker::setTargetIpAddress(QString addr)
-{
-    param.targetIpAddr = QHostAddress(addr);
-}
-
-//////////////////////////////////////////////////
-void NetworkWorker::setTargetIpPort_Tx(quint16 port)
-{
-    param.port_Tx = port;
-}
-//////////////////////////////////////////////////
-void NetworkWorker::setTargetIpPort_Rx(quint16 port)
-{
-    param.port_Rx = port;
+    return myIPaddresses;
 }
 
 //////////////////////////////////////////////////
