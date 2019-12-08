@@ -206,7 +206,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox_networkProtocol"/>
+            <widget class="QComboBox" name="comboBox_networkProtocol">
+             <property name="minimumSize">
+              <size>
+               <width>80</width>
+               <height>0</height>
+              </size>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
