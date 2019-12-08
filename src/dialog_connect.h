@@ -8,16 +8,12 @@
 
 #include "mainwindow.h"
 
-
-#define SERIALPORT_REFRESH_PERIOD 100
-
-
 #define PORT_RANGE  65535
 #define TITLE_THIS_WINDOW   "Connect"
 #define TITLE_TAB_SERIAL    "Serial"
 #define TITLE_TAB_NETWORK    "Network"
 
-#define SERIALPORT_REFRESH_PERIOD   100 // ms
+#define SERIALPORT_REFRESH_PERIOD   100 // ms        // todo:tweak
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"

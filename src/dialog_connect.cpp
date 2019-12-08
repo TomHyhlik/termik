@@ -81,11 +81,11 @@ void Dialog_connect::init()
 
     timer_updatePorts = new QTimer(this);
     connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(serialPort_nameRefresh()));
-
     timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
+
     ui->comboBox_portName->setFocus();
     currentTab = ui->tabWidget->currentIndex();
-//    configurationRead(); << todo
+    //    configurationRead(); << todo
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
@@ -94,59 +94,68 @@ void Dialog_connect::initColors()
                         .arg(COLOR_WHITE).arg(COLOR_GRAY1));
 
     ui->tab_serial->setStyleSheet(QString("color: %1; background-color: %2")
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+                                  .arg(COLOR_WHITE).arg(COLOR_GRAY2));
     ui->tab_network->setStyleSheet(QString("color: %1; background-color: %2")
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+                                   .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
     ui->comboBox_baudRate->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_dataBits->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_flowControl->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_parity->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_portName->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->spinBox_ipPort_Tx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_ipAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_ipAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
-                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
+    QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
+
+
     /* delete ports which were plugged out */
-    for(int i = 0; i < ui->comboBox_portName->count(); i++){
+    for (int i = 0; i < ui->comboBox_portName->count(); i++) {
         bool isHere = false;
-        foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
-            if(info.portName() == ui->comboBox_portName->itemText(i)){
+        for (int j = 0; j < currentAvailablePorts.size(); j++) {
+            if (ui->comboBox_portName->itemText(i) == currentAvailablePorts.at(j).portName()) {
                 isHere = true;
+                break;
             }
         }
         if(!isHere){
             ui->comboBox_portName->removeItem(i);
         }
+
     }
+
     /* add ports which were plugged in */
-    foreach(const QSerialPortInfo &info, QSerialPortInfo::availablePorts()){
-        bool isHere = false;
-        for(int i = 0; i < ui->comboBox_portName->count(); i++){
-            if(info.portName() == ui->comboBox_portName->itemText(i)){
-                isHere = true;
+    if (ui->comboBox_portName->count() != currentAvailablePorts.size()) {
+        for (int j = 0; j < currentAvailablePorts.size(); j++) {
+            bool isHere = false;
+            for(int i = 0; i < ui->comboBox_portName->count(); i++){
+                if(currentAvailablePorts.at(j).portName() == ui->comboBox_portName->itemText(i)){
+                    isHere = true;
+                    break;
+                }
             }
-        }
-        if(!isHere){
-            ui->comboBox_portName->addItem(info.portName());
+            if(!isHere){
+                ui->comboBox_portName->addItem(currentAvailablePorts.at(j).portName());
+            }
         }
     }
 }
@@ -266,7 +275,7 @@ void Dialog_connect::on_comboBox_portName_currentTextChanged(const QString &arg1
         /* if the port name is known, print info */
         if(info.portName() == arg1){
             ui->label_portDescription->setText(QString("Description: %1")
-                                           .arg(info.description()));
+                                               .arg(info.description()));
             ui->label_manufacturer->setText(QString("Manufacturer: %1")
                                             .arg(info.manufacturer()));
             ui->label_serialNumber->setText(QString("Serial number: %1")

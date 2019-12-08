@@ -892,6 +892,7 @@ void MainWindow::toggleShowSettings()
 {
     if (ui->groupBox_settings->isHidden()) {
         ui->groupBox_settings->show();
+        ui->checkBox_timeLog->setFocus();
     } else {
         ui->groupBox_settings->hide();
     }
