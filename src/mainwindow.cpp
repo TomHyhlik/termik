@@ -891,7 +891,17 @@ void MainWindow::EscPressed()
 /////////////////////////////////////////////////////////////////
 void MainWindow::moveCursorToTerminalInputLine()
 {
-    //#error todo
+    switch (ui->tabWidget->currentIndex())
+    {
+    case data_ascii:
+        ui->lineEdit_in_ascii->setFocus();
+        break;
+    case data_hex:
+        ui->lineEdit_in_hex->setFocus();
+        break;
+    case data_dec:
+        ui->lineEdit_in_dec->setFocus();
+    }
 }
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::showSettings

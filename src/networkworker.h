@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QUdpSocket>
+#include <QTcpSocket>
 #include <QNetworkInterface>
 
 
@@ -23,7 +24,8 @@ enum protocolType {
 class NetworkWorker : public QObject
 {
     Q_OBJECT
-    QUdpSocket *udpSocket;
+    QUdpSocket* udpSocket;
+    QTcpSocket* tcpSocket;
 
 public:
     explicit NetworkWorker(QObject *parent = nullptr);

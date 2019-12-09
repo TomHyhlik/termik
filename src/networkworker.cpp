@@ -4,19 +4,33 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
 {
     udpSocket = new QUdpSocket(this);
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
+
+    tcpSocket = new QTcpSocket(this);
+    connect(tcpSocket, SIGNAL(readyRead()),this, SLOT(read()));
 }
 
 //////////////////////////////////////////////////
 bool NetworkWorker::open()
 {
     close();
-    return udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
+    bool opened = false;
+    switch (param.protocolType) {
+    case UDP:
+        opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
+        break;
+    case TCP:
+        opened = tcpSocket->bind(param.IpAddr_Rx, param.port_Rx);
+        break;
+    }
+    return opened;
 }
 //////////////////////////////////////////////////
 void  NetworkWorker::close()
 {
     if (udpSocket->isOpen())
         udpSocket->close();
+    else if (tcpSocket->isOpen())
+        tcpSocket->close();
 }
 //////////////////////////////////////////////////
 void NetworkWorker::send(QByteArray data)

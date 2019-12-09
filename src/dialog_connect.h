@@ -13,7 +13,7 @@
 #define TITLE_TAB_SERIAL    "Serial"
 #define TITLE_TAB_NETWORK    "Network"
 
-#define SERIALPORT_REFRESH_PERIOD   100 // ms        // todo:tweak
+#define SERIALPORT_REFRESH_PERIOD   200
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"
