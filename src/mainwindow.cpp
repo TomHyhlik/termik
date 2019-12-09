@@ -42,7 +42,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
     logFile = new LogFile(this);
     script = new runScript(this);
-    connect(script, SIGNAL(Tx(QByteArray)), this, SLOT(Tx(QByteArray)));
+    connect(script, SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
 
     tick_lastRx = 0;
     tick.start();
@@ -144,7 +144,7 @@ void MainWindow::currentAppConfig_load()
     switch (saveCfg.data.script.dataFormat) {
     case data_ascii:
     case data_hex:
-            script->setDataFormat(saveCfg.data.script.dataFormat);
+        script->setDataFormat(saveCfg.data.script.dataFormat);
     }
 
 
@@ -349,7 +349,9 @@ void MainWindow::tryConnectDevice(int connectionType)
         break;
     case network:
         connectedSuccessfully = nw->open();
-        deviceName = nw->param.IpAddr_Tx.toString();
+        deviceName = QString("%1:%2")
+                .arg(nw->param.IpAddr_Tx.toString())
+                .arg(QString::number(int(nw->param.port_Tx)));
         break;
     case none:
         break;
@@ -510,6 +512,11 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx_fromDataInput(int inputType)
 {
+    if (config.connectionType == none) {
+        log(error, "No connection established.");
+        return;
+    }
+
     QByteArray txData;        // to be transmitted
     dataConverter dataConv;
 
@@ -526,13 +533,19 @@ void MainWindow::Tx_fromDataInput(int inputType)
         dataConv.setStrDec(ui->lineEdit_in_dec->text());
         break;
     }
-
     txData = dataConv.getByteArray();
-    Tx(txData);
+    on_Tx(txData);
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::Tx(QByteArray txData)
+void MainWindow::on_Tx(QByteArray txData)
 {
+    if (config.connectionType == none) {
+        log(error, "No connection established.");
+        return;
+    }
+
+    TxHistory_add(txData);
+
     /* add prefix and suffix to the data */
     if (config.prefix_tx_enabled)
         txData.prepend(config.prefix_tx);
@@ -544,18 +557,13 @@ void MainWindow::Tx(QByteArray txData)
     {
     case serial:
         sw->write(txData);
-        terminalOutUpdate(data_Tx, txData);
-        TxHistory_add(txData);
         break;
     case network:
         nw->send(txData);
-        terminalOutUpdate(data_Tx, txData);
-        TxHistory_add(txData);
         break;
-    case none:
-        log(error, "No connection established.");
-        return;
     }
+
+    terminalOutUpdate(data_Tx, txData);
 
     if (config.clearOutputLine) {
         ui->lineEdit_in_ascii->clear();
@@ -892,7 +900,6 @@ void MainWindow::toggleShowSettings()
 {
     if (ui->groupBox_settings->isHidden()) {
         ui->groupBox_settings->show();
-        ui->checkBox_timeLog->setFocus();
     } else {
         ui->groupBox_settings->hide();
     }

@@ -315,6 +315,8 @@ void Dialog_connect::on_buttonBox_accepted()
     nw->param.IpAddr_Tx = QHostAddress(ui->comboBox_ipAddr_tx->currentText());
     nw->param.port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     nw->param.port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
+    nw->param.protocolType = getSelectedNetworkProtocol();
+
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
@@ -327,7 +329,18 @@ void Dialog_connect::on_buttonBox_accepted()
         break;
     }
 }
-
+/////////////////////////////////////////////////////////////////////
+int Dialog_connect::getSelectedNetworkProtocol()
+{
+    if (ui->comboBox_networkProtocol->currentText() == NETWORKPROTOCOL_UDP) {
+        return UDP;
+    }
+    else if (ui->comboBox_networkProtocol->currentText() == NETWORKPROTOCOL_TCP) {
+        return TCP;
+    } else {
+        return TCP;
+    }
+}
 
 /////////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::getProductIdentifier

@@ -80,6 +80,8 @@ private:
 
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
+    int getSelectedNetworkProtocol();
+
 
 private slots:
     void serialPort_nameRefresh();

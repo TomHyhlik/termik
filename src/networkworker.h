@@ -13,13 +13,17 @@ public:
 
     quint16 port_Tx;
     quint16 port_Rx;
+    int protocolType;
 };
 
+enum protocolType {
+    UDP, TCP
+};
 
 class NetworkWorker : public QObject
 {
     Q_OBJECT
-    QUdpSocket *socket;
+    QUdpSocket *udpSocket;
 
 public:
     explicit NetworkWorker(QObject *parent = nullptr);

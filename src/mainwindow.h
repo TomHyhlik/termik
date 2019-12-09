@@ -150,7 +150,7 @@ private slots:
     void keyDownPressed();
     void keyEnterPressed();
 
-    void Tx(QByteArray);
+    void on_Tx(QByteArray);
     void Tx_fromDataInput(int);
 
 
