@@ -6,9 +6,13 @@
 #include <QTcpSocket>
 #include <QNetworkInterface>
 
+#include <QDebug>
+
 
 class NetworkWorkerParameters {
 public:
+
+
     QHostAddress IpAddr_Tx;
     QHostAddress IpAddr_Rx;
 

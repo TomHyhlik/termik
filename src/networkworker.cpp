@@ -1,3 +1,4 @@
+
 #include "networkworker.h"
 
 NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
@@ -5,8 +6,19 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
     udpSocket = new QUdpSocket(this);
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
 
+
     tcpSocket = new QTcpSocket(this);
     connect(tcpSocket, SIGNAL(readyRead()),this, SLOT(read()));
+
+    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+             this, SLOT(error(QAbstractSocket::SocketError)));
+     connect(tcpSocket, SIGNAL(connected()),
+             this, SLOT(requestForID()));
+     connect(tcpSocket, SIGNAL(readyRead()),
+             this, SLOT(receiveMessage()));
+     tcpSocket->connectToHost(QHostAddress::LocalHost, param.port_Tx);
+
+
 }
 
 //////////////////////////////////////////////////
@@ -27,23 +39,41 @@ bool NetworkWorker::open()
 //////////////////////////////////////////////////
 void  NetworkWorker::close()
 {
-    if (udpSocket->isOpen())
-        udpSocket->close();
-    else if (tcpSocket->isOpen())
-        tcpSocket->close();
+    switch (param.protocolType) {
+    case UDP:
+        if (udpSocket->isOpen())
+            udpSocket->close();
+        break;
+    case TCP:
+        if (tcpSocket->isOpen())
+            udpSocket->close();
+        break;
+    }
 }
 //////////////////////////////////////////////////
 void NetworkWorker::send(QByteArray data)
 {
-    udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
-    // socket->writeDatagram(data, QHostAddress::LocalHost, 11999);
+    switch (param.protocolType) {
+    case UDP:
+        udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
+        break;
+    case TCP:
+//        tcpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
+        break;
+    }
 }
 
 //////////////////////////////////////////////////
 void NetworkWorker::send(QString IPaddress, quint16 port, QByteArray data)
 {
-    udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
-    // socket->writeDatagram(data, QHostAddress::LocalHost, 11999);
+    switch (param.protocolType) {
+    case UDP:
+        udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
+        break;
+    case TCP:
+//        tcpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
+        break;
+    }
 }
 
 //////////////////////////////////////////////////
@@ -53,8 +83,16 @@ void NetworkWorker::read()
     QHostAddress sender;
     quint16 senderPort;
 
-    buffer.resize(int(udpSocket->pendingDatagramSize()));
-    udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+    switch (param.protocolType) {
+    case UDP:
+        buffer.resize(int(udpSocket->pendingDatagramSize()));
+        udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+        break;
+    case TCP:
+//        buffer.resize(int(tcpSocket->pendingDatagramSize()));
+//        tcpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+        break;
+    }
 
     RxData.append(buffer);
     QString message = QString(buffer);
