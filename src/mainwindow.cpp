@@ -742,7 +742,7 @@ void MainWindow::dataArrived()
         terminalOutUpdate(data_Rx, sw->ReadAllRx());
         break;
     case network:
-        terminalOutUpdate(data_Rx, nw->ReadAllRx());
+        terminalOutUpdate(data_Rx, nw->readAllRx());
         break;
     case none:
         break;

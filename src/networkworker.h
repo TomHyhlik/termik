@@ -19,6 +19,7 @@ public:
     quint16 port_Tx;
     quint16 port_Rx;
     int protocolType;
+
 };
 
 enum protocolType {
@@ -30,6 +31,8 @@ class NetworkWorker : public QObject
     Q_OBJECT
     QUdpSocket* udpSocket;
     QTcpSocket* tcpSocket;
+
+    bool tcpConnected;
 
 public:
     explicit NetworkWorker(QObject *parent = nullptr);
@@ -48,10 +51,9 @@ public:
 
     QByteArray readAllRx();
 
-    QByteArray ReadAllRx();
-
     QList <QByteArray> RxData;
 
+    bool tcpIsConnected();
 
 signals:
 
@@ -63,6 +65,8 @@ public slots:
 
     void read();
 
+    void connected();
+    void disconnected();
 
 
 };

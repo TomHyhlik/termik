@@ -6,18 +6,13 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
     udpSocket = new QUdpSocket(this);
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
 
-
+    tcpConnected = false;
     tcpSocket = new QTcpSocket(this);
+
+    connect(tcpSocket, SIGNAL(connected()),this, SLOT(connected()));
+    connect(tcpSocket, SIGNAL(disconnected()),this, SLOT(disconnected()));
+//    connect(tcpSocket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(tcpSocket, SIGNAL(readyRead()),this, SLOT(read()));
-
-    connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-             this, SLOT(error(QAbstractSocket::SocketError)));
-     connect(tcpSocket, SIGNAL(connected()),
-             this, SLOT(requestForID()));
-     connect(tcpSocket, SIGNAL(readyRead()),
-             this, SLOT(receiveMessage()));
-     tcpSocket->connectToHost(QHostAddress::LocalHost, param.port_Tx);
-
 
 }
 
@@ -31,7 +26,7 @@ bool NetworkWorker::open()
         opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
         break;
     case TCP:
-        opened = tcpSocket->bind(param.IpAddr_Rx, param.port_Rx);
+       tcpSocket->connectToHost(param.IpAddr_Rx, param.port_Rx);
         break;
     }
     return opened;
@@ -71,7 +66,7 @@ void NetworkWorker::send(QString IPaddress, quint16 port, QByteArray data)
         udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
         break;
     case TCP:
-//        tcpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
+        tcpSocket->write(data);
         break;
     }
 }
@@ -89,8 +84,7 @@ void NetworkWorker::read()
         udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
         break;
     case TCP:
-//        buffer.resize(int(tcpSocket->pendingDatagramSize()));
-//        tcpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
+        buffer = tcpSocket->readAll();
         break;
     }
 
@@ -118,7 +112,7 @@ QList <QString> NetworkWorker::getAll_iPaddr_rx()
 }
 
 //////////////////////////////////////////////////
-QByteArray NetworkWorker::ReadAllRx()
+QByteArray NetworkWorker::readAllRx()
 {
     QByteArray out;
     while (!RxData.isEmpty()) {
@@ -128,4 +122,16 @@ QByteArray NetworkWorker::ReadAllRx()
     return out;
 }
 //////////////////////////////////////////////////
+void NetworkWorker::connected()
+{
+    tcpConnected = true;
+}
+void NetworkWorker::disconnected()
+{
+    tcpConnected = false;
+}
+bool NetworkWorker::tcpIsConnected()
+{
+    return tcpConnected;
+}
 //////////////////////////////////////////////////
