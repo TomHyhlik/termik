@@ -38,10 +38,7 @@ bool NetworkWorker::open()
         opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
         break;
     case TCP:
-
-
-        qDebug() << "Client connects" << c->connectToHost(QHostAddress::LocalHost);
-
+        opened = c->connectToHost(QHostAddress::LocalHost);
         break;
     }
     return opened;
@@ -56,7 +53,7 @@ void  NetworkWorker::close()
         break;
     case TCP:
 
-
+        qDebug() << "TODO:435793";
 
 
         break;
