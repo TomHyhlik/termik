@@ -1,20 +1,32 @@
 
 #include "networkworker.h"
+#include "tcpworker.h"
+
 
 NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
 {
     udpSocket = new QUdpSocket(this);
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
 
-    tcpConnected = false;
-    tcpSocket = new QTcpSocket(this);
 
-    connect(tcpSocket, SIGNAL(connected()),this, SLOT(connected()));
-    connect(tcpSocket, SIGNAL(disconnected()),this, SLOT(disconnected()));
-//    connect(tcpSocket, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
-    connect(tcpSocket, SIGNAL(readyRead()),this, SLOT(read()));
+
+    s = new Server();
+    connect(s, SIGNAL(dataReceived(QByteArray)), this, SLOT(on_dataReceived(QByteArray)));
+
+
+   c = new Client();
+
+
+
+
 
 }
+void NetworkWorker::on_dataReceived(QByteArray data)
+{
+    RxData.append(data);
+    emit dataReceived();
+}
+
 
 //////////////////////////////////////////////////
 bool NetworkWorker::open()
@@ -26,7 +38,10 @@ bool NetworkWorker::open()
         opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
         break;
     case TCP:
-       tcpSocket->connectToHost(param.IpAddr_Rx, param.port_Rx);
+
+
+        qDebug() << "Client connects" << c->connectToHost(QHostAddress::LocalHost);
+
         break;
     }
     return opened;
@@ -40,8 +55,10 @@ void  NetworkWorker::close()
             udpSocket->close();
         break;
     case TCP:
-        if (tcpSocket->isOpen())
-            udpSocket->close();
+
+
+
+
         break;
     }
 }
@@ -53,23 +70,28 @@ void NetworkWorker::send(QByteArray data)
         udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
         break;
     case TCP:
-//        tcpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
+
+        c->writeData(data);
+
+
         break;
     }
 }
 
 //////////////////////////////////////////////////
-void NetworkWorker::send(QString IPaddress, quint16 port, QByteArray data)
-{
-    switch (param.protocolType) {
-    case UDP:
-        udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
-        break;
-    case TCP:
-        tcpSocket->write(data);
-        break;
-    }
-}
+//void NetworkWorker::send(QString IPaddress, quint16 port, QByteArray data)
+//{
+//    switch (param.protocolType) {
+//    case UDP:
+//        udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
+//        break;
+//    case TCP:
+
+
+
+//        break;
+//    }
+//}
 
 //////////////////////////////////////////////////
 void NetworkWorker::read()
@@ -84,12 +106,13 @@ void NetworkWorker::read()
         udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
         break;
     case TCP:
-        buffer = tcpSocket->readAll();
+
+        qDebug() << "ERRROR: 3242, not implemented";
+
         break;
     }
 
     RxData.append(buffer);
-    QString message = QString(buffer);
 //    qDebug() << "_____________________________________";
 //    qDebug() << "sender: " << sender;
 //    qDebug() << "sender port: " << senderPort;

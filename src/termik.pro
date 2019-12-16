@@ -23,7 +23,8 @@ SOURCES += \
         networkworker.cpp \
         runscript.cpp \
         saveconfiguration.cpp \
-        serialworker.cpp
+        serialworker.cpp \
+        tcpworker.cpp
 
 HEADERS += \
         dataconverter.h \
@@ -34,7 +35,8 @@ HEADERS += \
         networkworker.h \
         runscript.h \
         saveconfiguration.h \
-        serialworker.h
+        serialworker.h \
+        tcpworker.h
 
 FORMS += \
         mainwindow.ui \

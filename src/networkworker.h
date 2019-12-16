@@ -8,6 +8,8 @@
 
 #include <QDebug>
 
+#include "tcpworker.h"
+
 
 class NetworkWorkerParameters {
 public:
@@ -43,7 +45,7 @@ public:
     QList <QString> getAll_iPaddr_rx();
     QList <QString> getAll_iPaddr_tx();
 
-    void send(QString IPaddress, quint16 port, QByteArray data);
+//    void send(QString IPaddress, quint16 port, QByteArray data);
     void send(QByteArray data);
 
     bool open();
@@ -54,6 +56,11 @@ public:
     QList <QByteArray> RxData;
 
     bool tcpIsConnected();
+
+
+
+    Server *s;
+    Client *c;
 
 signals:
 
@@ -67,6 +74,7 @@ public slots:
 
     void connected();
     void disconnected();
+    void on_dataReceived(QByteArray);
 
 
 };
