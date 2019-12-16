@@ -20,6 +20,6 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
+	* tweak NetworkWorker class
 	* scan all ip addresses in network and show it in the dialog_config
-	* implement TCP connection
 	* save/read configuration to json file is not finished

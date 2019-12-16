@@ -14,24 +14,27 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
     connect(s, SIGNAL(dataReceived(QByteArray)), this, SLOT(on_dataReceived(QByteArray)));
 
 
-   c = new Client();
-
-
-
+    c = new Client();
 
 
 }
+
 void NetworkWorker::on_dataReceived(QByteArray data)
 {
     RxData.append(data);
     emit dataReceived();
 }
+//////////////////////////////////////////////////
 
+bool NetworkWorker::isConnected()
+{
+    return false;
+}
 
 //////////////////////////////////////////////////
-bool NetworkWorker::open()
+bool NetworkWorker::connectDevice()
 {
-    close();
+
     bool opened = false;
     switch (param.protocolType) {
     case UDP:
@@ -44,7 +47,7 @@ bool NetworkWorker::open()
     return opened;
 }
 //////////////////////////////////////////////////
-void  NetworkWorker::close()
+void  NetworkWorker::disconnect()
 {
     switch (param.protocolType) {
     case UDP:
@@ -60,7 +63,7 @@ void  NetworkWorker::close()
     }
 }
 //////////////////////////////////////////////////
-void NetworkWorker::send(QByteArray data)
+bool NetworkWorker::write(QByteArray data)
 {
     switch (param.protocolType) {
     case UDP:
@@ -74,21 +77,6 @@ void NetworkWorker::send(QByteArray data)
         break;
     }
 }
-
-//////////////////////////////////////////////////
-//void NetworkWorker::send(QString IPaddress, quint16 port, QByteArray data)
-//{
-//    switch (param.protocolType) {
-//    case UDP:
-//        udpSocket->writeDatagram(data, QHostAddress(IPaddress), port);
-//        break;
-//    case TCP:
-
-
-
-//        break;
-//    }
-//}
 
 //////////////////////////////////////////////////
 void NetworkWorker::read()
@@ -110,12 +98,12 @@ void NetworkWorker::read()
     }
 
     RxData.append(buffer);
-//    qDebug() << "_____________________________________";
-//    qDebug() << "sender: " << sender;
-//    qDebug() << "sender port: " << senderPort;
-//    qDebug() << "message: " << message;
+    //    qDebug() << "_____________________________________";
+    //    qDebug() << "sender: " << sender;
+    //    qDebug() << "sender port: " << senderPort;
+    //    qDebug() << "message: " << message;
 
-//    emit packetArrived(sender.toString(), senderPort, message);
+    //    emit packetArrived(sender.toString(), senderPort, message);
     emit dataReceived();
 }
 

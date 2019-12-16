@@ -46,10 +46,11 @@ public:
     QList <QString> getAll_iPaddr_tx();
 
 //    void send(QString IPaddress, quint16 port, QByteArray data);
-    void send(QByteArray data);
+    bool write(QByteArray data);
 
-    bool open();
-    void close();
+    bool connectDevice();
+    void disconnect();
+    bool isConnected();
 
     QByteArray readAllRx();
 

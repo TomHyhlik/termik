@@ -65,7 +65,7 @@ void MainWindow::connectOrDisconnect()
         config.connectionType = none;
         break;
     case network:
-        nw->close();
+        nw->disconnect();
         config.connectionType = none;
         break;
     case none:
@@ -348,7 +348,7 @@ void MainWindow::tryConnectDevice(int connectionType)
         deviceName = sw->param.portName;
         break;
     case network:
-        connectedSuccessfully = nw->open();
+        connectedSuccessfully = nw->connectDevice();
         deviceName = QString("%1:%2")
                 .arg(nw->param.IpAddr_Tx.toString())
                 .arg(QString::number(int(nw->param.port_Tx)));
@@ -559,7 +559,7 @@ void MainWindow::on_Tx(QByteArray txData)
         sw->write(txData);
         break;
     case network:
-        nw->send(txData);
+        nw->write(txData);
         break;
     }
 
