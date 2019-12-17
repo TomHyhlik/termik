@@ -10,12 +10,11 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
 
 
 
-    s = new Server();
+    s = new TcpServer();
     connect(s, SIGNAL(dataReceived(QByteArray)), this, SLOT(on_dataReceived(QByteArray)));
 
 
-    c = new Client();
-
+    c = new TcpClient();
 
 }
 

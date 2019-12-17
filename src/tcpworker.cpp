@@ -4,26 +4,26 @@
 
 static inline QByteArray IntToArray(qint32 source);
 
-Client::Client(QObject *parent) : QObject(parent)
+TcpClient::TcpClient(QObject *parent) : QObject(parent)
 {
     socket = new QTcpSocket(this);
     connect(socket, SIGNAL(readyRead()), SLOT(on_readyRead()));
 
 }
 
-void Client::on_readyRead()
+void TcpClient::on_readyRead()
 {
     QByteArray data = socket->readAll();
     qDebug() << "Client received: " << data;
 }
 
-bool Client::connectToHost(QHostAddress host, quint16 port)
+bool TcpClient::connectToHost(QHostAddress host, quint16 port)
 {
     socket->connectToHost(host, port);
     return socket->waitForConnected();
 }
 
-bool Client::writeData(QByteArray data)
+bool TcpClient::writeData(QByteArray data)
 {
     if(socket->state() == QAbstractSocket::ConnectedState)
     {
@@ -56,7 +56,7 @@ QByteArray IntToArray(qint32 source) //Use qint32 to ensure that the number have
 
 static inline qint32 ArrayToInt(QByteArray source);
 
-Server::Server(QObject *parent) : QObject(parent)
+TcpServer::TcpServer(QObject *parent) : QObject(parent)
 {
     server = new QTcpServer(this);
     connect(server, SIGNAL(newConnection()), SLOT(newConnection()));
@@ -64,7 +64,7 @@ Server::Server(QObject *parent) : QObject(parent)
 
 }
 
-void Server::newConnection()
+void TcpServer::newConnection()
 {
     while (server->hasPendingConnections())
     {
@@ -78,7 +78,7 @@ void Server::newConnection()
     }
 }
 
-void Server::disconnected()
+void TcpServer::disconnected()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
     QByteArray *buffer = buffers.value(socket);
@@ -88,7 +88,7 @@ void Server::disconnected()
     delete s;
 }
 
-void Server::on_readyRead()
+void TcpServer::on_readyRead()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
     QByteArray *buffer = buffers.value(socket);
@@ -118,7 +118,7 @@ void Server::on_readyRead()
     }
 }
 
-void Server::send(QByteArray data)
+void TcpServer::send(QByteArray data)
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 

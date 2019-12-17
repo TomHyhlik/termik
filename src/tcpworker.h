@@ -10,11 +10,11 @@
 
 
 
-class Client : public QObject
+class TcpClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit Client(QObject *parent = 0);
+    explicit TcpClient(QObject *parent = 0);
 
 public slots:
     bool connectToHost(QHostAddress host, quint16 port);
@@ -27,11 +27,11 @@ private:
 
 
 
-class Server : public QObject
+class TcpServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit Server(QObject *parent = 0);
+    explicit TcpServer(QObject *parent = 0);
     void send(QByteArray);
 
 signals:

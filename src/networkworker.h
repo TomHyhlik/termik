@@ -60,8 +60,8 @@ public:
 
 
 
-    Server *s;
-    Client *c;
+    TcpServer *s;
+    TcpClient *c;
 
 signals:
 
