@@ -34,14 +34,16 @@ bool NetworkWorker::isConnected()
 //////////////////////////////////////////////////
 bool NetworkWorker::connectDevice()
 {
-
+    if (isConnected()) {
+        disconnect();
+    }
     bool opened = false;
     switch (param.protocolType) {
     case UDP:
         opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
         break;
     case TCP:
-        opened = c->connectToHost(QHostAddress::LocalHost);
+        opened = c->connectToHost(param.IpAddr_Rx, param.port_Rx);
         break;
     }
     return opened;

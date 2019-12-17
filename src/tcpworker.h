@@ -17,7 +17,7 @@ public:
     explicit Client(QObject *parent = 0);
 
 public slots:
-    bool connectToHost(QHostAddress host);
+    bool connectToHost(QHostAddress host, quint16 port);
     bool writeData(QByteArray data);
     void on_readyRead();
 

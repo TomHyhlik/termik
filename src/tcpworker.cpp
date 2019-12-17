@@ -17,9 +17,9 @@ void Client::on_readyRead()
     qDebug() << "Client received: " << data;
 }
 
-bool Client::connectToHost(QHostAddress host)
+bool Client::connectToHost(QHostAddress host, quint16 port)
 {
-    socket->connectToHost(host, 5000);
+    socket->connectToHost(host, port);
     return socket->waitForConnected();
 }
 
