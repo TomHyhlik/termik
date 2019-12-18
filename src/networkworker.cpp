@@ -23,8 +23,7 @@ void NetworkWorker::on_dataReceived(QByteArray data)
 
 bool NetworkWorker::isConnected()
 {
-    qDebug() << "TODO: 34234";
-    return false;
+    return tcpServer->isListening();
 }
 
 //////////////////////////////////////////////////
@@ -56,27 +55,23 @@ void  NetworkWorker::disconnect()
             udpSocket->close();
         break;
     case TCP:
-
-        qDebug() << "TODO:435793";
-
-
+        tcpServer->close();
         break;
     }
 }
 //////////////////////////////////////////////////
 bool NetworkWorker::write(QByteArray data)
 {
+    bool success = false;
     switch (param.protocolType) {
     case UDP:
-        udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
+        success = udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
         break;
     case TCP:
-
-        tcpClient->writeData(data);
-
-
+        success = tcpClient->writeData(data);
         break;
     }
+    return success;
 }
 
 //////////////////////////////////////////////////
@@ -93,7 +88,7 @@ void NetworkWorker::read()
         break;
     case TCP:
 
-        qDebug() << "ERRROR: 3242, not implemented";
+        qDebug() << "ERRROR: 3242, not implemented"; // todo
 
         break;
     }
@@ -103,7 +98,6 @@ void NetworkWorker::read()
     //    qDebug() << "sender: " << sender;
     //    qDebug() << "sender port: " << senderPort;
     //    qDebug() << "message: " << message;
-
     emit dataReceived();
 }
 

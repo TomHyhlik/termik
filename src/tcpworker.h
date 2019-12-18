@@ -34,6 +34,8 @@ public:
     explicit TcpServer(QObject *parent = 0);
     void send(QByteArray);
     bool listen(QHostAddress, quint16);
+    bool isListening();
+    void close();
 
 signals:
     void dataReceived(QByteArray);

@@ -49,11 +49,6 @@ QByteArray IntToArray(qint32 source) //Use qint32 to ensure that the number have
 
 
 
-
-
-
-
-
 static inline qint32 ArrayToInt(QByteArray source);
 
 TcpServer::TcpServer(QObject *parent) : QObject(parent)
@@ -67,6 +62,18 @@ bool TcpServer::listen(QHostAddress addr, quint16 port)
     return server->listen(addr, port);
 }
 
+bool TcpServer::isListening()
+{
+    return server->isListening();
+}
+
+void TcpServer::close()
+{
+    server->close();
+
+//    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+//    socket->close();
+}
 
 void TcpServer::newConnection()
 {
