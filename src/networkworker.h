@@ -32,7 +32,9 @@ class NetworkWorker : public QObject
 {
     Q_OBJECT
     QUdpSocket* udpSocket;
-    QTcpSocket* tcpSocket;
+
+    TcpServer *tcpServer;
+    TcpClient *tcpClient;
 
     bool tcpConnected;
 
@@ -57,11 +59,6 @@ public:
     QList <QByteArray> RxData;
 
     bool tcpIsConnected();
-
-
-
-    TcpServer *s;
-    TcpClient *c;
 
 signals:
 

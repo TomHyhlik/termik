@@ -8,14 +8,10 @@ NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
     udpSocket = new QUdpSocket(this);
     connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
 
-
-
-    s = new TcpServer();
-    connect(s, SIGNAL(dataReceived(QByteArray)), this, SLOT(on_dataReceived(QByteArray)));
-
-
-    c = new TcpClient();
-
+    tcpServer = new TcpServer();
+    connect(tcpServer, SIGNAL(dataReceived(QByteArray)),
+            this, SLOT(on_dataReceived(QByteArray)));
+    tcpClient = new TcpClient();
 }
 
 void NetworkWorker::on_dataReceived(QByteArray data)
@@ -27,6 +23,7 @@ void NetworkWorker::on_dataReceived(QByteArray data)
 
 bool NetworkWorker::isConnected()
 {
+    qDebug() << "TODO: 34234";
     return false;
 }
 
@@ -42,7 +39,10 @@ bool NetworkWorker::connectDevice()
         opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
         break;
     case TCP:
-        opened = c->connectToHost(param.IpAddr_Rx, param.port_Rx);
+        opened = tcpServer->listen(param.IpAddr_Rx, param.port_Rx);
+        if (opened) {
+            opened = tcpClient->connectToHost(param.IpAddr_Tx, param.port_Tx);
+        }
         break;
     }
     return opened;
@@ -72,7 +72,7 @@ bool NetworkWorker::write(QByteArray data)
         break;
     case TCP:
 
-        c->writeData(data);
+        tcpClient->writeData(data);
 
 
         break;
@@ -104,7 +104,6 @@ void NetworkWorker::read()
     //    qDebug() << "sender port: " << senderPort;
     //    qDebug() << "message: " << message;
 
-    //    emit packetArrived(sender.toString(), senderPort, message);
     emit dataReceived();
 }
 

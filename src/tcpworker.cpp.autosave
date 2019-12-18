@@ -49,11 +49,6 @@ QByteArray IntToArray(qint32 source) //Use qint32 to ensure that the number have
 
 
 
-
-
-
-
-
 static inline qint32 ArrayToInt(QByteArray source);
 
 TcpServer::TcpServer(QObject *parent) : QObject(parent)

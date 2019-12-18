@@ -33,6 +33,7 @@ class TcpServer : public QObject
 public:
     explicit TcpServer(QObject *parent = 0);
     void send(QByteArray);
+    bool listen(QHostAddress, quint16);
 
 signals:
     void dataReceived(QByteArray);
