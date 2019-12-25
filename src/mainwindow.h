@@ -11,7 +11,6 @@
 
 #include "serialworker.h"
 #include "networkworker.h"
-#include "handlearguments.h"
 #include "logfile.h"
 #include "runscript.h"
 
@@ -80,7 +79,7 @@ public:
 #define COLOR_DATA      "#949494"
 
 #define COLOR_GREEN     "green"
-#define COLOR_RED     "red"
+#define COLOR_RED       "red"
 
 
 #define COLOR_TOPLINE   "#A0A0A0"
@@ -217,7 +216,7 @@ private:
     void uiInit();
     void handleAppArguments(QStringList arguments);
     void handleAppArguments_printHelp();
-    void handleAppArguments_printHelp_wrap(char argData, QString argTitle);
+    void handleAppArguments_printHelp_wrap(QString argData, QString argTitle);
     bool handleAppArguments_setParam(QString command, QString passedData);
 
     void writeToTextedit(QTextEdit *textEdit, QString color, QString data);

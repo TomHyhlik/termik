@@ -1,0 +1,32 @@
+{
+    "Application": {
+        "Connection type": 2,
+        "Prefix Tx data": null,
+        "Prefix Tx enabled": false,
+        "Save terminal output to file": false,
+        "Suffix Tx data": "\r\n",
+        "Suffix Tx enabled": true,
+        "Time info enabled": false,
+        "Time log enabled": true
+    },
+    "Log files directory": "",
+    "Network": {
+        "IP address": "127.0.0.1",
+        "Port Rx": 11199,
+        "Port Tx": 11199
+    },
+    "Script": {
+        "Data format": 0,
+        "File name": "",
+        "Repeat": false,
+        "Timeout": 0
+    },
+    "Serial": {
+        "Baud rate": -2071699280,
+        "Data bits": 32675,
+        "Flow control": -416450720,
+        "Parity": -16,
+        "Port name": "",
+        "Stop bits": -1
+    }
+}

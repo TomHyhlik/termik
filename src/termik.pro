@@ -15,6 +15,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        appargs.cpp \
         dataconverter.cpp \
         logfile.cpp \
         main.cpp \
@@ -27,8 +28,8 @@ SOURCES += \
         tcpworker.cpp
 
 HEADERS += \
+        appargs.h \
         dataconverter.h \
-        handlearguments.h \
         logfile.h \
         mainwindow.h \
         dialog_connect.h \

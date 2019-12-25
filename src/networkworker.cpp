@@ -6,7 +6,7 @@
 NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
 {
     udpSocket = new QUdpSocket(this);
-    connect(udpSocket, SIGNAL(readyRead()),this, SLOT(read()));
+    connect(udpSocket, SIGNAL(readyRead()),this, SLOT(udpRead()));
 
     tcpServer = new TcpServer();
     connect(tcpServer, SIGNAL(dataReceived(QByteArray)),
@@ -75,23 +75,15 @@ bool NetworkWorker::write(QByteArray data)
 }
 
 //////////////////////////////////////////////////
-void NetworkWorker::read()
+void NetworkWorker::udpRead()
 {
     QByteArray buffer;
     QHostAddress sender;
     quint16 senderPort;
 
-    switch (param.protocolType) {
-    case UDP:
-        buffer.resize(int(udpSocket->pendingDatagramSize()));
-        udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
-        break;
-    case TCP:
 
-        qDebug() << "ERRROR: 3242, not implemented"; // todo
-
-        break;
-    }
+    buffer.resize(int(udpSocket->pendingDatagramSize()));
+    udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
     RxData.append(buffer);
     //    qDebug() << "_____________________________________";

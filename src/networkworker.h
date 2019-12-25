@@ -68,7 +68,7 @@ signals:
 
 public slots:
 
-    void read();
+    void udpRead();
 
     void connected();
     void disconnected();

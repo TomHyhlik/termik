@@ -11,12 +11,16 @@
 #include <QDateTimeEdit>
 #include <QDebug>
 
+#include <stdio.h>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "string.h"
 #include "dialog_connect.h"
 #include "dataconverter.h"
 #include "saveconfiguration.h"
+#include "appargs.h"
+
 
 
 /////////////////////////////////////////////////////////////////
@@ -53,6 +57,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
     currentAppConfig_load();
     handleAppArguments(arguments);
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -213,24 +218,27 @@ void MainWindow::handleAppArguments(QStringList arguments)
         command = arguments.at(0);
         arguments.removeFirst();
 
-        /* check if the command has syntax like: -x */
-        if (command.at(0) == ARG_PREFIX_SHORT &&
-                command.size() == 2) {
+        /* check if the command starts with "-" */
+        if (command.at(0) == ARG_PREFIX_SHORT) {
+            command.remove(0, 1); // remove "-" at the beginning
+            /* read the passed data to the argument */
             if (!arguments.isEmpty()) {
                 passedData = arguments.at(0);
                 arguments.removeFirst();
-
                 if (!handleAppArguments_setParam(command, passedData)) {
+                    handleAppArguments_printHelp();
                     return;
                 }
             } else {
                 qDebug() << "ERROR: No passed data for command " << command;
                 handleAppArguments_printHelp();
+                return;
             }
         } else {
             qDebug() << "ERROR: Failed to handle input arguments, "
-                        "the command has invalid syntax.";
+                        "the command does not start with \"-\"";
             handleAppArguments_printHelp();
+            return;
         }
     }
 
@@ -242,61 +250,62 @@ void MainWindow::handleAppArguments(QStringList arguments)
 
 bool MainWindow::handleAppArguments_setParam(QString command, QString passedData)
 {
-    char cmdChar = command.toUtf8().at(1);
     bool ok = true;
 
-    switch (cmdChar)
+    AppArgs appargs;
+
+    switch (appargs.indexOf(command))
     {
-    case ARG_NETWORK_IPADDR:
+    case ARG_INDEX_NETWORK_IPADDR:
         nw->param.IpAddr_Tx = QHostAddress(passedData);
         if (nw->param.IpAddr_Tx.isNull())
             ok = false;
         break;
-    case ARG_NETWORK_TXPORT:
+    case ARG_INDEX_NETWORK_TXPORT:
         nw->param.port_Tx = quint16(passedData.toInt(&ok, 10));
         break;
-    case ARG_NETWORK_RXPORT:
+    case ARG_INDEX_NETWORK_RXPORT:
         nw->param.port_Rx = quint16(passedData.toInt(&ok, 10));
         break;
 
-    case ARG_SERIAL_PORTNAME:
+    case ARG_INDEX_SERIAL_PORTNAME:
         sw->param.portName = passedData;
         break;
-    case ARG_SERIAL_BAUDRATE:
+    case ARG_INDEX_SERIAL_BAUDRATE:
         sw->param.baudRate = passedData.toInt(&ok, 10);
         break;
-    case ARG_SERIAL_DATABITS:
+    case ARG_INDEX_SERIAL_DATABITS:
         sw->param.dataBits = passedData.toInt(&ok, 10);
         break;
-    case ARG_SERIAL_PARITY:
-        sw->param.parity= passedData.toInt(&ok, 10);
+    case ARG_INDEX_SERIAL_PARITY:
+        sw->param.parity = passedData.toInt(&ok, 10);
         break;
-    case ARG_SERIAL_STOPBITS:
-        sw->param.stopBits= passedData.toInt(&ok, 10);
+    case ARG_INDEX_SERIAL_STOPBITS:
+        sw->param.stopBits = passedData.toInt(&ok, 10);
         break;
-    case ARG_SERIAL_FLOWCONTROL:
+    case ARG_INDEX_SERIAL_FLOWCONTROL:
         sw->param.flowControl = passedData.toInt(&ok, 10);
         break;
-
-    case ARG_CONNECTIONTYPE:
-        if (passedData == "serial") {
+    case ARG_INDEX_CONNECTIONTYPE:
+        if (passedData == ARG_CONNECTIONTYPE_SERIAL) {
             config.connectionType = serial;
         }
-        else if (passedData == "network") {
+        else if (passedData == ARG_CONNECTIONTYPE_NETWORK) {
             config.connectionType = network;
         }
         else {
-            qDebug() << "Invalid paramerer";
+            qDebug() << "Failed to handle arguments: " << command << " " << passedData;
             ok = false;
         }
         break;
+
     default:
-        qDebug() << "ERROR: Unknown command -" << command;
+        qDebug() << "ERROR: Unknown command " << ARG_PREFIX_SHORT
+                 << command;
+        ok = false;
     }
 
-    if (!ok) {
-        qDebug() << "Failed to handle arguments: " << command << " " << passedData;
-    } else {
+    if (ok) {
         qDebug() << "Setting" << command << " to " << passedData;
     }
 
@@ -306,13 +315,12 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
 void MainWindow::handleAppArguments_printHelp()
 {
     qDebug("");
-    qDebug() << "*** The options are as follows:";
+    qDebug() << "*** OPTIONS";
 
-    qDebug() << "\n\t- Select connection type to connect automatically: ";
-    handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial or network");
+    qDebug() << "\n\tSelect connection type to connect automatically: ";
+    handleAppArguments_printHelp_wrap(ARG_CONNECTIONTYPE,      "serial or network");
 
-
-    qDebug() << "\n\t- Parameters for connection via serial: ";
+    qDebug() << "\n\tParameters for connection via serial: ";
     handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial port name");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_BAUDRATE,      "baud rate");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_DATABITS,      "data bits");
@@ -320,19 +328,32 @@ void MainWindow::handleAppArguments_printHelp()
     handleAppArguments_printHelp_wrap(ARG_SERIAL_STOPBITS,      "stop bits");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_FLOWCONTROL,   "flow control");
 
-    qDebug() << "\n\t- Parameters for connection via network: ";
+    qDebug() << "\n\tParameters for connection via network: ";
+    handleAppArguments_printHelp_wrap(ARG_NETWORK_PROTOCOLTYPE,   "Protocol type");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_IPADDR,   "IP address");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_TXPORT,   "Tx port");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_RXPORT,   "Rx port");
 
-    qDebug("");
+    qDebug() << "\n";
 }
 
-void MainWindow::handleAppArguments_printHelp_wrap(char cmd, QString argTitle)
+void MainWindow::handleAppArguments_printHelp_wrap(QString cmd, QString argTitle)
 {
-    // todo: odstranit warning mozna...
-    qDebug("\t\t" + QString(ARG_PREFIX_SHORT).toLatin1() +
-           QString(cmd).toLatin1() + "\t" + argTitle.toLatin1());
+//    printf("\t\t%s%s\t\t%s\n" ,
+//           QString(ARG_PREFIX_SHORT).toStdString().c_str(),
+//           cmd.toStdString().c_str(),
+//           argTitle.toStdString().c_str());
+
+//    qDebug() << "\t\t" << QString(ARG_PREFIX_SHORT).toStdString().c_str() <<
+//                           cmd.toStdString().c_str()  << "\t" << argTitle;
+
+
+    qDebug() << "\t\t"
+             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
+             << cmd.toStdString().c_str()
+             << "\t\t"
+             << argTitle.toStdString().c_str();
+
 }
 
 //////////////////////////////////////////////////////////////////////
