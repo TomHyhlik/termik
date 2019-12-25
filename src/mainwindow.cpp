@@ -22,7 +22,6 @@
 #include "appargs.h"
 
 
-
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
@@ -298,6 +297,11 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
             ok = false;
         }
         break;
+    case ARG_INDEX_HELP:
+    case ARG_INDEX_HELP_LONG:
+        handleAppArguments_printHelp();
+        close();
+        break;
 
     default:
         qDebug() << "ERROR: Unknown command " << ARG_PREFIX_SHORT
@@ -314,13 +318,13 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
 
 void MainWindow::handleAppArguments_printHelp()
 {
-    qDebug("");
-    qDebug() << "*** OPTIONS";
 
-    qDebug() << "\n\tSelect connection type to connect automatically: ";
+    printf("*** OPTIONS\n");
+
+    printf("\n\tSelect connection type to connect automatically: \n");
     handleAppArguments_printHelp_wrap(ARG_CONNECTIONTYPE,      "serial or network");
 
-    qDebug() << "\n\tParameters for connection via serial: ";
+    printf("\n\tParameters for connection via serial: \n");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_PORTNAME,      "serial port name");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_BAUDRATE,      "baud rate");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_DATABITS,      "data bits");
@@ -328,32 +332,31 @@ void MainWindow::handleAppArguments_printHelp()
     handleAppArguments_printHelp_wrap(ARG_SERIAL_STOPBITS,      "stop bits");
     handleAppArguments_printHelp_wrap(ARG_SERIAL_FLOWCONTROL,   "flow control");
 
-    qDebug() << "\n\tParameters for connection via network: ";
+    printf("\n\tParameters for connection via network: \n");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_PROTOCOLTYPE,   "Protocol type");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_IPADDR,   "IP address");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_TXPORT,   "Tx port");
     handleAppArguments_printHelp_wrap(ARG_NETWORK_RXPORT,   "Rx port");
 
-    qDebug() << "\n";
+    printf("\n\n");
 }
 
 void MainWindow::handleAppArguments_printHelp_wrap(QString cmd, QString argTitle)
 {
-//    printf("\t\t%s%s\t\t%s\n" ,
-//           QString(ARG_PREFIX_SHORT).toStdString().c_str(),
-//           cmd.toStdString().c_str(),
-//           argTitle.toStdString().c_str());
+    printf("\t\t%s%s\t\t%s\n" ,
+           QString(ARG_PREFIX_SHORT).toStdString().c_str(),
+           cmd.toStdString().c_str(),
+           argTitle.toStdString().c_str());
 
 //    qDebug() << "\t\t" << QString(ARG_PREFIX_SHORT).toStdString().c_str() <<
 //                           cmd.toStdString().c_str()  << "\t" << argTitle;
 
 
-    qDebug() << "\t\t"
-             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
-             << cmd.toStdString().c_str()
-             << "\t\t"
-             << argTitle.toStdString().c_str();
-
+//    qDebug() << "\t\t"
+//             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
+//             << cmd.toStdString().c_str()
+//             << "\t\t"
+//             << argTitle.toStdString().c_str();
 }
 
 //////////////////////////////////////////////////////////////////////
