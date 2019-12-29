@@ -191,11 +191,11 @@ void Dialog_connect::initColors()
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")      // todo
+    ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_addr_tx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")      // todo
+    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
