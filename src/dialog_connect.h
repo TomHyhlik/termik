@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QSerialPort>
 #include <QTimer>
+#include <QTableWidget>
 
 #include "mainwindow.h"
 
@@ -13,7 +14,7 @@
 #define TITLE_TAB_SERIAL    "Serial"
 #define TITLE_TAB_NETWORK    "Network"
 
-#define SERIALPORT_REFRESH_PERIOD   200
+#define SERIALPORT_REFRESH_PERIOD  1000// 300
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"
@@ -37,6 +38,8 @@ public:
         return currentTab;
     }
 
+    void showEvent(QShowEvent *event);
+
     void setSw(SerialWorker * val){
         sw = val;
     }
@@ -45,6 +48,8 @@ public:
     }
 
     void init();
+    void timerRefresh_start();
+    void timerRefresh_stop();
 
 
 private:
@@ -81,23 +86,33 @@ private:
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
     int getSelectedNetworkProtocol();
+    void table_init();
+    void table_addHost(QTableWidget* table, QHostInfo host);
+    void table_clear(QTableWidget* table);
+
+    QString table_getHost(QTableWidget* table, int column);
 
 
 private slots:
+    void networkHosts_refresh();
     void serialPort_nameRefresh();
+    void refreshDevices();
     void on_comboBox_portName_currentTextChanged(const QString &arg1);
 
 
     void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
+    void on_buttonBox_rejected();
 
     void focus_1();
     void focus_2();
-
-
-public slots:
     void refreshParameters();
+    void EscPressed();
 
+
+    void on_tableWidget_addr_tx_cellClicked(int row, int column);
+
+    void on_tableWidget_addr_rx_cellClicked(int row, int column);
 
 signals:
 
@@ -105,8 +120,7 @@ signals:
     void tryConnect(int);
     void log(int, QString);
 
-protected:
-    void showEvent(QShowEvent *ev);
+
 
 };
 

@@ -22,11 +22,11 @@
         "Timeout": 0
     },
     "Serial": {
-        "Baud rate": -2071699280,
-        "Data bits": 32675,
-        "Flow control": -416450720,
-        "Parity": -16,
-        "Port name": "",
-        "Stop bits": -1
+        "Baud rate": 115200,
+        "Data bits": 8,
+        "Flow control": 0,
+        "Parity": 0,
+        "Port name": "tty.usbmodem14203",
+        "Stop bits": 1
     }
 }

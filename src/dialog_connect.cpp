@@ -8,6 +8,10 @@
 #include <QSerialPortInfo>
 #include <QTimer>
 #include <QShortcut>
+#include <QtDebug>
+
+#define TITLE_NAME      "Name"
+#define TITLE_ADDR      "Address"
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
     QDialog(parent),
@@ -20,9 +24,36 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
 
+    table_init();
 }
 
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::EscPressed()
+{
+        timerRefresh_stop();
+        this->close();
+}
+
+/////////////////////////////////////////////////////////////////
+//void Dialog_connect::showEvent(QShowEvent *event)
+//{
+//    qDebug() << "SHOW";
+//    timerRefresh_start();
+//    event->accept();
+//}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::timerRefresh_start()
+{
+    timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::timerRefresh_stop()
+{
+    timer_updatePorts->stop();
+}
 /////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::showEvent
 /// called when the dialog is shown
@@ -30,6 +61,9 @@ void Dialog_connect::showEvent( QShowEvent* event ) {
     QWidget::showEvent( event );
 
     refreshParameters();
+
+//    qDebug() << "Dialog_connect SHOW";
+    timerRefresh_start();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -41,19 +75,60 @@ void Dialog_connect::refreshParameters()
     ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, sw->param.stopBits));
     ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, sw->param.flowControl));
 
-    QStringList ipAddrs_rx = nw->getAll_iPaddr_rx();
-    for (int i = 0; i < ipAddrs_rx.size(); i++)
-        ui->comboBox_ipAddr_rx->addItem(ipAddrs_rx.at(i));
 
     if (!nw->param.IpAddr_Rx.toString().isEmpty())
-        ui->comboBox_ipAddr_rx->setCurrentText(nw->param.IpAddr_Rx.toString());
+        ui->lineEdit_selectedAddr_rx->setText(nw->param.IpAddr_Rx.toString());
     if (!nw->param.IpAddr_Tx.toString().isEmpty())
-        ui->comboBox_ipAddr_tx->setCurrentText(nw->param.IpAddr_Tx.toString());
+        ui->lineEdit_selectedAddr_tx->setText(nw->param.IpAddr_Tx.toString());
 
     ui->spinBox_ipPort_Tx->setValue(nw->param.port_Tx);
     ui->spinBox_ipPort_Rx->setValue(nw->param.port_Rx);
 }
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_init()
+{
+    QList <QString> titles;
+    titles << TITLE_ADDR << TITLE_NAME;
 
+    ui->tableWidget_addr_rx->setColumnCount(titles.size());
+    ui->tableWidget_addr_rx->setHorizontalHeaderLabels(titles);
+
+    ui->tableWidget_addr_tx->setColumnCount(titles.size());
+    ui->tableWidget_addr_tx->setHorizontalHeaderLabels(titles);
+
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
+{
+    QStringList element;
+
+    if (!host.addresses().isEmpty()) {
+        element << host.addresses().first().toString();
+    }
+    element << host.hostName();
+
+
+    tableWidget->insertRow(tableWidget->rowCount());
+    /* get number of the new row */
+    int newRow = tableWidget->rowCount() - 1;
+
+    /* for each element in the row */
+    for (int column = 0; column < element.size(); column++){
+        /* create new item to the table */
+        QTableWidgetItem *item = new QTableWidgetItem(tr("%1").arg(element.at(column)));
+        /* make the item non-editable */
+        item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+        item->setTextAlignment(Qt::AlignVCenter);
+        /* add the item to specified column and row */
+        tableWidget->setItem(newRow, column, item);
+        /* todo: delete item */
+    }
+
+    /* resize the columns to be optimized for the content */
+    for (int i = 0; i < tableWidget->columnCount(); i++){
+        tableWidget->resizeColumnToContents(i);
+    }
+}
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::blockAllsignals(bool state)
 {
@@ -80,12 +155,13 @@ void Dialog_connect::init()
     tab_port_init();
 
     timer_updatePorts = new QTimer(this);
-    connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(serialPort_nameRefresh()));
-    timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
+    connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
     ui->comboBox_portName->setFocus();
     currentTab = ui->tabWidget->currentIndex();
     //    configurationRead(); << todo
+
+//    timerRefresh_start();
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
@@ -115,18 +191,55 @@ void Dialog_connect::initColors()
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_ipAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")      // todo
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_ipAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tableWidget_addr_tx->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")      // todo
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_selectedAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::refreshDevices()
+{
+    serialPort_nameRefresh();
+    networkHosts_refresh();
+}
 
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::networkHosts_refresh()
+{
+    table_clear(ui->tableWidget_addr_rx);
+    table_clear(ui->tableWidget_addr_tx);
+
+    nw->scanNetwork();
+    QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
+    for (int i = 0; i < ipAddrs_rx.size(); i++) {
+        table_addHost(ui->tableWidget_addr_rx, ipAddrs_rx.at(i));
+    }
+
+    QList <QHostInfo> ipAddrs_tx = nw->getAll_iPaddr_tx();
+    for (int i = 0; i < ipAddrs_tx.size(); i++) {
+        table_addHost(ui->tableWidget_addr_tx, ipAddrs_tx.at(i));
+    }
+
+}
+///////////////////////////////////////////////////////////////////////
+void Dialog_connect::table_clear(QTableWidget* table)
+{
+    table->clearContents();
+    while (table->rowCount()) {
+        table->removeRow(0);
+    }
+    /* set column size to widget size */
+    table->horizontalHeader()->setStretchLastSection(true);
+}
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
     QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
-
 
     /* delete ports which were plugged out */
     for (int i = 0; i < ui->comboBox_portName->count(); i++) {
@@ -303,6 +416,8 @@ void Dialog_connect::on_comboBox_portName_currentTextChanged(const QString &arg1
 ///     read all parameters from the UI
 void Dialog_connect::on_buttonBox_accepted()
 {
+    timerRefresh_stop();
+
     /* load the  port configuration to the sw class */
     sw->param.portName = ui->comboBox_portName->currentText();
     sw->param.baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
@@ -311,8 +426,8 @@ void Dialog_connect::on_buttonBox_accepted()
     sw->param.stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
     sw->param.flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
 
-    nw->param.IpAddr_Rx = QHostAddress(ui->comboBox_ipAddr_rx->currentText());
-    nw->param.IpAddr_Tx = QHostAddress(ui->comboBox_ipAddr_tx->currentText());
+    nw->param.IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
+    nw->param.IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
     nw->param.port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     nw->param.port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
     nw->param.protocolType = getSelectedNetworkProtocol();
@@ -328,6 +443,11 @@ void Dialog_connect::on_buttonBox_accepted()
         emit tryConnect(network);
         break;
     }
+}
+/////////////////////////////////////////////////////////////////////
+void Dialog_connect::on_buttonBox_rejected()
+{
+    timerRefresh_stop();
 }
 /////////////////////////////////////////////////////////////////////
 int Dialog_connect::getSelectedNetworkProtocol()
@@ -375,5 +495,22 @@ void Dialog_connect::focus_1()
 void Dialog_connect::focus_2()
 {
     ui->tabWidget->setCurrentIndex(1);
+}
+//////////////////////////////////////////////////////////////////////////////
+QString Dialog_connect::table_getHost(QTableWidget* table, int row)
+{
+    return table->item(row, 0)->text();
+}
+//////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::on_tableWidget_addr_rx_cellClicked(int row, int column)
+{
+    QString hostName = table_getHost(ui->tableWidget_addr_rx, row);
+    ui->lineEdit_selectedAddr_rx->setText(hostName);
+}
+
+void Dialog_connect::on_tableWidget_addr_tx_cellClicked(int row, int column)
+{
+    QString hostName = table_getHost(ui->tableWidget_addr_tx, row);
+    ui->lineEdit_selectedAddr_tx->setText(hostName);
 }
 //////////////////////////////////////////////////////////////////////////////

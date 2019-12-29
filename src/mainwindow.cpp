@@ -1140,6 +1140,7 @@ void MainWindow::fillShortcutsTable()
         shortcuts.pop_front();
     }
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::setupShortcuts()
 {
