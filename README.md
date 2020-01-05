@@ -21,5 +21,8 @@ Transmit data in the terminal is done by pressing Enter.
 
 
 ## todo:
+	* autoclear not finished
 	* tweak NetworkWorker class
 	* save/read configuration to json file is not finished
+	* network Protocol add to config json save file
+	* make handle app arguments class and operate it to in the function main()

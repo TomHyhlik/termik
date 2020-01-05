@@ -70,7 +70,8 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         data.serial.flowControl = jObj_serial.value(QString(JSONTITLE_SERIAL_FLOWCONTROL)).toInt();
 
         QJsonObject jObj_network = jObj.value(QString(JSONTITLE_NETWORK)).toObject();
-        data.network.IpAddr_Tx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS)).toString());
+        data.network.IpAddr_Rx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_RX)).toString());
+        data.network.IpAddr_Tx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_TX)).toString());
         data.network.port_Tx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTTX)).toInt());
         data.network.port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
 
@@ -121,7 +122,9 @@ QByteArray SaveConfiguration::jsonData_make()
     jObj.insert(JSONTITLE_SERIAL, jObj_serial);
 
     QJsonObject jObj_network;
-    jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS ,
+    jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS_RX ,
+                        QJsonValue::fromVariant(data.network.IpAddr_Rx.toString()));
+    jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS_TX ,
                         QJsonValue::fromVariant(data.network.IpAddr_Tx.toString()));
     jObj_network.insert(JSONTITLE_NETWORK_PORTTX ,
                         QJsonValue::fromVariant(data.network.port_Tx));

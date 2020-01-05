@@ -20,7 +20,8 @@
 #define JSONTITLE_SERIAL_FLOWCONTROL    "Flow control"
 
 #define JSONTITLE_NETWORK                "Network"
-#define JSONTITLE_NETWORK_IPADDRESS     "IP address"
+#define JSONTITLE_NETWORK_IPADDRESS_RX  "IP address Rx"
+#define JSONTITLE_NETWORK_IPADDRESS_TX  "IP address Tx"
 #define JSONTITLE_NETWORK_PORTTX        "Port Tx"
 #define JSONTITLE_NETWORK_PORTRX        "Port Rx"
 

@@ -20,12 +20,48 @@
 #define DIGIT_NUM_DEC   3
 #define DIGIT_NUM_BIN   8
 
-#define RXDATAEVENT_TIMEOUT 100
+#define RXDATAEVENT_TIMEOUT 50
 
 #define SUFFIX_DEFAULT      "\r\n"
 
 #define TIME_FORMAT "dd.MM.yyyy, hh:mm:ss"
 
+#define AUTOCLEAR_VAL_DEFAULT   100
+
+#define SCRIPT_TXPERIOD_DEFAULT 1000
+
+#define COLOR_BLACK     "black"
+#define COLOR_WHITE     "white"
+
+#define COLOR_DATA_RX      "DeepSkyBlue"
+#define COLOR_DATA_TX      "lime"
+#define COLOR_ERROR     "Tomato"
+#define COLOR_PREAMBLE      "#949494"
+
+#define COLOR_GREEN     "green"
+#define COLOR_RED       "red"
+
+
+#define COLOR_TOPLINE   "#A0A0A0"
+#define COLOR_GRAY0     "#404040"
+#define COLOR_GRAY1     "#202020"
+#define COLOR_GRAY2     "#151515"
+#define COLOR_GRAY3     "#101010"
+#define COLOR_GRAY4     "#050505"
+
+#define MAINWINDOWTITLE "Termik"
+
+#define LOGTIMEOUT_ERROR    300*1000
+#define LOGTIMEOUT_NOTE     60*1000
+#define LOGTIMEOUT_INFO     30*1000
+
+#define TITLE_DATA_ASCII    "ASCII"
+#define TITLE_DATA_HEX      "HEX"
+
+#define TITLE_BUTTON_SCRIPT_RUN "Run"
+#define TITLE_BUTTON_SCRIPT_STOP "Stop"
+
+#define LOCATION_DEFAULT    "~/"
 
 enum logType {
     error, note, info
@@ -67,41 +103,14 @@ public:
 
     bool saveTerminalOutToFile;
 
+    bool autoclerTermOut;
+    int autoclerTermOut_maxChars;
+
 
 };
 
-#define COLOR_BLACK     "black"
-#define COLOR_WHITE     "white"
-
-#define COLOR_DATA_RX      "DeepSkyBlue"
-#define COLOR_DATA_TX      "lime"
-#define COLOR_ERROR     "Tomato"
-#define COLOR_DATA      "#949494"
-
-#define COLOR_GREEN     "green"
-#define COLOR_RED       "red"
 
 
-#define COLOR_TOPLINE   "#A0A0A0"
-#define COLOR_GRAY0     "#404040"
-#define COLOR_GRAY1     "#202020"
-#define COLOR_GRAY2     "#151515"
-#define COLOR_GRAY3     "#101010"
-#define COLOR_GRAY4     "#050505"
-
-#define MAINWINDOWTITLE "Termik"
-
-#define LOGTIMEOUT_ERROR    300*1000
-#define LOGTIMEOUT_NOTE     60*1000
-#define LOGTIMEOUT_INFO     30*1000
-
-#define TITLE_DATA_ASCII    "ASCII"
-#define TITLE_DATA_HEX      "HEX"
-
-#define TITLE_BUTTON_SCRIPT_RUN "Run"
-#define TITLE_BUTTON_SCRIPT_STOP "Stop"
-
-#define LOCATION_DEFAULT    "~/"
 
 /////////////////////////////////////////////////////////
 namespace Ui {
@@ -181,6 +190,10 @@ private slots:
 
     void connectOrDisconnect();
 
+    void on_checkBox_autoclear_stateChanged(int arg1);
+
+    void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
+
 public slots:
     void tryConnectDevice(int);
 
@@ -202,7 +215,7 @@ private:
 
     void configInit();
 
-    void log(int logType, QString data);
+    void showMessage(int, QString);
 
     void terminalOutUpdate(int, QByteArray);
     void TxHistory_add(QByteArray data);
@@ -219,7 +232,8 @@ private:
     void handleAppArguments_printHelp_wrap(QString argData, QString argTitle);
     bool handleAppArguments_setParam(QString command, QString passedData);
 
-    void writeToTextedit(QTextEdit *textEdit, QString color, QString data);
+    void writeToTextedit(QTextEdit* textEdit, QString color, QString data);
+    void shortenTextEdit(QTextEdit* textEdit);
 
     void setupShortcuts();
 
@@ -228,6 +242,12 @@ private:
 
     void pushButton_runScript_setColor_green();
     void pushButton_runScript_setColor_red();
+
+    bool preambleShouldBeAddrd(int);
+    void preambleAdd(int);
+    QString getDataColor(int);
+    QString terminalOutGetPreamble(int);
+    bool checkboxChecked(int);
 
 };
 

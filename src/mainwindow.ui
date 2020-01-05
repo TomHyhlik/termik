@@ -29,71 +29,85 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_10">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QCheckBox" name="checkBox_timeLog">
+          <widget class="QCheckBox" name="checkBox_autoclear">
            <property name="text">
-            <string>Enable time log</string>
+            <string>Auto clear output, maximum of characters: </string>
            </property>
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
-           <item>
-            <widget class="QCheckBox" name="checkBox_outputSave">
-             <property name="text">
-              <string>Save terminal output to:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="lineEdit_save"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_save">
-             <property name="text">
-              <string>browse</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_14">
-           <item>
-            <widget class="QCheckBox" name="checkBox_prefix">
-             <property name="text">
-              <string>Enable Tx Prefix:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="lineEdit_prefix"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <item>
-            <widget class="QCheckBox" name="checkBox_suffix">
-             <property name="text">
-              <string>Enable Tx Suffix:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="lineEdit_suffix"/>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBox_clearOutputLine">
-           <property name="text">
-            <string>Clear output line automatically</string>
+          <widget class="QSpinBox" name="spinBox_autoclear_maxCharCnt">
+           <property name="maximum">
+            <number>100000</number>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_timeLog">
+         <property name="text">
+          <string>Enable time log</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QCheckBox" name="checkBox_outputSave">
+           <property name="text">
+            <string>Save terminal output to:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_save"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_save">
+           <property name="text">
+            <string>browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <item>
+          <widget class="QCheckBox" name="checkBox_prefix">
+           <property name="text">
+            <string>Enable Tx Prefix:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_prefix"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <item>
+          <widget class="QCheckBox" name="checkBox_suffix">
+           <property name="text">
+            <string>Enable Tx Suffix:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_suffix"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_clearOutputLine">
+         <property name="text">
+          <string>Clear output line automatically</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

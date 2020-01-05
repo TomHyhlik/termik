@@ -104,6 +104,7 @@ void MainWindow::currentAppConfig_save()
     saveCfg.data.serial.stopBits = sw->param.stopBits;
     saveCfg.data.serial.flowControl = sw->param.flowControl;
 
+    saveCfg.data.network.IpAddr_Rx = nw->param.IpAddr_Rx;
     saveCfg.data.network.IpAddr_Tx = nw->param.IpAddr_Tx;
     saveCfg.data.network.port_Tx = nw->param.port_Tx;
     saveCfg.data.network.port_Rx = nw->param.port_Rx;
@@ -113,6 +114,7 @@ void MainWindow::currentAppConfig_save()
     saveCfg.data.script = script->getWholeConfig();
     saveCfg.data.LogFileDir = logFile->getFileDirectory();
 
+    /* save all the data into json file */
     saveCfg.write();
 }
 //////////////////////////////////////////////////////////////////////
@@ -131,6 +133,7 @@ void MainWindow::currentAppConfig_load()
     sw->param.flowControl = saveCfg.data.serial.flowControl;
 
     /* load networkworker parameters */
+    nw->param.IpAddr_Rx = saveCfg.data.network.IpAddr_Rx;
     nw->param.IpAddr_Tx = saveCfg.data.network.IpAddr_Tx;
     nw->param.port_Tx = saveCfg.data.network.port_Tx;
     nw->param.port_Rx = saveCfg.data.network.port_Rx;
@@ -153,7 +156,6 @@ void MainWindow::currentAppConfig_load()
 
 
     /* todo: continue here, load the saveCfg.data.app to ui */
-
 
 }
 //////////////////////////////////////////////////////////////////////
@@ -184,7 +186,7 @@ void MainWindow::saveToFile_init()
 
     logFile->init(fileLocation);
     QString message = QString("Output saved in %1").arg(fileLocation);
-    log(info, message);
+    showMessage(info, message);
     qDebug() << message;
 }
 
@@ -348,15 +350,15 @@ void MainWindow::handleAppArguments_printHelp_wrap(QString cmd, QString argTitle
            cmd.toStdString().c_str(),
            argTitle.toStdString().c_str());
 
-//    qDebug() << "\t\t" << QString(ARG_PREFIX_SHORT).toStdString().c_str() <<
-//                           cmd.toStdString().c_str()  << "\t" << argTitle;
+    //    qDebug() << "\t\t" << QString(ARG_PREFIX_SHORT).toStdString().c_str() <<
+    //                           cmd.toStdString().c_str()  << "\t" << argTitle;
 
 
-//    qDebug() << "\t\t"
-//             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
-//             << cmd.toStdString().c_str()
-//             << "\t\t"
-//             << argTitle.toStdString().c_str();
+    //    qDebug() << "\t\t"
+    //             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
+    //             << cmd.toStdString().c_str()
+    //             << "\t\t"
+    //             << argTitle.toStdString().c_str();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -383,12 +385,12 @@ void MainWindow::tryConnectDevice(int connectionType)
 
     if (connectedSuccessfully) {
         config.connectionType = connectionType;
-        log(note, QString("Connected to: %1").arg(deviceName));
+        showMessage(note, QString("Connected to: %1").arg(deviceName));
         ui->lineEdit_in_ascii->setFocus();
         currentAppConfig_save();
     } else {
         config.connectionType = none;
-        log(error, QString("Failed to connect to: %1").arg(deviceName));
+        showMessage(error, QString("Failed to connect to: %1").arg(deviceName));
         dialog_connect->show();
     }
 }
@@ -448,6 +450,9 @@ void MainWindow::uiInit()
     ui->comboBox_script_dataType->setStyleSheet(QString("color: %1; background-color: %2")
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString("color: %1; background-color: %2")
+                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
 
     /* pushbuttons */
     ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
@@ -483,6 +488,8 @@ void MainWindow::uiInit()
     ui->checkBox_clearOutputLine->setChecked(true);
     ui->checkBox_script_repeat->setChecked(true);
     ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
+    ui->spinBox_autoclear_maxCharCnt->setValue(AUTOCLEAR_VAL_DEFAULT);
+    ui->spinBox_script_period->setValue(SCRIPT_TXPERIOD_DEFAULT);
 
     hideFindUi();
     hideHelp();
@@ -537,7 +544,7 @@ void MainWindow::clearOutput()
 void MainWindow::Tx_fromDataInput(int inputType)
 {
     if (config.connectionType == none) {
-        log(error, "No connection established.");
+        showMessage(error, "No connection established.");
         return;
     }
 
@@ -564,7 +571,7 @@ void MainWindow::Tx_fromDataInput(int inputType)
 void MainWindow::on_Tx(QByteArray txData)
 {
     if (config.connectionType == none) {
-        log(error, "No connection established.");
+        showMessage(error, "No connection established.");
         return;
     }
 
@@ -773,24 +780,20 @@ void MainWindow::dataArrived()
     }
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::log
-///         display event in the statusBar
-/// \param logType  depending on this is set timeout
-/// \param data     to be displayed
-void MainWindow::log(int logType, QString data)
+void MainWindow::showMessage(int type, QString messageData)
 {   
     int timeout;
 
-    switch(logType)
+    switch (type)
     {
     case error:
         timeout = LOGTIMEOUT_ERROR;
-        data.prepend("Error: ");
+        messageData.prepend("Error: ");
         break;
 
     case note:
         timeout = LOGTIMEOUT_NOTE;
-        data.prepend("Note: ");
+        messageData.prepend("Note: ");
         break;
 
     case info:
@@ -800,74 +803,124 @@ void MainWindow::log(int logType, QString data)
         timeout = LOGTIMEOUT_ERROR;
     }
 
-    ui->statusBar->showMessage(data, timeout);
+    ui->statusBar->showMessage(messageData, timeout);
 }
+
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::
-/// \param dataKind depends how the data will be logged
-/// \param data to be logged
-///
-void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
+bool MainWindow::preambleShouldBeAddrd(int dataKind)
 {
     if (config.timeLogEnabled &&
             (((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) ||
-             (lastTerminalData != dataKind)))
+             (lastTerminalData != dataKind))) {
+        return true;
+    }    else {
+        return false;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::preambleAdd(int dataKind)
+{
+    lastTerminalData = dataKind;
+
+    QString preamble = terminalOutGetPreamble(dataKind);
+
+    /* put the preamble into text edits */
+    writeToTextedit(ui->textEdit_out_ascii, COLOR_PREAMBLE, preamble);
+    writeToTextedit(ui->textEdit_out_hex, COLOR_PREAMBLE, preamble);
+    writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
+
+    /* put the preamble into text file */
+    if (config.saveTerminalOutToFile) {
+        logFile->writeData_ascii(preamble);
+        logFile->writeData_hex(preamble);
+    }
+}
+/////////////////////////////////////////////////////////////////
+QString MainWindow::terminalOutGetPreamble(int dataKind)
+{
+    QDateTime dt = QDateTime::currentDateTime();
+    QString time = dt.toString(TIME_FORMAT);
+
+    QString preamble;
+    preamble.append("\n");
+    preamble.append(time);
+
+    switch (dataKind)
     {
-        lastTerminalData = dataKind;
-
-        /* get the time */
-        QDateTime dt = QDateTime::currentDateTime();
-        QString preamble;
-        preamble.append("\n");
-        preamble.append(dt.toString(TIME_FORMAT));
-        switch (dataKind) {
-        case data_Rx:
-            preamble.append(" [Rx] - ");
-            break;
-        case data_Tx:
-            preamble.append(" [Tx] - ");
-            break;
-        }
-
-        /* put the preamble into text edits */
-        writeToTextedit(ui->textEdit_out_ascii, COLOR_DATA, preamble);
-        writeToTextedit(ui->textEdit_out_hex, COLOR_DATA, preamble);
-        writeToTextedit(ui->textEdit_out_dec, COLOR_DATA, preamble);
-
-        /* put the preamble into text file */
-        if (config.saveTerminalOutToFile) {
-            logFile->writeData_ascii(preamble);
-            logFile->writeData_hex(preamble);
-        }
-
+    case data_Rx:
+        preamble.append(" [Rx] - ");
+        break;
+    case data_Tx:
+        preamble.append(" [Tx] - ");
+        break;
+    default:
+        preamble.append("  ");
+    }
+    return preamble;
+}
+/////////////////////////////////////////////////////////////////
+/// \brief MainWindow::terminalOutUpdate
+/// \param dataKind
+/// \param data
+/// update the terminal output event
+void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
+{
+    if (preambleShouldBeAddrd(dataKind)) {
+        preambleAdd(dataKind);
     }
 
-    /* refresh */
     tick_lastRx = tick.elapsed();
+
+    /* update terminal output logs - textEdits */
+    QString dataColor = getDataColor(dataKind);
 
     dataConverter dataConv;
     dataConv.setByteArray(data);
 
-    /* update terminal output logs - textEdits */
-    QString color;
-    switch (dataKind)
-    {
-    case data_Rx:
-        color = COLOR_DATA_RX;
-        break;
-    case data_Tx:
-        color = COLOR_DATA_TX;
-        break;
-    }
+    /* update terminal output text edits */
+    writeToTextedit(ui->textEdit_out_ascii,  dataColor, dataConv.getStrAscii());
+    writeToTextedit(ui->textEdit_out_hex,    dataColor, dataConv.getStrHex());
+    writeToTextedit(ui->textEdit_out_dec,    dataColor, dataConv.getStrDec());
 
-    writeToTextedit(ui->textEdit_out_ascii,  color, dataConv.getStrAscii());
-    writeToTextedit(ui->textEdit_out_hex,    color, dataConv.getStrHex());
-    writeToTextedit(ui->textEdit_out_dec,    color, dataConv.getStrDec());
-
-    /* update terminal output logs - files */
+    /* update terminal output log files */
     if (config.saveTerminalOutToFile) {
         logFile->writeData_ascii(dataConv.getStrAscii());
         logFile->writeData_hex(dataConv.getStrHex());
+    }
+
+    /* clear part of the text in the text edits */
+    if (config.autoclerTermOut) {
+        shortenTextEdit(ui->textEdit_out_ascii);
+        shortenTextEdit(ui->textEdit_out_hex);
+        shortenTextEdit(ui->textEdit_out_dec);
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+QString MainWindow::getDataColor(int dataKind)
+{
+    switch (dataKind)
+    {
+    case data_Rx:
+        return COLOR_DATA_RX;
+        break;
+    case data_Tx:
+        return COLOR_DATA_TX;
+        break;
+    default:
+        qDebug() << "ERROR: 29083475";
+        return COLOR_DATA_TX;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::shortenTextEdit(QTextEdit* textEdit)
+{
+    if (textEdit->document()->blockCount() > config.autoclerTermOut_maxChars) {
+
+        textEdit->clear();
+        /* todo autoclear should do better then this */
     }
 }
 
@@ -991,74 +1044,54 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         ui->lineEdit_in_ascii->setFocus();
     }
 }
+
 /////////////////////////////////////////////////////////////////
-void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
+void MainWindow::on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1)
 {
-    switch (arg1) {
-    case Qt::Checked:
-        config.prefix_tx_enabled = true;
-        break;
-    case Qt::Unchecked:
-        config.prefix_tx_enabled = false;
-        break;
-    }
-}
-void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
-{
-    switch (arg1) {
-    case Qt::Checked:
-        config.suffix_tx_enabled = true;
-        break;
-    case Qt::Unchecked:
-        config.suffix_tx_enabled = false;
-        break;
-    }
-}
-void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
-{
-    switch (arg1) {
-    case Qt::Checked:
-        config.timeLogEnabled = true;
-        break;
-    case Qt::Unchecked:
-        config.timeLogEnabled = false;
-        break;
-    }
-}
-void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
-{
-    switch (arg1) {
-    case Qt::Checked:
-        config.clearOutputLine = true;
-        break;
-    case Qt::Unchecked:
-        config.clearOutputLine = false;
-        break;
-    }
-}
-/////////////////////////////////////////////////////////////////
-void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
-{
-    switch (arg1) {
-    case Qt::Checked:
-        config.saveTerminalOutToFile = true;
-        break;
-    case Qt::Unchecked:
-        config.saveTerminalOutToFile = false;
-        break;
-    }
+    config.autoclerTermOut_maxChars = arg1;
 }
 
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
+{
+    config.prefix_tx_enabled = checkboxChecked(arg1);
+}
+void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
+{
+    config.suffix_tx_enabled = checkboxChecked(arg1);
+}
+void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
+{
+    config.timeLogEnabled = checkboxChecked(arg1);
+}
+void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
+{
+    config.clearOutputLine = checkboxChecked(arg1);
+}
+void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
+{
+    config.saveTerminalOutToFile = checkboxChecked(arg1);
+}
 void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 {
-    switch (arg1) {
+    script->setRepeat(checkboxChecked(arg1));
+}
+void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
+{
+    config.autoclerTermOut = checkboxChecked(arg1);
+}
+/////////////////////////////////////////////////////////////////
+bool MainWindow::checkboxChecked(int state)
+{
+    switch (state)
+    {
     case Qt::Checked:
-        script->setRepeat(true);
-        break;
+    case Qt::PartiallyChecked:
+        return  true;
+
     case Qt::Unchecked:
-        script->setRepeat(false);
-        break;
+    default:
+        return false;
     }
 }
 
@@ -1167,4 +1200,3 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
 }
 /////////////////////////////////////////////////////////////////
-

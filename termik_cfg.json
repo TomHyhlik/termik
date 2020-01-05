@@ -11,7 +11,8 @@
     },
     "Log files directory": "",
     "Network": {
-        "IP address": "127.0.0.1",
+        "IP address Rx": "",
+        "IP address Tx": "",
         "Port Rx": 11199,
         "Port Tx": 11199
     },
