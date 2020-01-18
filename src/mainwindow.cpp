@@ -939,6 +939,8 @@ void MainWindow::writeToTextedit(QTextEdit *textEdit, QString color, QString dat
 
     /* return cursor where it was */
     textEdit->setTextCursor(prev_cursor);
+
+//    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
 }
 
 /////////////////////////////////////////////////////////////////
