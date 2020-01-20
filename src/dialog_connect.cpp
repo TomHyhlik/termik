@@ -27,7 +27,8 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
 
-    table_init();
+    table_network_init();
+    table_serial_init();
 
     setWindowTitle(TITLE_THIS_WINDOW);
     ui->tabWidget->setTabText(serial, TITLE_TAB_SERIAL);
@@ -44,7 +45,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     timer_updatePorts = new QTimer(this);
     connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
-    ui->comboBox_portName->setFocus();
     currentTab = ui->tabWidget->currentIndex();
 
 }
@@ -105,7 +105,7 @@ void Dialog_connect::refreshParameters()
     ui->spinBox_ipPort_Rx->setValue(nw->param.port_Rx);
 }
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::table_init()
+void Dialog_connect::table_network_init()
 {
     QList <QString> titles;
     titles << TITLE_ADDR << TITLE_NAME;
@@ -115,6 +115,18 @@ void Dialog_connect::table_init()
 
     ui->tableWidget_addr_tx->setColumnCount(titles.size());
     ui->tableWidget_addr_tx->setHorizontalHeaderLabels(titles);
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_serial_init()
+{
+    QList <QString> titles;
+    titles << TITLE_TAB_SERIAL_NAME << TITLE_TAB_SERIAL_DESCRIPTION
+           << TITLE_TAB_SERIAL_MANUFACTURER << TITLE_TAB_SERIAL_SERIALNUMBER
+           << TITLE_TAB_SERIAL_LOCATION << TITLE_TAB_SERIAL_VENDORIDENTIFIER
+           << TITLE_TAB_SERIAL_PRODUCTIDENTIFIER;
+
+    ui->tableWidget_serialPorts->setColumnCount(titles.size());
+    ui->tableWidget_serialPorts->setHorizontalHeaderLabels(titles);
 
 }
 /////////////////////////////////////////////////////////////////
@@ -155,7 +167,7 @@ void Dialog_connect::blockAllsignals(bool state)
     ui->comboBox_baudRate->blockSignals(state);
     ui->comboBox_parity->blockSignals(state);
     ui->comboBox_dataBits->blockSignals(state);
-    ui->comboBox_portName->blockSignals(state);
+    ui->lineEdit_serialPortName->blockSignals(state);
     ui->comboBox_stopBits->blockSignals(state);
     ui->comboBox_flowControl->blockSignals(state);
 }
@@ -178,7 +190,7 @@ void Dialog_connect::initColors()
                                             .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_parity->setStyleSheet(QString("color: %1; background-color: %2")
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_portName->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_serialPortName->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
@@ -189,6 +201,8 @@ void Dialog_connect::initColors()
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->tableWidget_serialPorts->setStyleSheet(QString("color: %1; background-color: %2")
+                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_addr_tx->setStyleSheet(QString("color: %1; background-color: %2")
@@ -240,34 +254,67 @@ void Dialog_connect::serialPort_nameRefresh()
     QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
 
     /* delete ports which were plugged out */
-    for (int i = 0; i < ui->comboBox_portName->count(); i++) {
-        bool isHere = false;
-        for (int j = 0; j < currentAvailablePorts.size(); j++) {
-            if (ui->comboBox_portName->itemText(i) == currentAvailablePorts.at(j).portName()) {
-                isHere = true;
-                break;
-            }
-        }
-        if(!isHere){
-            ui->comboBox_portName->removeItem(i);
-        }
+//    for (int i = 0; i < ui->comboBox_portName->count(); i++) {
+//        bool isHere = false;
+//        for (int j = 0; j < currentAvailablePorts.size(); j++) {
+//            if (ui->comboBox_portName->itemText(i) == currentAvailablePorts.at(j).portName()) {
+//                isHere = true;
+//                break;
+//            }
+//        }
+//        if(!isHere){
+//            ui->comboBox_portName->removeItem(i);
+//        }
 
-    }
+//    }
 
     /* add ports which were plugged in */
-    if (ui->comboBox_portName->count() != currentAvailablePorts.size()) {
+    if (ui->tableWidget_serialPorts->rowCount() != currentAvailablePorts.size()) {
         for (int j = 0; j < currentAvailablePorts.size(); j++) {
             bool isHere = false;
-            for(int i = 0; i < ui->comboBox_portName->count(); i++){
-                if(currentAvailablePorts.at(j).portName() == ui->comboBox_portName->itemText(i)){
+            for(int i = 0; i < ui->tableWidget_serialPorts->rowCount(); i++){
+                if(currentAvailablePorts.at(j).portName() == ui->tableWidget_serialPorts->item(i,0)->text()){
                     isHere = true;
                     break;
                 }
             }
             if(!isHere){
-                ui->comboBox_portName->addItem(currentAvailablePorts.at(j).portName());
+                table_serial_add(currentAvailablePorts.at(j));
             }
         }
+    }
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
+{
+    QStringList element;
+    element << serialPort.portName()
+            << serialPort.description()
+            << serialPort.manufacturer()
+            << serialPort.serialNumber()
+            << serialPort.systemLocation()
+            << QString("%1").arg(serialPort.vendorIdentifier())
+            << QString("%1").arg(serialPort.productIdentifier());
+
+
+    ui->tableWidget_serialPorts->insertRow(ui->tableWidget_serialPorts->rowCount());
+    /* get number of the new row */
+    int newRow =  ui->tableWidget_serialPorts->rowCount() - 1;
+
+    /* for each element in the row */
+    for (int column = 0; column < element.size(); column++){
+        /* create new item to the table */
+        QTableWidgetItem *item = new QTableWidgetItem(tr("%1").arg(element.at(column)));
+        /* make the item non-editable */
+        item->setFlags(item->flags() ^ Qt::ItemIsEditable);
+        item->setTextAlignment(Qt::AlignVCenter);
+        /* add the item to specified column and row */
+         ui->tableWidget_serialPorts->setItem(newRow, column, item);
+        /* todo: delete item */
+    }
+    /* resize the columns to be optimized for the content */
+    for (int i = 0; i <  ui->tableWidget_serialPorts->columnCount(); i++){
+         ui->tableWidget_serialPorts->resizeColumnToContents(i);
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -375,40 +422,6 @@ void Dialog_connect::on_tabWidget_currentChanged(int index)
     currentTab = index;
 }
 
-///////////////////////////////////////////////////////////////////////
-/// \brief Read information about selected port and put it to the QLabels
-///         and update the port name in SerialWorker class
-/// \param arg1: the port name from the combobox
-void Dialog_connect::on_comboBox_portName_currentTextChanged(const QString &arg1)
-{
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-    {
-        /* if the port name is known, print info */
-        if(info.portName() == arg1){
-            ui->label_portDescription->setText(QString("Description: %1")
-                                               .arg(info.description()));
-            ui->label_manufacturer->setText(QString("Manufacturer: %1")
-                                            .arg(info.manufacturer()));
-            ui->label_serialNumber->setText(QString("Serial number: %1")
-                                            .arg(info.serialNumber()));
-            ui->label_location->setText(QString("Location: %1")
-                                        .arg(info.systemLocation()));
-            ui->label_vendorIdentifier->setText(QString("Vendor identifier: %1")
-                                                .arg(info.vendorIdentifier()));
-            ui->label_productIdentifier->setText(QString("Product identifier: %1")
-                                                 .arg(info.productIdentifier()));
-            return;
-        }
-    }
-    /* othervise leave it empty */
-    ui->label_portDescription->setText(QString("Description: "));
-    ui->label_manufacturer->setText(QString("Manufacturer: "));
-    ui->label_serialNumber->setText(QString("Serial number: "));
-    ui->label_location->setText(QString("Location: "));
-    ui->label_vendorIdentifier->setText(QString("Vendor identifier: "));
-    ui->label_productIdentifier->setText(QString("Product identifier: "));
-
-}
 //////////////////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::on_buttonBox_accepted
 ///     read all parameters from the UI
@@ -417,7 +430,7 @@ void Dialog_connect::on_buttonBox_accepted()
     timerRefresh_stop();
 
     /* load the  port configuration to the sw class */
-    sw->param.portName = ui->comboBox_portName->currentText();
+    sw->param.portName = ui->lineEdit_serialPortName->text();
     sw->param.baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
     sw->param.dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
     sw->param.parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
@@ -494,21 +507,24 @@ void Dialog_connect::focus_2()
 {
     ui->tabWidget->setCurrentIndex(1);
 }
-//////////////////////////////////////////////////////////////////////////////
-QString Dialog_connect::table_getHost(QTableWidget* table, int row)
-{
-    return table->item(row, 0)->text();
-}
+
 //////////////////////////////////////////////////////////////////////////////
 void Dialog_connect::on_tableWidget_addr_rx_cellClicked(int row, int column)
 {
-    QString hostName = table_getHost(ui->tableWidget_addr_rx, row);
+    QString hostName = ui->tableWidget_addr_rx->item(row, 0)->text();
     ui->lineEdit_selectedAddr_rx->setText(hostName);
 }
 
 void Dialog_connect::on_tableWidget_addr_tx_cellClicked(int row, int column)
 {
-    QString hostName = table_getHost(ui->tableWidget_addr_tx, row);
+    QString hostName = ui->tableWidget_addr_tx->item(row, 0)->text();
     ui->lineEdit_selectedAddr_tx->setText(hostName);
+}
+//////////////////////////////////////////////////////////////////////////////
+
+void Dialog_connect::on_tableWidget_serialPorts_cellClicked(int row, int column)
+{
+    QString portName = ui->tableWidget_serialPorts->item(row, 0)->text();
+    ui->lineEdit_serialPortName->setText(portName);
 }
 //////////////////////////////////////////////////////////////////////////////

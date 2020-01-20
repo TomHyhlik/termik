@@ -14,6 +14,18 @@
 #define TITLE_TAB_SERIAL    "Serial"
 #define TITLE_TAB_NETWORK    "Network"
 
+
+#define TITLE_TAB_SERIAL_NAME                      "Name"
+#define TITLE_TAB_SERIAL_DESCRIPTION               "Description"
+#define TITLE_TAB_SERIAL_MANUFACTURER              "Manufacturer"
+#define TITLE_TAB_SERIAL_SERIALNUMBER              "Serial number"
+#define TITLE_TAB_SERIAL_LOCATION                  "Location"
+#define TITLE_TAB_SERIAL_VENDORIDENTIFIER          "Vendor identifier"
+#define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
+
+
+
+
 #define SERIALPORT_REFRESH_PERIOD  400// 300
 
 #define NETWORKPROTOCOL_UDP     "UDP"
@@ -85,19 +97,16 @@ private:
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
     int getSelectedNetworkProtocol();
-    void table_init();
+    void table_network_init();
+    void table_serial_init();
     void table_addHost(QTableWidget* table, QHostInfo host);
     void table_clear(QTableWidget* table);
-
-    QString table_getHost(QTableWidget* table, int column);
-
+    void table_serial_add(QSerialPortInfo);
 
 private slots:
     void networkHosts_refresh();
     void serialPort_nameRefresh();
     void refreshDevices();
-    void on_comboBox_portName_currentTextChanged(const QString &arg1);
-
 
     void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
@@ -110,8 +119,8 @@ private slots:
 
 
     void on_tableWidget_addr_tx_cellClicked(int row, int column);
-
     void on_tableWidget_addr_rx_cellClicked(int row, int column);
+    void on_tableWidget_serialPorts_cellClicked(int row, int column);
 
 signals:
 
