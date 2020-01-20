@@ -132,34 +132,7 @@ void Dialog_connect::table_serial_init()
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
 {
-    QStringList element;
 
-    if (!host.addresses().isEmpty()) {
-        element << host.addresses().first().toString();
-    }
-    element << host.hostName();
-
-
-    tableWidget->insertRow(tableWidget->rowCount());
-    /* get number of the new row */
-    int newRow = tableWidget->rowCount() - 1;
-
-    /* for each element in the row */
-    for (int column = 0; column < element.size(); column++){
-        /* create new item to the table */
-        QTableWidgetItem *item = new QTableWidgetItem(tr("%1").arg(element.at(column)));
-        /* make the item non-editable */
-        item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-        item->setTextAlignment(Qt::AlignVCenter);
-        /* add the item to specified column and row */
-        tableWidget->setItem(newRow, column, item);
-        /* todo: delete item */
-    }
-
-    /* resize the columns to be optimized for the content */
-    for (int i = 0; i < tableWidget->columnCount(); i++){
-        tableWidget->resizeColumnToContents(i);
-    }
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::blockAllsignals(bool state)
@@ -229,14 +202,26 @@ void Dialog_connect::networkHosts_refresh()
     nw->scanNetwork();
     QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
     for (int i = 0; i < ipAddrs_rx.size(); i++) {
-        table_addHost(ui->tableWidget_addr_rx, ipAddrs_rx.at(i));
+
+        QHostInfo host = ipAddrs_rx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_rx, element);
     }
 
     QList <QHostInfo> ipAddrs_tx = nw->getAll_iPaddr_tx();
     for (int i = 0; i < ipAddrs_tx.size(); i++) {
-        table_addHost(ui->tableWidget_addr_tx, ipAddrs_tx.at(i));
+        QHostInfo host = ipAddrs_tx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_tx, element);
     }
-
 }
 ///////////////////////////////////////////////////////////////////////
 void Dialog_connect::table_clear(QTableWidget* table)
@@ -251,12 +236,6 @@ void Dialog_connect::table_clear(QTableWidget* table)
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
-
-
-
-
-
-
     QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
 
     /* delete ports which were plugged out */
@@ -271,7 +250,6 @@ void Dialog_connect::serialPort_nameRefresh()
         if(!isHere){
             ui->tableWidget_serialPorts->removeRow(i);
         }
-
     }
 
     /* add ports which were plugged in */
@@ -302,9 +280,14 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
             << QString("%1").arg(serialPort.productIdentifier());
 
 
-    ui->tableWidget_serialPorts->insertRow(ui->tableWidget_serialPorts->rowCount());
+    table_addItem(ui->tableWidget_serialPorts, element);
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_addItem(QTableWidget* table, QStringList element)
+{
+    table->insertRow(table->rowCount());
     /* get number of the new row */
-    int newRow =  ui->tableWidget_serialPorts->rowCount() - 1;
+    int newRow =  table->rowCount() - 1;
 
     /* for each element in the row */
     for (int column = 0; column < element.size(); column++){
@@ -314,12 +297,12 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
         item->setFlags(item->flags() ^ Qt::ItemIsEditable);
         item->setTextAlignment(Qt::AlignVCenter);
         /* add the item to specified column and row */
-         ui->tableWidget_serialPorts->setItem(newRow, column, item);
+        table->setItem(newRow, column, item);
         /* todo: delete item */
     }
     /* resize the columns to be optimized for the content */
-    for (int i = 0; i <  ui->tableWidget_serialPorts->columnCount(); i++){
-         ui->tableWidget_serialPorts->resizeColumnToContents(i);
+    for (int i = 0; i <  table->columnCount(); i++){
+         table->resizeColumnToContents(i);
     }
 }
 /////////////////////////////////////////////////////////////////

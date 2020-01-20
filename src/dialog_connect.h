@@ -24,9 +24,7 @@
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
 
-
-
-#define SERIALPORT_REFRESH_PERIOD  100// 300
+#define SERIALPORT_REFRESH_PERIOD  300
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"
@@ -102,6 +100,7 @@ private:
     void table_addHost(QTableWidget* table, QHostInfo host);
     void table_clear(QTableWidget* table);
     void table_serial_add(QSerialPortInfo);
+    void table_addItem(QTableWidget* table, QStringList l);
 
 private slots:
     void networkHosts_refresh();
