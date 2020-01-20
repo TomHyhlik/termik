@@ -20,6 +20,7 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(serial);
 
+    /* add shortcuts */
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
@@ -27,6 +28,25 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
 
     table_init();
+
+    setWindowTitle(TITLE_THIS_WINDOW);
+    ui->tabWidget->setTabText(serial, TITLE_TAB_SERIAL);
+    ui->tabWidget->setTabText(network, TITLE_TAB_NETWORK);
+    ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
+    ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
+
+    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_UDP);
+    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_TCP);
+
+    initColors();
+    tab_port_init();
+
+    timer_updatePorts = new QTimer(this);
+    connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
+
+    ui->comboBox_portName->setFocus();
+    currentTab = ui->tabWidget->currentIndex();
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -139,31 +159,7 @@ void Dialog_connect::blockAllsignals(bool state)
     ui->comboBox_stopBits->blockSignals(state);
     ui->comboBox_flowControl->blockSignals(state);
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::init()
-{
-    setWindowTitle(TITLE_THIS_WINDOW);
-    ui->tabWidget->setTabText(serial, TITLE_TAB_SERIAL);
-    ui->tabWidget->setTabText(network, TITLE_TAB_NETWORK);
-    ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
-    ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
-
-    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_UDP);
-    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_TCP);
-
-    initColors();
-    tab_port_init();
-
-    timer_updatePorts = new QTimer(this);
-    connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
-
-    ui->comboBox_portName->setFocus();
-    currentTab = ui->tabWidget->currentIndex();
-    //    configurationRead(); << todo
-
-//    timerRefresh_start();
-}
-/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
 {
     this->setStyleSheet(QString("color: %1; background-color: %2")
@@ -185,6 +181,8 @@ void Dialog_connect::initColors()
     ui->comboBox_portName->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_networkProtocol->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->spinBox_ipPort_Tx->setStyleSheet(QString("color: %1; background-color: %2")

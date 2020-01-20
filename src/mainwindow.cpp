@@ -38,7 +38,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     dialog_connect = new Dialog_connect(this);
     dialog_connect->setSw(sw);
     dialog_connect->setNw(nw);
-    dialog_connect->init();
     connect(dialog_connect, SIGNAL(tryConnect(int)), this,
             SLOT(tryConnectDevice(int)));
 
