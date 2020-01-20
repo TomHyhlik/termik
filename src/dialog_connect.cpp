@@ -251,38 +251,43 @@ void Dialog_connect::table_clear(QTableWidget* table)
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
+
+
+
+
+
+
     QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
 
     /* delete ports which were plugged out */
-//    for (int i = 0; i < ui->comboBox_portName->count(); i++) {
-//        bool isHere = false;
-//        for (int j = 0; j < currentAvailablePorts.size(); j++) {
-//            if (ui->comboBox_portName->itemText(i) == currentAvailablePorts.at(j).portName()) {
-//                isHere = true;
-//                break;
-//            }
-//        }
-//        if(!isHere){
-//            ui->comboBox_portName->removeItem(i);
-//        }
-
-//    }
-
-    /* add ports which were plugged in */
-    if (ui->tableWidget_serialPorts->rowCount() != currentAvailablePorts.size()) {
+    for (int i = 0; i < ui->tableWidget_serialPorts->rowCount(); i++) {
+        bool isHere = false;
         for (int j = 0; j < currentAvailablePorts.size(); j++) {
-            bool isHere = false;
-            for(int i = 0; i < ui->tableWidget_serialPorts->rowCount(); i++){
-                if(currentAvailablePorts.at(j).portName() == ui->tableWidget_serialPorts->item(i,0)->text()){
-                    isHere = true;
-                    break;
-                }
-            }
-            if(!isHere){
-                table_serial_add(currentAvailablePorts.at(j));
+            if (ui->tableWidget_serialPorts->item(i, 0)->text() == currentAvailablePorts.at(j).portName()) {
+                isHere = true;
+                break;
             }
         }
+        if(!isHere){
+            ui->tableWidget_serialPorts->removeRow(i);
+        }
+
     }
+
+    /* add ports which were plugged in */
+    for (int j = 0; j < currentAvailablePorts.size(); j++) {
+        bool isHere = false;
+        for(int i = 0; i < ui->tableWidget_serialPorts->rowCount(); i++){
+            if(currentAvailablePorts.at(j).portName() == ui->tableWidget_serialPorts->item(i,0)->text()){
+                isHere = true;
+                break;
+            }
+        }
+        if(!isHere){
+            table_serial_add(currentAvailablePorts.at(j));
+        }
+    }
+
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
