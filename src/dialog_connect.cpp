@@ -134,6 +134,7 @@ void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
 {
 
 }
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::blockAllsignals(bool state)
 {
@@ -298,7 +299,6 @@ void Dialog_connect::table_addItem(QTableWidget* table, QStringList element)
         item->setTextAlignment(Qt::AlignVCenter);
         /* add the item to specified column and row */
         table->setItem(newRow, column, item);
-        /* todo: delete item */
     }
     /* resize the columns to be optimized for the content */
     for (int i = 0; i <  table->columnCount(); i++){

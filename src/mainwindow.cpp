@@ -1051,7 +1051,6 @@ void MainWindow::on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1)
 {
     config.autoclerTermOut_maxChars = arg1;
 }
-
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
 {
