@@ -87,7 +87,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     currentAppConfig_save();
 
     qDebug() << "\n" << "Closing" << MAINWINDOWTITLE << "\n";
-    event->accept();
+//    event->accept(); // todo:error
 }
 //////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::currentAppConfig_save
