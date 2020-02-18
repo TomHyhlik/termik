@@ -4,9 +4,27 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QList>
+#include <QSerialPortInfo>
+
+#include "communicationworker.h"
+
+
+#define DBG_EXCHANGEDDATA   0
+
 
 class SerialWorkerParameters {
 public:
+    /* init the default parameters */
+    SerialWorkerParameters()
+    {
+        baudRate = QSerialPort::Baud115200;
+        dataBits = QSerialPort::Data8;
+        parity = QSerialPort::NoParity;
+        stopBits = QSerialPort::OneStop;
+        flowControl = QSerialPort::NoFlowControl;
+    }
+
+
     QString portName;
     qint32 baudRate;
     int dataBits;
@@ -17,34 +35,29 @@ public:
 
 
 /////////////////////////////////////////////////////////////////////////
-class SerialWorker : public QObject
+class SerialWorker : public CommunicationWorker
 {
     Q_OBJECT
 public:
-    explicit SerialWorker(QObject *parent = nullptr);
+    explicit SerialWorker();
 
-    bool open();
-    bool close();
-    bool isOpen();
+    bool open() override;
+    bool close() override;
+    bool isOpen() override;
+    QByteArray readAllRx() override;
 
     SerialWorkerParameters param;
-
-    QList <QByteArray> RxData;
-
-    QByteArray ReadAllRx();
 
 private:
 
     QSerialPort* serial;
-    QByteArray buffer;
-    void setDefaultParameters();
 
 public slots:
-    void readData();
-    bool write(QByteArray);
+    void on_dataReceived() override;
+    bool write(QByteArray) override;
 
 signals:
-    void dataReceived();
+
 
 };
 

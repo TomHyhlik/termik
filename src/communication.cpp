@@ -13,10 +13,10 @@ Communication::Communication(QObject *parent) : QObject(parent)
     connType = comType_none;
 
 
-    serial = new SerialWorker(this);
+    serial = new SerialWorker();
     connect(serial, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
-    network = new NetworkWorker(this);
+    network = new NetworkWorker();
     connect(network, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
 }
@@ -27,7 +27,7 @@ void Communication::dataArrived()
     switch (connType)
     {
     case comType_serial:
-        displayData(data_Rx, serial->ReadAllRx());
+        displayData(data_Rx, serial->readAllRx());
         break;
     case comType_network:
         displayData(data_Rx, network->readAllRx());
@@ -54,7 +54,7 @@ void Communication::establish(communicationType type)
         deviceName = serial->param.portName;
         break;
     case comType_network:
-        connectedSuccessfully = network->connectDevice();
+        connectedSuccessfully = network->open();
         deviceName = QString("%1:%2")
                 .arg(network->param.IpAddr_Tx.toString())
                 .arg(QString::number(int(network->param.port_Tx)));

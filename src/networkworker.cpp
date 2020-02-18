@@ -3,10 +3,10 @@
 #include "tcpworker.h"
 
 
-NetworkWorker::NetworkWorker(QObject *parent) : QObject(parent)
+NetworkWorker::NetworkWorker()
 {
     udpSocket = new QUdpSocket(this);
-    connect(udpSocket, SIGNAL(readyRead()),this, SLOT(udpRead()));
+    connect(udpSocket, SIGNAL(readyRead()),this, SLOT(on_dataReceived()));
 
     tcpServer = new TcpServer();
     connect(tcpServer, SIGNAL(dataReceived(QByteArray)),
@@ -92,16 +92,15 @@ void NetworkWorker::on_dataReceived(QByteArray data)
     emit dataReceived();
 }
 //////////////////////////////////////////////////
-
-bool NetworkWorker::isConnected()
+bool NetworkWorker::isOpen()
 {
     return tcpServer->isListening();
 }
 
 //////////////////////////////////////////////////
-bool NetworkWorker::connectDevice()
+bool NetworkWorker::open()
 {
-    if (isConnected()) {
+    if (isOpen()) {
         disconnect();
     }
     bool opened = false;
@@ -119,7 +118,7 @@ bool NetworkWorker::connectDevice()
     return opened;
 }
 //////////////////////////////////////////////////
-void  NetworkWorker::disconnect()
+bool  NetworkWorker::close()
 {
     switch (param.protocolType) {
     case UDP:
@@ -147,7 +146,7 @@ bool NetworkWorker::write(QByteArray data)
 }
 
 //////////////////////////////////////////////////
-void NetworkWorker::udpRead()
+void NetworkWorker::on_dataReceived()
 {
     QByteArray buffer;
     QHostAddress sender;

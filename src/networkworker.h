@@ -11,6 +11,8 @@
 
 #include "tcpworker.h"
 
+#include "communicationworker.h"
+
 
 class NetworkWorkerParameters {
 public:
@@ -31,7 +33,8 @@ enum protocolType {
     UDP, TCP
 };
 
-class NetworkWorker : public QObject
+/////////////////////////////////////////////////////////////////////////
+class NetworkWorker : public CommunicationWorker
 {
     Q_OBJECT
     QUdpSocket* udpSocket;
@@ -44,7 +47,7 @@ class NetworkWorker : public QObject
     void scanNetwork_addHost(QHostInfo host);
 
 public:
-    explicit NetworkWorker(QObject *parent = nullptr);
+    explicit NetworkWorker();
 
 
     NetworkWorkerParameters param;
@@ -53,15 +56,11 @@ public:
     QList <QHostInfo> getAll_iPaddr_tx();
 
 //    void send(QString IPaddress, quint16 port, QByteArray data);
-    bool write(QByteArray data);
 
-    bool connectDevice();
-    void disconnect();
-    bool isConnected();
-
-    QByteArray readAllRx();
-
-    QList <QByteArray> RxData;
+    bool open() override;
+    bool close() override;
+    bool isOpen() override;
+    QByteArray readAllRx() override;
 
     bool tcpIsConnected();
     void scanNetwork();
@@ -69,18 +68,19 @@ public:
 signals:
 
     void packetArrived(QString, quint32,  QString);
-    void dataReceived();
+
 
 
 public slots:
 
-    void udpRead();
+    void on_dataReceived() override;
 
     void connected();
     void disconnected();
     void on_dataReceived(QByteArray);
 
     void scanNetwork_printResults(QHostInfo);
+    bool write(QByteArray data) override;
 
 
 };
@@ -89,25 +89,25 @@ public slots:
 
 
 
-class NetworkScan : public QThread
-{
-    Q_OBJECT
+//class NetworkScan : public QThread    // todo
+//{
+//    Q_OBJECT
 
-    void run() override
-    {
-
-
+//    void run() override
+//    {
 
 
 
-    }
 
 
-signals:
+//    }
+
+
+//signals:
 
 
 
-};
+//};
 
 
 
