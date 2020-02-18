@@ -20,7 +20,7 @@
 #include "dataconverter.h"
 #include "saveconfiguration.h"
 #include "appargs.h"
-
+#include "communication.h"
 
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
@@ -29,15 +29,10 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    sw = new SerialWorker(this);
-    connect(sw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
 
-    nw = new NetworkWorker(this);
-    connect(nw, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
+    communic = new Communication(this);
 
     dialog_connect = new Dialog_connect(this);
-    dialog_connect->setSw(sw);
-    dialog_connect->setNw(nw);
     connect(dialog_connect, SIGNAL(tryConnect(int)), this,
             SLOT(tryConnectDevice(int)));
 
@@ -61,22 +56,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 //////////////////////////////////////////////////////////////////////
 void MainWindow::connectOrDisconnect()
 {
-    switch (config.connectionType)
-    {
-    case serial:
-        sw->close();
-        config.connectionType = none;
-        break;
-    case network:
-        nw->disconnect();
-        config.connectionType = none;
-        break;
-    case none:
-        showConnectionSettings();
-        break;
-    default:
-        config.connectionType = none;
-    }
+    communic->establishToggle();
 }
 //////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::closeEvent
@@ -96,12 +76,8 @@ void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
 
-    saveCfg.data.serial.portName = sw->param.portName;
-    saveCfg.data.serial.baudRate = sw->param.baudRate;
-    saveCfg.data.serial.dataBits = sw->param.dataBits;
-    saveCfg.data.serial.parity = sw->param.parity;
-    saveCfg.data.serial.stopBits = sw->param.stopBits;
-    saveCfg.data.serial.flowControl = sw->param.flowControl;
+    saveCfg.data.serial = sw->param;
+
 
     saveCfg.data.network.IpAddr_Rx = nw->param.IpAddr_Rx;
     saveCfg.data.network.IpAddr_Tx = nw->param.IpAddr_Tx;

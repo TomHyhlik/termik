@@ -13,6 +13,7 @@
 #include "networkworker.h"
 #include "logfile.h"
 #include "runscript.h"
+#include "communication.h"
 
 
 
@@ -79,16 +80,13 @@ enum dataFormat {
     data_ascii, data_hex, data_dec, //data_bin
 };
 
-enum connectionType {
-    serial, network, none
-};
 
 
 
 class appConfiguration {
 public:
 
-    int connectionType;
+//    int connectionType;       todo: rmLater
 
     bool timeLogEnabled;
 
@@ -199,8 +197,8 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-    SerialWorker *sw;
-    NetworkWorker *nw;
+
+    Communication* communic;
     Dialog_connect* dialog_connect;
     LogFile* logFile;
     appConfiguration config;

@@ -23,7 +23,7 @@
         "Timeout": 0
     },
     "Serial": {
-        "Baud rate": 115200,
+        "Baud rate": 9600,
         "Data bits": 8,
         "Flow control": 0,
         "Parity": 0,

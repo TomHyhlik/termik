@@ -16,6 +16,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         appargs.cpp \
+        communication.cpp \
+        communicationworker.cpp \
         dataconverter.cpp \
         logfile.cpp \
         main.cpp \
@@ -29,6 +31,8 @@ SOURCES += \
 
 HEADERS += \
         appargs.h \
+        communication.h \
+        communicationworker.h \
         dataconverter.h \
         logfile.h \
         mainwindow.h \
