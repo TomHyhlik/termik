@@ -76,7 +76,7 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         data.network.port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
 
         QJsonObject jObj_app = jObj.value(QString(JSONTITLE_APP)).toObject();
-        data.app.connectionType = jObj_app.value(QString(JSONTITLE_APP_CONNECTIONTYPE)).toBool();
+//        data.app.connectionType = jObj_app.value(QString(JSONTITLE_APP_CONNECTIONTYPE)).toBool(); // todo
         data.app.timeLogEnabled = jObj_app.value(QString(JSONTITLE_APP_TIMELOGENABLED)).toBool();
         data.app.suffix_tx_enabled = jObj_app.value(QString(JSONTITLE_APP_SUFFIXTXENABLED)).toBool();
         data.app.prefix_tx_enabled = jObj_app.value(QString(JSONTITLE_APP_PREFIXTXENABLED)).toBool();
@@ -133,8 +133,8 @@ QByteArray SaveConfiguration::jsonData_make()
     jObj.insert(JSONTITLE_NETWORK, jObj_network);
 
     QJsonObject jObj_app;
-    jObj_app.insert(JSONTITLE_APP_CONNECTIONTYPE ,
-                    QJsonValue::fromVariant(data.app.connectionType));
+//    jObj_app.insert(JSONTITLE_APP_CONNECTIONTYPE ,
+//                    QJsonValue::fromVariant(data.app.connectionType)); // todo
     jObj_app.insert(JSONTITLE_APP_TIMELOGENABLED ,
                     QJsonValue::fromVariant(data.app.timeLogEnabled));
     jObj_app.insert(JSONTITLE_APP_SUFFIXTXENABLED ,

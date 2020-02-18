@@ -68,7 +68,7 @@ enum logType {
     error, note, info
 };
 
-enum terminalData {
+enum dataToDisplay {
      data_Rx, data_Tx
 };
 
@@ -130,7 +130,6 @@ public:
     ~MainWindow();
 
 private slots:   
-    void dataArrived();
     void EscPressed();
     void moveCursorToEnd();
     void showFindUi();
@@ -163,6 +162,9 @@ private slots:
     void historyTxUpdate();
     void selectScript();
 
+    void terminalOutUpdate(int, QByteArray);
+
+
     void on_checkBox_prefix_stateChanged(int arg1);
     void on_checkBox_suffix_stateChanged(int arg1);
     void on_lineEdit_suffix_textChanged(const QString &arg1);
@@ -189,11 +191,10 @@ private slots:
     void connectOrDisconnect();
 
     void on_checkBox_autoclear_stateChanged(int arg1);
-
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
 
 public slots:
-    void tryConnectDevice(int);
+
 
 private:
     Ui::MainWindow *ui;
@@ -215,7 +216,6 @@ private:
 
     void showMessage(int, QString);
 
-    void terminalOutUpdate(int, QByteArray);
     void TxHistory_add(QByteArray data);
 
     bool stringList_find(QList<QString> list, QString data);

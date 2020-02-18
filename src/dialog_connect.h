@@ -92,6 +92,7 @@ private:
 
     void configurationSave();
 
+    void shortcuts_init();
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
     int getSelectedNetworkProtocol();
@@ -124,7 +125,7 @@ private slots:
 signals:
 
     void connectVia_serial(QString serialPortName);
-    void tryConnect(int);
+    void tryConnect(communicationType);
     void log(int, QString);
 
 

@@ -31,10 +31,15 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
 
     communic = new Communication(this);
+    connect(communic, SIGNAL(displayData(int, QByteArray)),
+            this, SLOT(terminalOutUpdate(int, QByteArray)));
+
 
     dialog_connect = new Dialog_connect(this);
-    connect(dialog_connect, SIGNAL(tryConnect(int)), this,
-            SLOT(tryConnectDevice(int)));
+    dialog_connect->setSw(communic->serial);
+    dialog_connect->setNw(communic->network);
+    connect(dialog_connect, SIGNAL(tryConnect(communicationType)), communic,
+            SLOT(establish(communicationType)));
 
 
     logFile = new LogFile(this);
@@ -76,13 +81,8 @@ void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
 
-    saveCfg.data.serial = sw->param;
-
-
-    saveCfg.data.network.IpAddr_Rx = nw->param.IpAddr_Rx;
-    saveCfg.data.network.IpAddr_Tx = nw->param.IpAddr_Tx;
-    saveCfg.data.network.port_Tx = nw->param.port_Tx;
-    saveCfg.data.network.port_Rx = nw->param.port_Rx;
+    saveCfg.data.serial = communic->getParameters_serial();
+    saveCfg.data.network = communic->getParameters_network();
 
     saveCfg.data.app = config;
 
@@ -92,6 +92,7 @@ void MainWindow::currentAppConfig_save()
     /* save all the data into json file */
     saveCfg.write();
 }
+
 //////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::currentAppConfig_load
 ///     load app configuration from json file at app startup
@@ -99,19 +100,9 @@ void MainWindow::currentAppConfig_load()
 {
     SaveConfiguration saveCfg;
     saveCfg.read();
-    /* load serialworker parameters */
-    sw->param.portName = saveCfg.data.serial.portName;
-    sw->param.baudRate = saveCfg.data.serial.baudRate;
-    sw->param.dataBits = saveCfg.data.serial.dataBits;
-    sw->param.parity = saveCfg.data.serial.parity;
-    sw->param.stopBits = saveCfg.data.serial.stopBits;
-    sw->param.flowControl = saveCfg.data.serial.flowControl;
 
-    /* load networkworker parameters */
-    nw->param.IpAddr_Rx = saveCfg.data.network.IpAddr_Rx;
-    nw->param.IpAddr_Tx = saveCfg.data.network.IpAddr_Tx;
-    nw->param.port_Tx = saveCfg.data.network.port_Tx;
-    nw->param.port_Rx = saveCfg.data.network.port_Rx;
+    communic->setParameters_serial(saveCfg.data.serial);
+    communic->setParameters_network(saveCfg.data.network);
 
     /* load script parameters */
     if (!saveCfg.data.script.fileName.isEmpty()) {
@@ -168,7 +159,6 @@ void MainWindow::saveToFile_init()
 //////////////////////////////////////////////////////////////////////
 void MainWindow::configInit()
 {
-    config.connectionType = none;
     config.timeInfoEnabled = false;
     config.timeLogEnabled = true;
     config.clearOutputLine = true;
@@ -218,9 +208,9 @@ void MainWindow::handleAppArguments(QStringList arguments)
         }
     }
 
-    if (config.connectionType != none) {
+    if (communic->connType != comType_none) {
         qDebug() << "Trying to connect automatically";
-        tryConnectDevice(config.connectionType);
+        communic->establish();
     }
 }
 
@@ -233,41 +223,41 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
     switch (appargs.indexOf(command))
     {
     case ARG_INDEX_NETWORK_IPADDR:
-        nw->param.IpAddr_Tx = QHostAddress(passedData);
-        if (nw->param.IpAddr_Tx.isNull())
+        communic->network->param.IpAddr_Tx = QHostAddress(passedData);
+        if (communic->network->param.IpAddr_Tx.isNull())
             ok = false;
         break;
     case ARG_INDEX_NETWORK_TXPORT:
-        nw->param.port_Tx = quint16(passedData.toInt(&ok, 10));
+        communic->network->param.port_Tx = quint16(passedData.toInt(&ok, 10));
         break;
     case ARG_INDEX_NETWORK_RXPORT:
-        nw->param.port_Rx = quint16(passedData.toInt(&ok, 10));
+        communic->network->param.port_Rx = quint16(passedData.toInt(&ok, 10));
         break;
 
     case ARG_INDEX_SERIAL_PORTNAME:
-        sw->param.portName = passedData;
+        communic->serial->param.portName = passedData;
         break;
     case ARG_INDEX_SERIAL_BAUDRATE:
-        sw->param.baudRate = passedData.toInt(&ok, 10);
+        communic->serial->param.baudRate = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_DATABITS:
-        sw->param.dataBits = passedData.toInt(&ok, 10);
+        communic->serial->param.dataBits = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_PARITY:
-        sw->param.parity = passedData.toInt(&ok, 10);
+        communic->serial->param.parity = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_STOPBITS:
-        sw->param.stopBits = passedData.toInt(&ok, 10);
+        communic->serial->param.stopBits = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_FLOWCONTROL:
-        sw->param.flowControl = passedData.toInt(&ok, 10);
+        communic->serial->param.flowControl = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_CONNECTIONTYPE:
         if (passedData == ARG_CONNECTIONTYPE_SERIAL) {
-            config.connectionType = serial;
+            communic->connType = comType_serial;
         }
         else if (passedData == ARG_CONNECTIONTYPE_NETWORK) {
-            config.connectionType = network;
+            communic->connType = comType_network;
         }
         else {
             qDebug() << "Failed to handle arguments: " << command << " " << passedData;
@@ -334,40 +324,6 @@ void MainWindow::handleAppArguments_printHelp_wrap(QString cmd, QString argTitle
     //             << cmd.toStdString().c_str()
     //             << "\t\t"
     //             << argTitle.toStdString().c_str();
-}
-
-//////////////////////////////////////////////////////////////////////
-void MainWindow::tryConnectDevice(int connectionType)
-{
-    bool connectedSuccessfully = false;
-    QString deviceName;
-
-    switch (connectionType)
-    {
-    case serial:
-        connectedSuccessfully = sw->open();
-        deviceName = sw->param.portName;
-        break;
-    case network:
-        connectedSuccessfully = nw->connectDevice();
-        deviceName = QString("%1:%2")
-                .arg(nw->param.IpAddr_Tx.toString())
-                .arg(QString::number(int(nw->param.port_Tx)));
-        break;
-    case none:
-        break;
-    }
-
-    if (connectedSuccessfully) {
-        config.connectionType = connectionType;
-        showMessage(note, QString("Connected to: %1").arg(deviceName));
-        ui->lineEdit_in_ascii->setFocus();
-        currentAppConfig_save();
-    } else {
-        config.connectionType = none;
-        showMessage(error, QString("Failed to connect to: %1").arg(deviceName));
-        dialog_connect->show();
-    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -518,7 +474,7 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx_fromDataInput(int inputType)
 {
-    if (config.connectionType == none) {
+    if (communic->connType == comType_none) {
         showMessage(error, "No connection established.");
         return;
     }
@@ -545,7 +501,7 @@ void MainWindow::Tx_fromDataInput(int inputType)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_Tx(QByteArray txData)
 {
-    if (config.connectionType == none) {
+    if (communic->connType == comType_none) {
         showMessage(error, "No connection established.");
         return;
     }
@@ -559,13 +515,15 @@ void MainWindow::on_Tx(QByteArray txData)
         txData.append(config.suffix_tx);
 
     /* transmit the data */
-    switch (config.connectionType)
+    switch (communic->connType)
     {
-    case serial:
-        sw->write(txData);
+    case comType_serial:
+        communic->serial->write(txData);
         break;
-    case network:
-        nw->write(txData);
+    case comType_network:
+        communic->network->write(txData);
+        break;
+    case comType_none:
         break;
     }
 
@@ -736,24 +694,7 @@ void MainWindow::focus_3()
     ui->lineEdit_in_dec->setFocus();
 }
 
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::dataArrived
-///     process the list of received data
-void MainWindow::dataArrived()
-{
-    /* get the data from apropriate class */
-    switch (config.connectionType)
-    {
-    case serial:
-        terminalOutUpdate(data_Rx, sw->ReadAllRx());
-        break;
-    case network:
-        terminalOutUpdate(data_Rx, nw->readAllRx());
-        break;
-    case none:
-        break;
-    }
-}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::showMessage(int type, QString messageData)
 {   

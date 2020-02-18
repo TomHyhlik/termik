@@ -18,21 +18,16 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui(new Ui::Dialog_connect)
 {
     ui->setupUi(this);
-    ui->tabWidget->setCurrentIndex(serial);
+    ui->tabWidget->setCurrentIndex(0);
 
-    /* add shortcuts */
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
+    shortcuts_init();
 
     table_network_init();
     table_serial_init();
 
     setWindowTitle(TITLE_THIS_WINDOW);
-    ui->tabWidget->setTabText(serial, TITLE_TAB_SERIAL);
-    ui->tabWidget->setTabText(network, TITLE_TAB_NETWORK);
+    ui->tabWidget->setTabText(0, TITLE_TAB_SERIAL);
+    ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
     ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
     ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
 
@@ -46,6 +41,17 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
     currentTab = ui->tabWidget->currentIndex();
+
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::shortcuts_init()
+{
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
 
 }
 
@@ -435,11 +441,11 @@ void Dialog_connect::on_buttonBox_accepted()
     /* connect */
     switch (ui->tabWidget->currentIndex())
     {
-    case serial:
-        emit tryConnect(serial);
+    case 0:
+        emit tryConnect(comType_serial);
         break;
-    case network:
-        emit tryConnect(network);
+    case 1:
+        emit tryConnect(comType_network);
         break;
     }
 }

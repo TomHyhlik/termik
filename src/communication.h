@@ -17,23 +17,53 @@ class Communication : public QObject
     Q_OBJECT
 
 
-    NetworkWorker* network;
-    SerialWorker* serial;
 
 
 
 public:
     explicit Communication(QObject *parent = nullptr);
 
+
+    NetworkWorker* network;
+    SerialWorker* serial;
+
+
     void establishToggle();
 
-    void isEstablished();
+    bool isEstablished();
+
+    communicationType connType;
+
+
+
+    NetworkWorkerParameters getParameters_network() {
+        return  network->param;
+    }
+    SerialWorkerParameters getParameters_serial() {
+        return serial->param;
+    }
+    void setParameters_network(NetworkWorkerParameters val) {
+        network->param = val;
+    }
+    void setParameters_serial(SerialWorkerParameters val) {
+        serial->param = val;
+    }
+
+public slots:
+
+    void establish();
+    void establish(communicationType);
+
+private slots:
+    void dataArrived();
 
 
 
 signals:
     void connected();
     void disconnected();
+
+    void displayData(int, QByteArray);
 
 };
 
