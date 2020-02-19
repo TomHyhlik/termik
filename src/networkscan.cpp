@@ -26,29 +26,21 @@ void NetworkScan::scanNetwork_addHost(QHostInfo host)
 //////////////////////////////////////////////////
 void NetworkScan::start()
 {
-    //    param.allHosts.clear();
-    QList <QHostInfo> addresses = get_addrs_devThis();
+    for (const QHostInfo& addr_devThis : get_addrs_devThis())
+    {
+        for (quint32 addrLastByte = 0; addrLastByte < 255; addrLastByte++)
+        {
+            quint32 addr = addr_devThis.addresses().first().toIPv4Address();
+            addr = (addr & ADDRSCAN_MASK) | addrLastByte;
+            searchedLast = QHostAddress(addr);
+            QHostInfo::lookupHost(QHostAddress(addr).toString(),
+                                  this, SLOT(scanNetwork_printResults(QHostInfo)));
+            //                    QHostInfo::lookupHost(QString("10.0.0.%1").arg(i, 0, 10), // todo select ip addr
+            //                                          this, SLOT(scanNetwork_printResults(QHostInfo)));
 
-    for (int j = 0; j < addresses.size(); j++) {
-        QList <QHostAddress> as = addresses.at(j).addresses();
-        if (!as.isEmpty()) {
-            QHostAddress a = as.first();
-            //            if (!a.isLoopback()) {
-            for (quint32 i = 0; i < 255; i++) {
-                quint32 val = a.toIPv4Address();
-                val = val & 0xFFFFFF00;
-                QHostAddress searched(val | i);
-                searchedLast = searched;
-                QHostInfo::lookupHost(searched.toString(),
-                                      this, SLOT(scanNetwork_printResults(QHostInfo)));
-                //                    QHostInfo::lookupHost(QString("10.0.0.%1").arg(i, 0, 10), // todo select ip addr
-                //                                          this, SLOT(scanNetwork_printResults(QHostInfo)));
-            }
-            //            }
         }
     }
 }
-
 
 //////////////////////////////////////////////////
 void NetworkScan::scanNetwork_printResults(QHostInfo host)
@@ -61,7 +53,7 @@ void NetworkScan::scanNetwork_printResults(QHostInfo host)
             //            QHostAddress addr = host.addresses().first();
             QHostAddress a(host.hostName());
             if (a.isNull()) {
-                //                qDebug() << "Addr: " << addrs.first().toString() << "Name: " << host.hostName();
+                // qDebug() << "Addr: " << addrs.first().toString() << "Name: " << host.hostName();
                 scanNetwork_addHost(host);
             }
 
@@ -72,8 +64,6 @@ void NetworkScan::scanNetwork_printResults(QHostInfo host)
     } else {
         qDebug() << "Lookup failed:" << host.errorString();
     }
-
-
 
     //    const auto addresses = host.addresses();
     //    for (const QHostAddress &address : addresses) {

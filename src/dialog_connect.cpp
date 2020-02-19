@@ -43,40 +43,9 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 
     networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
     connect(networkScan.data(), SIGNAL(finished()), this, SLOT(on_scanFinished()));
-
     timer_updatePorts.data()->start(SERIALPORT_REFRESH_PERIOD);
 
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::on_scanFinished()
-{
-    table_clear(ui->tableWidget_addr_rx);
-    table_clear(ui->tableWidget_addr_tx);
-
-    QList <QHostInfo> ipAddrs_rx = networkScan->get_addrs_devThis();
-    for (int i = 0; i < ipAddrs_rx.size(); i++) {
-
-        QHostInfo host = ipAddrs_rx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
-        }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_rx, element);
-    }
-
-    QList <QHostInfo> ipAddrs_tx = networkScan->get_addrs_devAll();
-    for (int i = 0; i < ipAddrs_tx.size(); i++) {
-        QHostInfo host = ipAddrs_tx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
-        }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_tx, element);
-    }
-
+    refreshDevices();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -236,6 +205,38 @@ void Dialog_connect::table_clear(QTableWidget* table)
     /* set column size to widget size */
     table->horizontalHeader()->setStretchLastSection(true);
 }
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::on_scanFinished()
+{
+    table_clear(ui->tableWidget_addr_rx);
+    table_clear(ui->tableWidget_addr_tx);
+
+    QList <QHostInfo> ipAddrs_rx = networkScan->get_addrs_devThis();
+    for (int i = 0; i < ipAddrs_rx.size(); i++) {
+
+        QHostInfo host = ipAddrs_rx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_rx, element);
+    }
+
+    QList <QHostInfo> ipAddrs_tx = networkScan->get_addrs_devAll();
+    for (int i = 0; i < ipAddrs_tx.size(); i++) {
+        QHostInfo host = ipAddrs_tx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_tx, element);
+    }
+
+}
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {

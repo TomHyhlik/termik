@@ -5,6 +5,8 @@
 
 #include <QHostInfo>
 
+#define ADDRSCAN_MASK   0xFFFFFF00
+
 class NetworkScan : public QObject
 {
     Q_OBJECT
