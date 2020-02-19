@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>835</width>
-    <height>389</height>
+    <width>905</width>
+    <height>369</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,30 +27,37 @@
       <attribute name="title">
        <string>Tab 1</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QTableWidget" name="tableWidget_serialPorts"/>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QLabel" name="label_serialPortName">
-               <property name="text">
-                <string>Name</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEdit_serialPortName"/>
-             </item>
-            </layout>
-           </item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <item>
+                <widget class="QLabel" name="label_serialPortName">
+                 <property name="text">
+                  <string>Name</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEdit_serialPortName">
+                 <property name="minimumSize">
+                  <size>
+                   <width>180</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
              <item>
               <widget class="QLabel" name="label_baudRate">
                <property name="text">
@@ -62,7 +69,7 @@
               <widget class="QComboBox" name="comboBox_baudRate">
                <property name="minimumSize">
                 <size>
-                 <width>50</width>
+                 <width>90</width>
                  <height>0</height>
                 </size>
                </property>
@@ -83,25 +90,14 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_dataBits"/>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_13">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QLabel" name="label_flowControl">
-               <property name="text">
-                <string>Flow control</string>
+              <widget class="QComboBox" name="comboBox_dataBits">
+               <property name="minimumSize">
+                <size>
+                 <width>50</width>
+                 <height>0</height>
+                </size>
                </property>
               </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="comboBox_flowControl"/>
              </item>
             </layout>
            </item>
@@ -115,23 +111,47 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_stopBits"/>
+              <widget class="QComboBox" name="comboBox_stopBits">
+               <property name="minimumSize">
+                <size>
+                 <width>60</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
-              <widget class="QLabel" name="label_parity">
+              <widget class="QLabel" name="label_flowControl">
                <property name="text">
-                <string>Parity</string>
+                <string>Flow control</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_parity"/>
+              <widget class="QComboBox" name="comboBox_flowControl">
+               <property name="minimumSize">
+                <size>
+                 <width>70</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
              </item>
             </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_parity">
+             <property name="text">
+              <string>Parity</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox_parity"/>
            </item>
           </layout>
          </item>
