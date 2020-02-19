@@ -115,7 +115,6 @@ namespace Ui {
 class MainWindow;
 }
 
-class Dialog_connect;
 
 class MainWindow : public QMainWindow
 {
@@ -200,7 +199,6 @@ private:
     Ui::MainWindow *ui;
 
     Communication* communic;
-    Dialog_connect* dialog_connect;
     LogFile* logFile;
     appConfiguration config;
     runScript* script;

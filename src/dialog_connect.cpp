@@ -18,29 +18,29 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui(new Ui::Dialog_connect)
 {
     ui->setupUi(this);
-    ui->tabWidget->setCurrentIndex(0);
+
 
     shortcuts_init();
 
     table_network_init();
     table_serial_init();
-
     setWindowTitle(TITLE_THIS_WINDOW);
     ui->tabWidget->setTabText(0, TITLE_TAB_SERIAL);
     ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
     ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
     ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
-
     ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_UDP);
     ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_TCP);
 
     initColors();
     tab_port_init();
 
-    timer_updatePorts = new QTimer(this);
-    connect(timer_updatePorts, SIGNAL(timeout()), this, SLOT(refreshDevices()));
+    ui->tabWidget->setCurrentIndex(0);
 
-    currentTab = ui->tabWidget->currentIndex();
+    timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
+    connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
+
+    timer_updatePorts.data()->start(SERIALPORT_REFRESH_PERIOD);
 
 }
 
@@ -52,44 +52,36 @@ void Dialog_connect::shortcuts_init()
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
-
 }
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::EscPressed()
 {
-        timerRefresh_stop();
         this->close();
 }
 
 /////////////////////////////////////////////////////////////////
-//void Dialog_connect::showEvent(QShowEvent *event)
-//{
-//    qDebug() << "SHOW";
-//    timerRefresh_start();
-//    event->accept();
-//}
+/// \brief Dialog_connect::closeEvent
+///  /// called when the dialog is closed
+void Dialog_connect::closeEvent(QCloseEvent *event)
+{
+//    timer_updatePorts.data()->stop();
 
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::timerRefresh_start()
-{
-    timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
+    QWidget::closeEvent(event);
+
+    this->deleteLater();
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::timerRefresh_stop()
-{
-    timer_updatePorts->stop();
-}
+
 /////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::showEvent
 /// called when the dialog is shown
-void Dialog_connect::showEvent( QShowEvent* event ) {
-    QWidget::showEvent( event );
+void Dialog_connect::showEvent( QShowEvent* event )
+{
+    QWidget::showEvent(event);
 
     refreshParameters();
 
 //    qDebug() << "Dialog_connect SHOW";
-    timerRefresh_start();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -272,8 +264,8 @@ void Dialog_connect::serialPort_nameRefresh()
             table_serial_add(currentAvailablePorts.at(j));
         }
     }
-
 }
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
 {
@@ -339,6 +331,7 @@ void Dialog_connect::tab_port_init()
     }
     ui->comboBox_baudRate->setCurrentText("115200");
     ui->comboBox_dataBits->setCurrentText("8");
+
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::fillBaudRate()
@@ -410,19 +403,12 @@ Dialog_connect::~Dialog_connect()
 {
     delete ui;
 }
-///////////////////////////////////////////////////////////////////////
-void Dialog_connect::on_tabWidget_currentChanged(int index)
-{
-    currentTab = index;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 /// \brief Dialog_connect::on_buttonBox_accepted
 ///     read all parameters from the UI
 void Dialog_connect::on_buttonBox_accepted()
 {
-    timerRefresh_stop();
-
     /* load the  port configuration to the sw class */
     sw->param.portName = ui->lineEdit_serialPortName->text();
     sw->param.baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
@@ -452,7 +438,6 @@ void Dialog_connect::on_buttonBox_accepted()
 /////////////////////////////////////////////////////////////////////
 void Dialog_connect::on_buttonBox_rejected()
 {
-    timerRefresh_stop();
 }
 /////////////////////////////////////////////////////////////////////
 int Dialog_connect::getSelectedNetworkProtocol()

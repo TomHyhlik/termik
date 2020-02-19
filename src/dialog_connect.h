@@ -7,6 +7,8 @@
 #include <QTimer>
 #include <QTableWidget>
 
+
+
 #include "mainwindow.h"
 
 #define PORT_RANGE  65535
@@ -24,7 +26,7 @@
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
 
-#define SERIALPORT_REFRESH_PERIOD  300
+#define SERIALPORT_REFRESH_PERIOD  100
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"
@@ -40,15 +42,15 @@ class Dialog_connect : public QDialog
 {
     Q_OBJECT
 
+
+    void showEvent(QShowEvent *event);
+    void closeEvent(QCloseEvent *event);
+
+
+
 public:
     explicit Dialog_connect(QWidget *parent = nullptr);
     ~Dialog_connect();
-
-    int getCurrentTab(){
-        return currentTab;
-    }
-
-    void showEvent(QShowEvent *event);
 
     void setSw(SerialWorker * val){
         sw = val;
@@ -57,16 +59,10 @@ public:
         nw = val;
     }
 
-    void timerRefresh_start();
-    void timerRefresh_stop();
-
-
 private:
     Ui::Dialog_connect *ui;
     SerialWorker* sw;
     NetworkWorker* nw;
-
-    int currentTab;
 
     void initColors();
 
@@ -88,7 +84,9 @@ private:
     void fillstopBits();
     void fillflowControl();
 
-    QTimer *timer_updatePorts;
+
+
+    QSharedPointer <QTimer> timer_updatePorts;
 
     void configurationSave();
 
@@ -108,7 +106,6 @@ private slots:
     void serialPort_nameRefresh();
     void refreshDevices();
 
-    void on_tabWidget_currentChanged(int index);
     void on_buttonBox_accepted();
     void on_buttonBox_rejected();
 
