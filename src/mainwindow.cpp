@@ -47,7 +47,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
     currentAppConfig_load();
     handleAppArguments(arguments);
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -116,6 +115,7 @@ void MainWindow::currentAppConfig_load()
     /* todo: continue here, load the saveCfg.data.app to ui */
 
 }
+
 //////////////////////////////////////////////////////////////////////
 void MainWindow::selectScript()
 {
@@ -437,8 +437,8 @@ void MainWindow::pushButton_runScript_setColor_red()
 void MainWindow::showConnectionSettings()
 {
     Dialog_connect* dialog_connect = new Dialog_connect(this);
-    dialog_connect->setSw(communic->serial);
-    dialog_connect->setNw(communic->network);
+    dialog_connect->setParamPtr_serial(&communic->serial->param);
+    dialog_connect->setParamPtr_network(&communic->network->param);
     connect(dialog_connect, SIGNAL(tryConnect(communicationType)), communic,
             SLOT(establish(communicationType)));
 

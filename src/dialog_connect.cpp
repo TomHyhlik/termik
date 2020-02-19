@@ -79,28 +79,27 @@ void Dialog_connect::showEvent( QShowEvent* event )
 {
     QWidget::showEvent(event);
 
-    refreshParameters();
+    loadParametersToUi();
 
 //    qDebug() << "Dialog_connect SHOW";
 }
 
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::refreshParameters()
+void Dialog_connect::loadParametersToUi()
 {
-    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, sw->param.baudRate));
-    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, sw->param.dataBits));
-    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, sw->param.parity));
-    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, sw->param.stopBits));
-    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, sw->param.flowControl));
+    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, param_sw->baudRate));
+    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, param_sw->dataBits));
+    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, param_sw->parity));
+    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, param_sw->stopBits));
+    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, param_sw->flowControl));
 
+    if (!param_nw->IpAddr_Rx.toString().isEmpty())
+        ui->lineEdit_selectedAddr_rx->setText(param_nw->IpAddr_Rx.toString());
+    if (!param_nw->IpAddr_Tx.toString().isEmpty())
+        ui->lineEdit_selectedAddr_tx->setText(param_nw->IpAddr_Tx.toString());
 
-    if (!nw->param.IpAddr_Rx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_rx->setText(nw->param.IpAddr_Rx.toString());
-    if (!nw->param.IpAddr_Tx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_tx->setText(nw->param.IpAddr_Tx.toString());
-
-    ui->spinBox_ipPort_Tx->setValue(nw->param.port_Tx);
-    ui->spinBox_ipPort_Rx->setValue(nw->param.port_Rx);
+    ui->spinBox_ipPort_Tx->setValue(param_nw->port_Tx);
+    ui->spinBox_ipPort_Rx->setValue(param_nw->port_Rx);
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_network_init()
@@ -198,29 +197,29 @@ void Dialog_connect::networkHosts_refresh()
     table_clear(ui->tableWidget_addr_rx);
     table_clear(ui->tableWidget_addr_tx);
 
-    nw->scanNetwork();
-    QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
-    for (int i = 0; i < ipAddrs_rx.size(); i++) {
+//    nw->scanNetwork();
+//    QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
+//    for (int i = 0; i < ipAddrs_rx.size(); i++) {
 
-        QHostInfo host = ipAddrs_rx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
-        }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_rx, element);
-    }
+//        QHostInfo host = ipAddrs_rx.at(i);
+//        QStringList element;
+//        if (!host.addresses().isEmpty()) {
+//            element << host.addresses().first().toString();
+//        }
+//        element << host.hostName();
+//        table_addItem(ui->tableWidget_addr_rx, element);
+//    }
 
-    QList <QHostInfo> ipAddrs_tx = nw->getAll_iPaddr_tx();
-    for (int i = 0; i < ipAddrs_tx.size(); i++) {
-        QHostInfo host = ipAddrs_tx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
-        }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_tx, element);
-    }
+//    QList <QHostInfo> ipAddrs_tx = nw->getAll_iPaddr_tx();
+//    for (int i = 0; i < ipAddrs_tx.size(); i++) {
+//        QHostInfo host = ipAddrs_tx.at(i);
+//        QStringList element;
+//        if (!host.addresses().isEmpty()) {
+//            element << host.addresses().first().toString();
+//        }
+//        element << host.hostName();
+//        table_addItem(ui->tableWidget_addr_tx, element);
+//    }
 }
 ///////////////////////////////////////////////////////////////////////
 void Dialog_connect::table_clear(QTableWidget* table)
@@ -410,18 +409,18 @@ Dialog_connect::~Dialog_connect()
 void Dialog_connect::on_buttonBox_accepted()
 {
     /* load the  port configuration to the sw class */
-    sw->param.portName = ui->lineEdit_serialPortName->text();
-    sw->param.baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
-    sw->param.dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
-    sw->param.parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
-    sw->param.stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
-    sw->param.flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
+    param_sw->portName = ui->lineEdit_serialPortName->text();
+    param_sw->baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
+    param_sw->dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
+    param_sw->parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
+    param_sw->stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
+    param_sw->flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
 
-    nw->param.IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
-    nw->param.IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
-    nw->param.port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
-    nw->param.port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
-    nw->param.protocolType = getSelectedNetworkProtocol();
+    param_nw->IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
+    param_nw->IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
+    param_nw->port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
+    param_nw->port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
+    param_nw->protocolType = getSelectedNetworkProtocol();
 
 
     /* connect */

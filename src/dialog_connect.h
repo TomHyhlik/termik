@@ -46,23 +46,23 @@ class Dialog_connect : public QDialog
     void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
 
+    SerialWorkerParameters* param_sw;
+    NetworkWorkerParameters* param_nw;
 
 
 public:
     explicit Dialog_connect(QWidget *parent = nullptr);
     ~Dialog_connect();
 
-    void setSw(SerialWorker * val){
-        sw = val;
+    void setParamPtr_serial(SerialWorkerParameters * val){
+        param_sw = val;
     }
-    void setNw(NetworkWorker * val){
-        nw = val;
+    void setParamPtr_network(NetworkWorkerParameters * val){
+        param_nw = val;
     }
 
 private:
     Ui::Dialog_connect *ui;
-    SerialWorker* sw;
-    NetworkWorker* nw;
 
     void initColors();
 
@@ -111,7 +111,7 @@ private slots:
 
     void focus_1();
     void focus_2();
-    void refreshParameters();
+    void loadParametersToUi();
     void EscPressed();
 
 
