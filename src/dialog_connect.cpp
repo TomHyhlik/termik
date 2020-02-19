@@ -197,7 +197,7 @@ void Dialog_connect::networkHosts_refresh()
     table_clear(ui->tableWidget_addr_rx);
     table_clear(ui->tableWidget_addr_tx);
 
-//    nw->scanNetwork();
+//    nw->scanNetwork();                            // todo
 //    QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
 //    for (int i = 0; i < ipAddrs_rx.size(); i++) {
 
