@@ -12,6 +12,7 @@
 
 #define TITLE_NAME      "Name"
 #define TITLE_ADDR      "Address"
+#include "networkscan.h"
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
     QDialog(parent),
@@ -40,7 +41,41 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
     connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
+    networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
+    connect(networkScan.data(), SIGNAL(finished()), this, SLOT(on_scanFinished()));
+
     timer_updatePorts.data()->start(SERIALPORT_REFRESH_PERIOD);
+
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::on_scanFinished()
+{
+    table_clear(ui->tableWidget_addr_rx);
+    table_clear(ui->tableWidget_addr_tx);
+
+    QList <QHostInfo> ipAddrs_rx = networkScan->get_addrs_devThis();
+    for (int i = 0; i < ipAddrs_rx.size(); i++) {
+
+        QHostInfo host = ipAddrs_rx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_rx, element);
+    }
+
+    QList <QHostInfo> ipAddrs_tx = networkScan->get_addrs_devAll();
+    for (int i = 0; i < ipAddrs_tx.size(); i++) {
+        QHostInfo host = ipAddrs_tx.at(i);
+        QStringList element;
+        if (!host.addresses().isEmpty()) {
+            element << host.addresses().first().toString();
+        }
+        element << host.hostName();
+        table_addItem(ui->tableWidget_addr_tx, element);
+    }
 
 }
 
@@ -188,39 +223,9 @@ void Dialog_connect::initColors()
 void Dialog_connect::refreshDevices()
 {
     serialPort_nameRefresh();
-    networkHosts_refresh();
+    networkScan->start();
 }
 
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::networkHosts_refresh()
-{
-    table_clear(ui->tableWidget_addr_rx);
-    table_clear(ui->tableWidget_addr_tx);
-
-//    nw->scanNetwork();                            // todo
-//    QList <QHostInfo> ipAddrs_rx = nw->getAll_iPaddr_rx();
-//    for (int i = 0; i < ipAddrs_rx.size(); i++) {
-
-//        QHostInfo host = ipAddrs_rx.at(i);
-//        QStringList element;
-//        if (!host.addresses().isEmpty()) {
-//            element << host.addresses().first().toString();
-//        }
-//        element << host.hostName();
-//        table_addItem(ui->tableWidget_addr_rx, element);
-//    }
-
-//    QList <QHostInfo> ipAddrs_tx = nw->getAll_iPaddr_tx();
-//    for (int i = 0; i < ipAddrs_tx.size(); i++) {
-//        QHostInfo host = ipAddrs_tx.at(i);
-//        QStringList element;
-//        if (!host.addresses().isEmpty()) {
-//            element << host.addresses().first().toString();
-//        }
-//        element << host.hostName();
-//        table_addItem(ui->tableWidget_addr_tx, element);
-//    }
-}
 ///////////////////////////////////////////////////////////////////////
 void Dialog_connect::table_clear(QTableWidget* table)
 {

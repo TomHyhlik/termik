@@ -5,7 +5,6 @@
 #include <QUdpSocket>
 #include <QTcpSocket>
 #include <QNetworkInterface>
-#include <QThread>
 
 #include <QDebug>
 
@@ -13,20 +12,15 @@
 
 #include "communicationworker.h"
 
-
-class NetworkWorkerParameters {
-public:
-
-
+/////////////////////////////////////////////////////////////////////////
+struct NetworkWorkerParameters
+{
     QHostAddress IpAddr_Tx;
     QHostAddress IpAddr_Rx;
 
     quint16 port_Tx;
     quint16 port_Rx;
     int protocolType;
-
-    QList <QHostInfo> allHosts;
-
 };
 
 enum protocolType {
@@ -44,16 +38,12 @@ class NetworkWorker : public CommunicationWorker
 
     bool tcpConnected;
 
-    void scanNetwork_addHost(QHostInfo host);
 
 public:
     explicit NetworkWorker();
 
 
     NetworkWorkerParameters param;
-
-    QList <QHostInfo> getAll_iPaddr_rx();
-    QList <QHostInfo> getAll_iPaddr_tx();
 
 //    void send(QString IPaddress, quint16 port, QByteArray data);
 
@@ -63,10 +53,8 @@ public:
     QByteArray readAllRx() override;
 
     bool tcpIsConnected();
-    void scanNetwork();
 
 signals:
-
     void packetArrived(QString, quint32,  QString);
 
 
@@ -78,55 +66,11 @@ public slots:
     void connected();
     void disconnected();
     void on_dataReceived(QByteArray);
-
-    void scanNetwork_printResults(QHostInfo);
     bool write(QByteArray data) override;
 
 
 };
 ////////////////////////////////////////////////////////////
-
-
-
-
-//class NetworkScan : public QThread    // todo
-//{
-//    Q_OBJECT
-
-//    void run() override
-//    {
-
-
-
-
-
-//    }
-
-
-//signals:
-
-
-
-//};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif // NETWORKWORKER_H

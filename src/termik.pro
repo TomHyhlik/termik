@@ -23,6 +23,7 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         dialog_connect.cpp \
+        networkscan.cpp \
         networkworker.cpp \
         runscript.cpp \
         saveconfiguration.cpp \
@@ -37,6 +38,7 @@ HEADERS += \
         logfile.h \
         mainwindow.h \
         dialog_connect.h \
+        networkscan.h \
         networkworker.h \
         runscript.h \
         saveconfiguration.h \

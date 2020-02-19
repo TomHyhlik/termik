@@ -7,8 +7,7 @@
 #include <QTimer>
 #include <QTableWidget>
 
-
-
+#include "networkscan.h"
 #include "mainwindow.h"
 
 #define PORT_RANGE  65535
@@ -87,6 +86,7 @@ private:
 
 
     QSharedPointer <QTimer> timer_updatePorts;
+    QSharedPointer <NetworkScan> networkScan;
 
     void configurationSave();
 
@@ -102,7 +102,7 @@ private:
     void table_addItem(QTableWidget* table, QStringList l);
 
 private slots:
-    void networkHosts_refresh();
+
     void serialPort_nameRefresh();
     void refreshDevices();
 
@@ -114,6 +114,7 @@ private slots:
     void loadParametersToUi();
     void EscPressed();
 
+    void on_scanFinished();
 
     void on_tableWidget_addr_tx_cellClicked(int row, int column);
     void on_tableWidget_addr_rx_cellClicked(int row, int column);
