@@ -128,11 +128,6 @@ void Dialog_connect::table_serial_init()
     ui->tableWidget_serialPorts->setHorizontalHeaderLabels(titles);
 
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
-{
-
-}
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::blockAllsignals(bool state)
@@ -205,18 +200,25 @@ void Dialog_connect::table_clear(QTableWidget* table)
 }
 
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::networkScanFinished()
+void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
+{
+    QStringList element;
+    element << host.addresses().first().toString() << host.hostName();
+    table_addItem(tableWidget, element);
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_updateHosts(QTableWidget* tableWidget,
+                                       const QList <QHostInfo> hosts)
 {
     bool isHere;
 
-    /* addrs_rx aka devThis */
     /* remove missing*/
-    isHere= false;
-    for (int i = 0; i < ui->tableWidget_addr_rx->rowCount(); i++)
+    for (int i = 0; i < tableWidget->rowCount(); i++)
     {
-        for (const QHostInfo& host : networkScan->get_addrs_devThis())
+        for (const QHostInfo& host : hosts)
         {
-            if (ui->tableWidget_addr_rx->item(i, 0)->text()
+            if (tableWidget->item(i, 0)->text()
                     == host.addresses().first().toString())
             {
                 isHere = true;
@@ -224,16 +226,16 @@ void Dialog_connect::networkScanFinished()
             }
         }
         if (!isHere) {
-            ui->tableWidget_addr_rx->removeRow(i);
+            tableWidget->removeRow(i);
         }
     }
     /* add new */
     isHere= false;
-    for (const QHostInfo& host : networkScan->get_addrs_devThis())
+    for (const QHostInfo& host : hosts)
     {
-        for (int i = 0; i < ui->tableWidget_addr_rx->rowCount(); i++)
+        for (int i = 0; i < tableWidget->rowCount(); i++)
         {
-            if (ui->tableWidget_addr_rx->item(i, 0)->text()
+            if (tableWidget->item(i, 0)->text()
                     == host.addresses().first().toString())
             {
                 isHere = true;
@@ -241,49 +243,16 @@ void Dialog_connect::networkScanFinished()
             }
         }
         if (!isHere) {
-            QStringList element;
-            element << host.addresses().first().toString() << host.hostName();
-            table_addItem(ui->tableWidget_addr_rx, element);
+            table_addHost(tableWidget, host);
         }
     }
+}
 
-    /* addrs_rx aka devThis */
-    /* remove missing*/
-    isHere= false;
-    for (int i = 0; i < ui->tableWidget_addr_tx->rowCount(); i++)
-    {
-        for (const QHostInfo& host : networkScan->get_addrs_devAll())
-        {
-            if (ui->tableWidget_addr_tx->item(i, 0)->text()
-                    == host.addresses().first().toString())
-            {
-                isHere = true;
-                break;
-            }
-        }
-        if (!isHere) {
-            ui->tableWidget_addr_tx->removeRow(i);
-        }
-    }
-    /* add new */
-    isHere= false;
-    for (const QHostInfo& host : networkScan->get_addrs_devAll())
-    {
-        for (int i = 0; i < ui->tableWidget_addr_tx->rowCount(); i++)
-        {
-            if (ui->tableWidget_addr_tx->item(i, 0)->text()
-                    == host.addresses().first().toString())
-            {
-                isHere = true;
-                break;
-            }
-        }
-        if (!isHere) {
-            QStringList element;
-            element << host.addresses().first().toString() << host.hostName();
-            table_addItem(ui->tableWidget_addr_tx, element);
-        }
-    }
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::networkScanFinished()
+{
+    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
+    table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
 }
 
 /////////////////////////////////////////////////////////////////
@@ -383,8 +352,8 @@ void Dialog_connect::tab_port_init()
     for (auto e :  flowControlS.toStdMap() ) {
         ui->comboBox_flowControl->addItem(e.second);
     }
-    ui->comboBox_baudRate->setCurrentText("115200");
-    ui->comboBox_dataBits->setCurrentText("8");
+    ui->comboBox_baudRate->setCurrentText(DEFAULT_BAUDRATE);
+    ui->comboBox_dataBits->setCurrentText(DEFAULT_DATABITS);
 
 }
 /////////////////////////////////////////////////////////////////
@@ -477,7 +446,6 @@ void Dialog_connect::on_buttonBox_accepted()
     param_nw->port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     param_nw->port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
     param_nw->protocolType = getSelectedNetworkProtocol();
-
 
     /* connect */
     switch (ui->tabWidget->currentIndex())

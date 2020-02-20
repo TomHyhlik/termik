@@ -25,6 +25,9 @@
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
 
+#define DEFAULT_BAUDRATE        "115200"
+#define DEFAULT_DATABITS        "8"
+
 #define SERIALPORT_REFRESH_PERIOD  500
 
 #define NETWORKPROTOCOL_UDP     "UDP"
@@ -98,6 +101,9 @@ private:
     void table_clear(QTableWidget* table);
     void table_serial_add(QSerialPortInfo);
     void table_addItem(QTableWidget* table, QStringList l);
+
+    void table_updateHosts(QTableWidget* tableWidget, const QList <QHostInfo> hosts);
+
 
 private slots:
 
