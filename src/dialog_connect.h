@@ -83,8 +83,6 @@ private:
     void fillstopBits();
     void fillflowControl();
 
-
-
     QSharedPointer <QTimer> timer_updatePorts;
     QSharedPointer <NetworkScan> networkScan;
 
@@ -114,7 +112,7 @@ private slots:
     void loadParametersToUi();
     void EscPressed();
 
-    void on_scanFinished();
+    void networkScanFinished();
 
     void on_tableWidget_addr_tx_cellClicked(int row, int column);
     void on_tableWidget_addr_rx_cellClicked(int row, int column);

@@ -42,8 +42,8 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
     networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
-    connect(networkScan.data(), SIGNAL(finished()), this, SLOT(on_scanFinished()));
-    timer_updatePorts.data()->start(SERIALPORT_REFRESH_PERIOD);
+    connect(networkScan.data(), SIGNAL(finished()), this, SLOT(networkScanFinished()));
+    timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
 
     refreshDevices();
 }
@@ -61,7 +61,7 @@ void Dialog_connect::shortcuts_init()
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::EscPressed()
 {
-        this->close();
+    this->close();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -69,8 +69,6 @@ void Dialog_connect::EscPressed()
 ///  /// called when the dialog is closed
 void Dialog_connect::closeEvent(QCloseEvent *event)
 {
-//    timer_updatePorts.data()->stop();
-
     QWidget::closeEvent(event);
 
     this->deleteLater();
@@ -85,7 +83,7 @@ void Dialog_connect::showEvent( QShowEvent* event )
 
     loadParametersToUi();
 
-//    qDebug() << "Dialog_connect SHOW";
+    //    qDebug() << "Dialog_connect SHOW";
 }
 
 /////////////////////////////////////////////////////////////////
@@ -166,26 +164,26 @@ void Dialog_connect::initColors()
     ui->comboBox_parity->setStyleSheet(QString("color: %1; background-color: %2")
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_serialPortName->setStyleSheet(QString("color: %1; background-color: %2")
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->comboBox_networkProtocol->setStyleSheet(QString("color: %1; background-color: %2")
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->spinBox_ipPort_Tx->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_serialPorts->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->tableWidget_addr_tx->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_selectedAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
-                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
 /////////////////////////////////////////////////////////////////
@@ -207,34 +205,85 @@ void Dialog_connect::table_clear(QTableWidget* table)
 }
 
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::on_scanFinished()
+void Dialog_connect::networkScanFinished()
 {
-    table_clear(ui->tableWidget_addr_rx);
-    table_clear(ui->tableWidget_addr_tx);
+    bool isHere;
 
-    QList <QHostInfo> ipAddrs_rx = networkScan->get_addrs_devThis();
-    for (int i = 0; i < ipAddrs_rx.size(); i++) {
-
-        QHostInfo host = ipAddrs_rx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
+    /* addrs_rx aka devThis */
+    /* remove missing*/
+    isHere= false;
+    for (int i = 0; i < ui->tableWidget_addr_rx->rowCount(); i++)
+    {
+        for (const QHostInfo& host : networkScan->get_addrs_devThis())
+        {
+            if (ui->tableWidget_addr_rx->item(i, 0)->text()
+                    == host.addresses().first().toString())
+            {
+                isHere = true;
+                break;
+            }
         }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_rx, element);
+        if (!isHere) {
+            ui->tableWidget_addr_rx->removeRow(i);
+        }
+    }
+    /* add new */
+    isHere= false;
+    for (const QHostInfo& host : networkScan->get_addrs_devThis())
+    {
+        for (int i = 0; i < ui->tableWidget_addr_rx->rowCount(); i++)
+        {
+            if (ui->tableWidget_addr_rx->item(i, 0)->text()
+                    == host.addresses().first().toString())
+            {
+                isHere = true;
+                break;
+            }
+        }
+        if (!isHere) {
+            QStringList element;
+            element << host.addresses().first().toString() << host.hostName();
+            table_addItem(ui->tableWidget_addr_rx, element);
+        }
     }
 
-    QList <QHostInfo> ipAddrs_tx = networkScan->get_addrs_devAll();
-    for (int i = 0; i < ipAddrs_tx.size(); i++) {
-        QHostInfo host = ipAddrs_tx.at(i);
-        QStringList element;
-        if (!host.addresses().isEmpty()) {
-            element << host.addresses().first().toString();
+    /* addrs_rx aka devThis */
+    /* remove missing*/
+    isHere= false;
+    for (int i = 0; i < ui->tableWidget_addr_tx->rowCount(); i++)
+    {
+        for (const QHostInfo& host : networkScan->get_addrs_devAll())
+        {
+            if (ui->tableWidget_addr_tx->item(i, 0)->text()
+                    == host.addresses().first().toString())
+            {
+                isHere = true;
+                break;
+            }
         }
-        element << host.hostName();
-        table_addItem(ui->tableWidget_addr_tx, element);
+        if (!isHere) {
+            ui->tableWidget_addr_tx->removeRow(i);
+        }
     }
-
+    /* add new */
+    isHere= false;
+    for (const QHostInfo& host : networkScan->get_addrs_devAll())
+    {
+        for (int i = 0; i < ui->tableWidget_addr_tx->rowCount(); i++)
+        {
+            if (ui->tableWidget_addr_tx->item(i, 0)->text()
+                    == host.addresses().first().toString())
+            {
+                isHere = true;
+                break;
+            }
+        }
+        if (!isHere) {
+            QStringList element;
+            element << host.addresses().first().toString() << host.hostName();
+            table_addItem(ui->tableWidget_addr_tx, element);
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -305,7 +354,7 @@ void Dialog_connect::table_addItem(QTableWidget* table, QStringList element)
     }
     /* resize the columns to be optimized for the content */
     for (int i = 0; i <  table->columnCount(); i++){
-         table->resizeColumnToContents(i);
+        table->resizeColumnToContents(i);
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -406,6 +455,7 @@ QString Dialog_connect::getSecondMapVal(QMap<int,QString> m, int val)
 ///////////////////////////////////////////////////////////////////////
 Dialog_connect::~Dialog_connect()
 {
+    qDebug() << "\n Dialog_connect destroyed \n";
     delete ui;
 }
 
@@ -439,10 +489,12 @@ void Dialog_connect::on_buttonBox_accepted()
         emit tryConnect(comType_network);
         break;
     }
+    this->close();
 }
 /////////////////////////////////////////////////////////////////////
 void Dialog_connect::on_buttonBox_rejected()
 {
+    this->close();
 }
 /////////////////////////////////////////////////////////////////////
 int Dialog_connect::getSelectedNetworkProtocol()
