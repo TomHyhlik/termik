@@ -5,6 +5,7 @@
 #include <QDebug>
 
 #include "saveconfiguration.h"
+#include "serialwparam.h"
 
 SaveConfiguration::SaveConfiguration(QObject *parent) : QObject(parent)
 {
@@ -62,12 +63,12 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         QJsonObject jObj = jDoc.object();
 
         QJsonObject jObj_serial = jObj.value(QString(JSONTITLE_SERIAL)).toObject();
-        data.serial.portName = jObj_serial.value(QString(JSONTITLE_SERIAL_PORTNAME)).toString();
-        data.serial.baudRate = jObj_serial.value(QString(JSONTITLE_SERIAL_BAUDRATE)).toInt();
-        data.serial.dataBits = jObj_serial.value(QString(JSONTITLE_SERIAL_DATABITS)).toInt();
-        data.serial.parity = jObj_serial.value(QString(JSONTITLE_SERIAL_PARITY)).toInt();
-        data.serial.stopBits = jObj_serial.value(QString(JSONTITLE_SERIAL_STOPBITS)).toInt();
-        data.serial.flowControl = jObj_serial.value(QString(JSONTITLE_SERIAL_FLOWCONTROL)).toInt();
+        SerialWParam::get().portName = jObj_serial.value(QString(JSONTITLE_SERIAL_PORTNAME)).toString();
+        SerialWParam::get().baudRate = jObj_serial.value(QString(JSONTITLE_SERIAL_BAUDRATE)).toInt();
+        SerialWParam::get().dataBits = jObj_serial.value(QString(JSONTITLE_SERIAL_DATABITS)).toInt();
+        SerialWParam::get().parity = jObj_serial.value(QString(JSONTITLE_SERIAL_PARITY)).toInt();
+        SerialWParam::get().stopBits = jObj_serial.value(QString(JSONTITLE_SERIAL_STOPBITS)).toInt();
+        SerialWParam::get().flowControl = jObj_serial.value(QString(JSONTITLE_SERIAL_FLOWCONTROL)).toInt();
 
         QJsonObject jObj_network = jObj.value(QString(JSONTITLE_NETWORK)).toObject();
         data.network.IpAddr_Rx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_RX)).toString());
@@ -108,17 +109,17 @@ QByteArray SaveConfiguration::jsonData_make()
 
     QJsonObject jObj_serial;
     jObj_serial.insert(JSONTITLE_SERIAL_PORTNAME ,
-                       QJsonValue::fromVariant(data.serial.portName));
+                       QJsonValue::fromVariant(SerialWParam::get().portName));
     jObj_serial.insert(JSONTITLE_SERIAL_BAUDRATE ,
-                       QJsonValue::fromVariant(data.serial.baudRate));
+                       QJsonValue::fromVariant(SerialWParam::get().baudRate));
     jObj_serial.insert(JSONTITLE_SERIAL_DATABITS ,
-                       QJsonValue::fromVariant(data.serial.dataBits));
+                       QJsonValue::fromVariant(SerialWParam::get().dataBits));
     jObj_serial.insert(JSONTITLE_SERIAL_PARITY ,
-                       QJsonValue::fromVariant(data.serial.parity));
+                       QJsonValue::fromVariant(SerialWParam::get().parity));
     jObj_serial.insert(JSONTITLE_SERIAL_STOPBITS ,
-                       QJsonValue::fromVariant(data.serial.stopBits));
+                       QJsonValue::fromVariant(SerialWParam::get().stopBits));
     jObj_serial.insert(JSONTITLE_SERIAL_FLOWCONTROL ,
-                       QJsonValue::fromVariant(data.serial.flowControl));
+                       QJsonValue::fromVariant(SerialWParam::get().flowControl));
     jObj.insert(JSONTITLE_SERIAL, jObj_serial);
 
     QJsonObject jObj_network;

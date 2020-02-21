@@ -28,6 +28,7 @@ SOURCES += \
         runscript.cpp \
         saveconfiguration.cpp \
         serialworker.cpp \
+        serialwparam.cpp \
         tcpworker.cpp
 
 HEADERS += \
@@ -43,6 +44,7 @@ HEADERS += \
         runscript.h \
         saveconfiguration.h \
         serialworker.h \
+        serialwparam.h \
         tcpworker.h
 
 FORMS += \

@@ -6,7 +6,7 @@
 #include "networkworker.h"
 #include "mainwindow.h"
 #include "logfile.h"
-
+#include "serialwparam.h"
 
 
 #define SAVECFG_FILENAME "./termik_cfg.json"
@@ -48,7 +48,7 @@
 //////////////////////////////////////////////////////////////////////////////
 class SaveConfigurationData {
 public:
-    SerialWorkerParameters serial;
+    SerialWParam& serial = SerialWParam::get();
     NetworkWorkerParameters network;
     appConfiguration app;
     QString LogFileDir;

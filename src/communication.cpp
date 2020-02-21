@@ -5,7 +5,7 @@
 #include "networkworker.h"
 
 #include "mainwindow.h"
-
+#include "serialwparam.h"
 
 //////////////////////////////////////////////////////////////////////
 Communication::Communication(QObject *parent) : QObject(parent)
@@ -51,7 +51,7 @@ void Communication::establish(communicationType type)
     {
     case comType_serial:
         connectedSuccessfully = serial->open();
-        deviceName = serial->param.portName;
+        deviceName = SerialWParam::get().portName;
         break;
     case comType_network:
         connectedSuccessfully = network->open();
@@ -63,15 +63,9 @@ void Communication::establish(communicationType type)
         break;
     }
 
-    if (connectedSuccessfully) {
-        connType = type;
-//        showMessage(note, QString("Connected to: %1").arg(deviceName));
-//        currentAppConfig_save();      // todo
-    } else {
-        connType = comType_none;
-//        showMessage(error, QString("Failed to connect to: %1").arg(deviceName));
-//        dialog_connect->show(); // todo
-    }
+    if (connectedSuccessfully) {    connType = type; }
+
+    emit connectionEstablished(connectedSuccessfully, deviceName);
 }
 
 //////////////////////////////////////////////////////////////////////

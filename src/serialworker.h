@@ -5,33 +5,21 @@
 #include <QSerialPort>
 #include <QList>
 #include <QSerialPortInfo>
-
+#include <QDebug>
 #include "communicationworker.h"
 
 
 #define DBG_EXCHANGEDDATA   0
 
 
-class SerialWorkerParameters {
-public:
-    /* init the default parameters */
-    SerialWorkerParameters()
-    {
-        baudRate = QSerialPort::Baud115200;
-        dataBits = QSerialPort::Data8;
-        parity = QSerialPort::NoParity;
-        stopBits = QSerialPort::OneStop;
-        flowControl = QSerialPort::NoFlowControl;
-    }
 
 
-    QString portName;
-    qint32 baudRate;
-    int dataBits;
-    int parity;
-    int stopBits;
-    int flowControl;
-};
+
+/////////////////////////////////////////////////////////////////////////
+
+
+
+
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -46,7 +34,7 @@ public:
     bool isOpen() override;
     QByteArray readAllRx() override;
 
-    SerialWorkerParameters param;
+    //    SerialWorkerParameters param;
 
 private:
 

@@ -10,9 +10,11 @@
 #include <QShortcut>
 #include <QtDebug>
 
-#define TITLE_NAME      "Name"
-#define TITLE_ADDR      "Address"
 #include "networkscan.h"
+#include "serialwparam.h"
+
+
+
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
     QDialog(parent),
@@ -89,11 +91,11 @@ void Dialog_connect::showEvent( QShowEvent* event )
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::loadParametersToUi()
 {
-    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, param_sw->baudRate));
-    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, param_sw->dataBits));
-    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, param_sw->parity));
-    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, param_sw->stopBits));
-    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, param_sw->flowControl));
+    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, SerialWParam::get().baudRate));
+    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, SerialWParam::get().dataBits));
+    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, SerialWParam::get().parity));
+    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, SerialWParam::get().stopBits));
+    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, SerialWParam::get().flowControl));
 
     if (!param_nw->IpAddr_Rx.toString().isEmpty())
         ui->lineEdit_selectedAddr_rx->setText(param_nw->IpAddr_Rx.toString());
@@ -352,9 +354,6 @@ void Dialog_connect::tab_port_init()
     for (auto e :  flowControlS.toStdMap() ) {
         ui->comboBox_flowControl->addItem(e.second);
     }
-    ui->comboBox_baudRate->setCurrentText(DEFAULT_BAUDRATE);
-    ui->comboBox_dataBits->setCurrentText(DEFAULT_DATABITS);
-
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::fillBaudRate()
@@ -434,12 +433,12 @@ Dialog_connect::~Dialog_connect()
 void Dialog_connect::on_buttonBox_accepted()
 {
     /* load the  port configuration to the sw class */
-    param_sw->portName = ui->lineEdit_serialPortName->text();
-    param_sw->baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
-    param_sw->dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
-    param_sw->parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
-    param_sw->stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
-    param_sw->flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
+    SerialWParam::get().portName = ui->lineEdit_serialPortName->text();
+    SerialWParam::get().baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
+    SerialWParam::get().dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
+    SerialWParam::get().parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
+    SerialWParam::get().stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
+    SerialWParam::get().flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
 
     param_nw->IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
     param_nw->IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());

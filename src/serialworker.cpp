@@ -1,10 +1,12 @@
 #include "serialworker.h"
+#include "serialwparam.h"
 
 #include <QtSerialPort/QSerialPort>
 #include <QSerialPortInfo>
 #include <QThread>
 
 #include <QDebug>
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,12 +24,12 @@ bool SerialWorker::open()
         serial->close();
     }
 
-    serial->setPortName(param.portName);
-    serial->setBaudRate(QSerialPort::BaudRate(param.baudRate));
-    serial->setDataBits(QSerialPort::DataBits(param.dataBits));
-    serial->setParity(QSerialPort::Parity(param.parity));
-    serial->setStopBits(QSerialPort::StopBits(param.stopBits));
-    serial->setFlowControl(QSerialPort::FlowControl(param.flowControl));
+    serial->setPortName(SerialWParam::get().portName);
+    serial->setBaudRate(QSerialPort::BaudRate(SerialWParam::get().baudRate));
+    serial->setDataBits(QSerialPort::DataBits(SerialWParam::get().dataBits));
+    serial->setParity(QSerialPort::Parity(SerialWParam::get().parity));
+    serial->setStopBits(QSerialPort::StopBits(SerialWParam::get().stopBits));
+    serial->setFlowControl(QSerialPort::FlowControl(SerialWParam::get().flowControl));
 
     serial->open(QIODevice::ReadWrite);
 

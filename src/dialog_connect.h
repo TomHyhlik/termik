@@ -24,14 +24,14 @@
 #define TITLE_TAB_SERIAL_VENDORIDENTIFIER          "Vendor identifier"
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
-
-#define DEFAULT_BAUDRATE        "115200"
-#define DEFAULT_DATABITS        "8"
-
 #define SERIALPORT_REFRESH_PERIOD  500
 
 #define NETWORKPROTOCOL_UDP     "UDP"
 #define NETWORKPROTOCOL_TCP     "TCP"
+
+#define TITLE_NAME      "Name"
+#define TITLE_ADDR      "Address"
+
 
 namespace Ui {
 class Dialog_connect;
@@ -48,7 +48,6 @@ class Dialog_connect : public QDialog
     void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
 
-    SerialWorkerParameters* param_sw;
     NetworkWorkerParameters* param_nw;
 
 
@@ -56,9 +55,6 @@ public:
     explicit Dialog_connect(QWidget *parent = nullptr);
     ~Dialog_connect();
 
-    void setParamPtr_serial(SerialWorkerParameters * val){
-        param_sw = val;
-    }
     void setParamPtr_network(NetworkWorkerParameters * val){
         param_nw = val;
     }

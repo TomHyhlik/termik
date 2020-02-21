@@ -192,6 +192,9 @@ private slots:
     void on_checkBox_autoclear_stateChanged(int arg1);
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
 
+    void on_connectionEstablished(bool success, QString deviceName);
+
+
 public slots:
 
 

@@ -21,6 +21,8 @@
 #include "saveconfiguration.h"
 #include "appargs.h"
 #include "communication.h"
+#include "serialwparam.h"
+
 
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
@@ -33,6 +35,9 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     communic = new Communication(this);
     connect(communic, SIGNAL(displayData(int, QByteArray)),
             this, SLOT(terminalOutUpdate(int, QByteArray)));
+    connect(communic, SIGNAL(connectionEstablished(bool, QString)),
+            this, SLOT(on_connectionEstablished(bool, QString)));
+
 
     logFile = new LogFile(this);
     script = new runScript(this);
@@ -50,6 +55,19 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 }
 
 //////////////////////////////////////////////////////////////////////
+void MainWindow::on_connectionEstablished(bool success, QString deviceName)
+{
+    if (success) {
+        showMessage(note, QString("Connected to: %1").arg(deviceName));
+        currentAppConfig_save();
+        terminalInputSetFocus();
+    } else {
+        showMessage(error, QString("Failed to connect to: %1").arg(deviceName));
+        showConnectionSettings();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
 void MainWindow::connectOrDisconnect()
 {
     communic->establishToggle();
@@ -63,7 +81,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     currentAppConfig_save();
 
     qDebug() << "\n" << "Closing" << MAINWINDOWTITLE << "\n";
-//    event->accept(); // todo:error
+    //    event->accept(); // todo:error
 }
 //////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::currentAppConfig_save
@@ -72,7 +90,6 @@ void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
 
-    saveCfg.data.serial = communic->getParameters_serial();
     saveCfg.data.network = communic->getParameters_network();
 
     saveCfg.data.app = config;
@@ -92,7 +109,7 @@ void MainWindow::currentAppConfig_load()
     SaveConfiguration saveCfg;
     saveCfg.read();
 
-    communic->setParameters_serial(saveCfg.data.serial);
+//    communic->setParameters_serial(saveCfg.data.serial);      todo rm
     communic->setParameters_network(saveCfg.data.network);
 
     /* load script parameters */
@@ -200,7 +217,7 @@ void MainWindow::handleAppArguments(QStringList arguments)
         }
     }
 
-    if (communic->connType != comType_none) {
+    if (communic->getConnType() != comType_none) {
         qDebug() << "Trying to connect automatically";
         communic->establish();
     }
@@ -227,22 +244,22 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
         break;
 
     case ARG_INDEX_SERIAL_PORTNAME:
-        communic->serial->param.portName = passedData;
+        SerialWParam::get().portName = passedData;
         break;
     case ARG_INDEX_SERIAL_BAUDRATE:
-        communic->serial->param.baudRate = passedData.toInt(&ok, 10);
+        SerialWParam::get().baudRate = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_DATABITS:
-        communic->serial->param.dataBits = passedData.toInt(&ok, 10);
+        SerialWParam::get().dataBits = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_PARITY:
-        communic->serial->param.parity = passedData.toInt(&ok, 10);
+        SerialWParam::get().parity = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_STOPBITS:
-        communic->serial->param.stopBits = passedData.toInt(&ok, 10);
+        SerialWParam::get().stopBits = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_SERIAL_FLOWCONTROL:
-        communic->serial->param.flowControl = passedData.toInt(&ok, 10);
+        SerialWParam::get().flowControl = passedData.toInt(&ok, 10);
         break;
     case ARG_INDEX_CONNECTIONTYPE:
         if (passedData == ARG_CONNECTIONTYPE_SERIAL) {
@@ -421,13 +438,13 @@ void MainWindow::uiInit()
     toggleShowSettings();
     focus_1();
 }
-
+/////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_green()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
                                              .arg(COLOR_WHITE).arg(COLOR_GREEN));
 }
-
+/////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_red()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
@@ -437,7 +454,6 @@ void MainWindow::pushButton_runScript_setColor_red()
 void MainWindow::showConnectionSettings()
 {
     Dialog_connect* dialog_connect = new Dialog_connect(this);
-    dialog_connect->setParamPtr_serial(&communic->serial->param);
     dialog_connect->setParamPtr_network(&communic->network->param);
     connect(dialog_connect, SIGNAL(tryConnect(communicationType)), communic,
             SLOT(establish(communicationType)));
@@ -855,7 +871,7 @@ void MainWindow::writeToTextedit(QTextEdit *textEdit, QString color, QString dat
     /* return cursor where it was */
     textEdit->setTextCursor(prev_cursor);
 
-//    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
+    //    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
 }
 
 /////////////////////////////////////////////////////////////////
