@@ -11,7 +11,6 @@ class SerialWParam
     SerialWParam()
     {
         init_default();
-        qDebug() << "SerialWParam created!\n";
     }
 
     static SerialWParam s_Instance;
@@ -29,7 +28,7 @@ public:
     SerialWParam(const SerialWParam&) = delete;
     static SerialWParam& get() { return s_Instance; }
 
-
+    /* the data */
     QString portName;
     qint32 baudRate;
     int dataBits;

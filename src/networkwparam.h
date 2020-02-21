@@ -15,7 +15,7 @@ public:
     NetworkWParam(const NetworkWParam&) = delete;
     static NetworkWParam& get() { return s_Instance; }
 
-
+    /* the data */
     QHostAddress IpAddr_Tx;
     QHostAddress IpAddr_Rx;
 
@@ -23,12 +23,7 @@ public:
     quint16 port_Rx;
     int protocolType;
 
-
-
 };
-
-
-//  NetworkWParam::get()
 
 
 
