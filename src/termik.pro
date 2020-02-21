@@ -25,6 +25,7 @@ SOURCES += \
         dialog_connect.cpp \
         networkscan.cpp \
         networkworker.cpp \
+        networkwparam.cpp \
         runscript.cpp \
         saveconfiguration.cpp \
         serialworker.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
         dialog_connect.h \
         networkscan.h \
         networkworker.h \
+        networkwparam.h \
         runscript.h \
         saveconfiguration.h \
         serialworker.h \

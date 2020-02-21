@@ -71,10 +71,10 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         SerialWParam::get().flowControl = jObj_serial.value(QString(JSONTITLE_SERIAL_FLOWCONTROL)).toInt();
 
         QJsonObject jObj_network = jObj.value(QString(JSONTITLE_NETWORK)).toObject();
-        data.network.IpAddr_Rx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_RX)).toString());
-        data.network.IpAddr_Tx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_TX)).toString());
-        data.network.port_Tx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTTX)).toInt());
-        data.network.port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
+        NetworkWParam::get().IpAddr_Rx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_RX)).toString());
+        NetworkWParam::get().IpAddr_Tx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_TX)).toString());
+        NetworkWParam::get().port_Tx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTTX)).toInt());
+        NetworkWParam::get().port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
 
         QJsonObject jObj_app = jObj.value(QString(JSONTITLE_APP)).toObject();
 //        data.app.connectionType = jObj_app.value(QString(JSONTITLE_APP_CONNECTIONTYPE)).toBool(); // todo
@@ -124,13 +124,13 @@ QByteArray SaveConfiguration::jsonData_make()
 
     QJsonObject jObj_network;
     jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS_RX ,
-                        QJsonValue::fromVariant(data.network.IpAddr_Rx.toString()));
+                        QJsonValue::fromVariant(NetworkWParam::get().IpAddr_Rx.toString()));
     jObj_network.insert(JSONTITLE_NETWORK_IPADDRESS_TX ,
-                        QJsonValue::fromVariant(data.network.IpAddr_Tx.toString()));
+                        QJsonValue::fromVariant(NetworkWParam::get().IpAddr_Tx.toString()));
     jObj_network.insert(JSONTITLE_NETWORK_PORTTX ,
-                        QJsonValue::fromVariant(data.network.port_Tx));
+                        QJsonValue::fromVariant(NetworkWParam::get().port_Tx));
     jObj_network.insert(JSONTITLE_NETWORK_PORTRX ,
-                        QJsonValue::fromVariant(data.network.port_Rx));
+                        QJsonValue::fromVariant(NetworkWParam::get().port_Rx));
     jObj.insert(JSONTITLE_NETWORK, jObj_network);
 
     QJsonObject jObj_app;

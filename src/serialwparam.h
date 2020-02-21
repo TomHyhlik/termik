@@ -11,7 +11,7 @@ class SerialWParam
     SerialWParam()
     {
         init_default();
-        qDebug() << "--------------SingletonClass instance created!\n";
+        qDebug() << "SerialWParam created!\n";
     }
 
     static SerialWParam s_Instance;

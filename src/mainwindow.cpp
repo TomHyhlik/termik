@@ -90,8 +90,6 @@ void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
 
-    saveCfg.data.network = communic->getParameters_network();
-
     saveCfg.data.app = config;
 
     saveCfg.data.script = script->getWholeConfig();
@@ -108,9 +106,6 @@ void MainWindow::currentAppConfig_load()
 {
     SaveConfiguration saveCfg;
     saveCfg.read();
-
-//    communic->setParameters_serial(saveCfg.data.serial);      todo rm
-    communic->setParameters_network(saveCfg.data.network);
 
     /* load script parameters */
     if (!saveCfg.data.script.fileName.isEmpty()) {
@@ -232,15 +227,15 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
     switch (appargs.indexOf(command))
     {
     case ARG_INDEX_NETWORK_IPADDR:
-        communic->network->param.IpAddr_Tx = QHostAddress(passedData);
-        if (communic->network->param.IpAddr_Tx.isNull())
+        NetworkWParam::get().IpAddr_Tx = QHostAddress(passedData);
+        if (NetworkWParam::get().IpAddr_Tx.isNull())
             ok = false;
         break;
     case ARG_INDEX_NETWORK_TXPORT:
-        communic->network->param.port_Tx = quint16(passedData.toInt(&ok, 10));
+        NetworkWParam::get().port_Tx = quint16(passedData.toInt(&ok, 10));
         break;
     case ARG_INDEX_NETWORK_RXPORT:
-        communic->network->param.port_Rx = quint16(passedData.toInt(&ok, 10));
+        NetworkWParam::get().port_Rx = quint16(passedData.toInt(&ok, 10));
         break;
 
     case ARG_INDEX_SERIAL_PORTNAME:
@@ -454,7 +449,6 @@ void MainWindow::pushButton_runScript_setColor_red()
 void MainWindow::showConnectionSettings()
 {
     Dialog_connect* dialog_connect = new Dialog_connect(this);
-    dialog_connect->setParamPtr_network(&communic->network->param);
     connect(dialog_connect, SIGNAL(tryConnect(communicationType)), communic,
             SLOT(establish(communicationType)));
 

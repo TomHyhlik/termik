@@ -34,19 +34,6 @@ public:
     communicationType getConnType() { return connType; }
 
 
-    NetworkWorkerParameters getParameters_network() {
-        return  network->param;
-    }
-//    SerialWorkerParameters getParameters_serial() {       // todo rm
-//        return serial->param;
-//    }
-    void setParameters_network(NetworkWorkerParameters val) {
-        network->param = val;
-    }
-//    void setParameters_serial(SerialWorkerParameters val) {    // todo rm
-//        serial->param = val;
-//    }
-
 public slots:
 
     void establish();

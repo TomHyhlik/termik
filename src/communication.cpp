@@ -56,8 +56,8 @@ void Communication::establish(communicationType type)
     case comType_network:
         connectedSuccessfully = network->open();
         deviceName = QString("%1:%2")
-                .arg(network->param.IpAddr_Tx.toString())
-                .arg(QString::number(int(network->param.port_Tx)));
+                .arg(NetworkWParam::get().IpAddr_Tx.toString())
+                .arg(QString::number(int(NetworkWParam::get().port_Tx)));
         break;
     case comType_none:
         break;

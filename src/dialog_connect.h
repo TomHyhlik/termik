@@ -44,20 +44,12 @@ class Dialog_connect : public QDialog
 {
     Q_OBJECT
 
-
     void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);
-
-    NetworkWorkerParameters* param_nw;
-
 
 public:
     explicit Dialog_connect(QWidget *parent = nullptr);
     ~Dialog_connect();
-
-    void setParamPtr_network(NetworkWorkerParameters * val){
-        param_nw = val;
-    }
 
 private:
     Ui::Dialog_connect *ui;

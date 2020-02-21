@@ -35,14 +35,14 @@ bool NetworkWorker::open()
         disconnect();
     }
     bool opened = false;
-    switch (param.protocolType) {
+    switch (NetworkWParam::get().protocolType) {
     case UDP:
-        opened = udpSocket->bind(param.IpAddr_Rx, param.port_Rx);
+        opened = udpSocket->bind(NetworkWParam::get().IpAddr_Rx, NetworkWParam::get().port_Rx);
         break;
     case TCP:
-        opened = tcpServer->listen(param.IpAddr_Rx, param.port_Rx);
+        opened = tcpServer->listen(NetworkWParam::get().IpAddr_Rx, NetworkWParam::get().port_Rx);
         if (opened) {
-            opened = tcpClient->connectToHost(param.IpAddr_Tx, param.port_Tx);
+            opened = tcpClient->connectToHost(NetworkWParam::get().IpAddr_Tx, NetworkWParam::get().port_Tx);
         }
         break;
     }
@@ -51,7 +51,7 @@ bool NetworkWorker::open()
 //////////////////////////////////////////////////
 bool  NetworkWorker::close()
 {
-    switch (param.protocolType) {
+    switch (NetworkWParam::get().protocolType) {
     case UDP:
         if (udpSocket->isOpen())
             udpSocket->close();
@@ -65,9 +65,9 @@ bool  NetworkWorker::close()
 bool NetworkWorker::write(QByteArray data)
 {
     bool success = false;
-    switch (param.protocolType) {
+    switch (NetworkWParam::get().protocolType) {
     case UDP:
-        success = udpSocket->writeDatagram(data, param.IpAddr_Tx, param.port_Tx);
+        success = udpSocket->writeDatagram(data, NetworkWParam::get().IpAddr_Tx, NetworkWParam::get().port_Tx);
         break;
     case TCP:
         success = tcpClient->writeData(data);

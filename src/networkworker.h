@@ -11,17 +11,8 @@
 #include "tcpworker.h"
 
 #include "communicationworker.h"
+#include "networkwparam.h"
 
-/////////////////////////////////////////////////////////////////////////
-struct NetworkWorkerParameters
-{
-    QHostAddress IpAddr_Tx;
-    QHostAddress IpAddr_Rx;
-
-    quint16 port_Tx;
-    quint16 port_Rx;
-    int protocolType;
-};
 
 enum protocolType {
     UDP, TCP
@@ -41,9 +32,6 @@ class NetworkWorker : public CommunicationWorker
 
 public:
     explicit NetworkWorker();
-
-
-    NetworkWorkerParameters param;
 
 //    void send(QString IPaddress, quint16 port, QByteArray data);
 

@@ -97,13 +97,13 @@ void Dialog_connect::loadParametersToUi()
     ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, SerialWParam::get().stopBits));
     ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, SerialWParam::get().flowControl));
 
-    if (!param_nw->IpAddr_Rx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_rx->setText(param_nw->IpAddr_Rx.toString());
-    if (!param_nw->IpAddr_Tx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_tx->setText(param_nw->IpAddr_Tx.toString());
+    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
+        ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
+    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
+        ui->lineEdit_selectedAddr_tx->setText(NetworkWParam::get().IpAddr_Tx.toString());
 
-    ui->spinBox_ipPort_Tx->setValue(param_nw->port_Tx);
-    ui->spinBox_ipPort_Rx->setValue(param_nw->port_Rx);
+    ui->spinBox_ipPort_Tx->setValue(NetworkWParam::get().port_Tx);
+    ui->spinBox_ipPort_Rx->setValue(NetworkWParam::get().port_Rx);
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_network_init()
@@ -440,11 +440,11 @@ void Dialog_connect::on_buttonBox_accepted()
     SerialWParam::get().stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
     SerialWParam::get().flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
 
-    param_nw->IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
-    param_nw->IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
-    param_nw->port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
-    param_nw->port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
-    param_nw->protocolType = getSelectedNetworkProtocol();
+    NetworkWParam::get().IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
+    NetworkWParam::get().IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
+    NetworkWParam::get().port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
+    NetworkWParam::get().port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
+    NetworkWParam::get().protocolType = getSelectedNetworkProtocol();
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
