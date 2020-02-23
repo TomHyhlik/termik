@@ -18,20 +18,17 @@ class Communication : public QObject
 
      std::unique_ptr <CommunicationWorker> communicWorker;
 
-//    NetworkWorker* network;
-//    SerialWorker* serial;
-
 
 public:
     explicit Communication(QObject *parent = nullptr);
 
-    communicationType connType;     // todo make private
 
     void establishToggle();
     bool isEstablished();
     void suspend();
 
-    communicationType getConnType() { return connType; }
+    communicationType getLastConnType() { return lastComType; }
+    communicationType lastComType;
 
 
 public slots:

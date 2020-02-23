@@ -34,48 +34,50 @@ bool Communication::isEstablished()
 //////////////////////////////////////////////////////////////////////
 void Communication::establish()
 {
-    establish(connType);
+    establish(lastComType);
 }
 //////////////////////////////////////////////////////////////////////
 void Communication::establish(communicationType type)
 {
-    bool connectedSuccessfully = false;
+    bool EstablishedSuccessful = false;
     QString deviceName;
 
     switch (type)
     {
     case comType_serial:
         communicWorker = std::unique_ptr <SerialWorker> (new SerialWorker());
-        connectedSuccessfully = communicWorker->open();
+        EstablishedSuccessful = communicWorker->open();
         deviceName = SerialWParam::get().portName;
         break;
     case comType_network:
         communicWorker = std::unique_ptr <NetworkWorker> (new NetworkWorker());
-        connectedSuccessfully = communicWorker->open();
+        EstablishedSuccessful = communicWorker->open();
         deviceName = QString("%1 : %2")
                 .arg(NetworkWParam::get().IpAddr_Tx.toString())
                 .arg(QString::number(int(NetworkWParam::get().port_Tx)));
         break;
     case comType_none:
+        suspend();
         return;
     }
 
     connect(communicWorker.get(), SIGNAL(dataReceived(QByteArray)), this,
             SLOT(dataArrived(QByteArray)));
 
-    if (connectedSuccessfully) {    connType = type; }
+    if (EstablishedSuccessful) {    lastComType = type; }
 
-    emit connectionEstablished(connectedSuccessfully, deviceName);
+    emit connectionEstablished(EstablishedSuccessful, deviceName);
 }
 
 //////////////////////////////////////////////////////////////////////
 void Communication::suspend()
 {
-    communicWorker = nullptr;
+    if (communicWorker != nullptr)  communicWorker = nullptr;
 }
 //////////////////////////////////////////////////////////////////////
 void Communication::establishToggle()
 {
+
     /* todo */
 
 

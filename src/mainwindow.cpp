@@ -212,7 +212,7 @@ void MainWindow::handleAppArguments(QStringList arguments)
         }
     }
 
-    if (communic->getConnType() != comType_none) {
+    if (communic->getLastConnType() != comType_none) {
         qDebug() << "Trying to connect automatically";
         communic->establish();
     }
@@ -258,10 +258,10 @@ bool MainWindow::handleAppArguments_setParam(QString command, QString passedData
         break;
     case ARG_INDEX_CONNECTIONTYPE:
         if (passedData == ARG_CONNECTIONTYPE_SERIAL) {
-            communic->connType = comType_serial;
+            communic->lastComType = comType_serial;
         }
         else if (passedData == ARG_CONNECTIONTYPE_NETWORK) {
-            communic->connType = comType_network;
+            communic->lastComType = comType_network;
         }
         else {
             qDebug() << "Failed to handle arguments: " << command << " " << passedData;
@@ -433,18 +433,21 @@ void MainWindow::uiInit()
     toggleShowSettings();
     focus_1();
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_green()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
                                              .arg(COLOR_WHITE).arg(COLOR_GREEN));
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_red()
 {
     ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
                                              .arg(COLOR_WHITE).arg(COLOR_RED));
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::showConnectionSettings()
 {
@@ -473,6 +476,7 @@ void MainWindow::terminalInputSetFocus()
         break;
     }
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::clearOutput()
 {
@@ -480,14 +484,10 @@ void MainWindow::clearOutput()
     ui->textEdit_out_hex->clear();
     ui->textEdit_out_dec->clear();
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx_fromDataInput(int inputType)
 {
-    if (communic->connType == comType_none) {
-        showMessage(error, "Can't transmit. No connection established.");
-        return;
-    }
-
     QByteArray txData;        // to be transmitted
     dataConverter dataConv;
 
@@ -507,11 +507,12 @@ void MainWindow::Tx_fromDataInput(int inputType)
     txData = dataConv.getByteArray();
     on_Tx(txData);
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_Tx(QByteArray txData)
 {
-    if (communic->connType == comType_none) {
-        showMessage(error, "No connection established.");
+    if (!communic->isEstablished()) {
+        showMessage(error, "Can't transmit. No connection established.");
         return;
     }
 
