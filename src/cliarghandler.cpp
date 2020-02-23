@@ -15,24 +15,20 @@ CliArgHandler::CliArgHandler(QStringList val) : arguments(val)
     /* now look at the pairs of arguments */
     while (!arguments.isEmpty())
     {
-        QString command, passedData;
-
-        command = arguments.at(0);
-        arguments.removeFirst();
-
+        QString command = arguments.takeFirst();
         /* check if the command starts with "-" */
         if (command.at(0) == ARG_PREFIX_SHORT) {
             command.remove(0, 1); // remove "-" at the beginning
             /* read the passed data to the argument */
             if (!arguments.isEmpty()) {
-                passedData = arguments.at(0);
-                arguments.removeFirst();
-                if (!setParam(command, passedData)) {
-                    printHelp();
-                    return;
+                QString passedData = arguments.takeFirst();
+                if (setParam(command, passedData)) {
+                    qDebug() << "Setting" << command << " to " << passedData;
+                } else {
+                    qDebug() << "ERROR: failed to set" << command << " to " << passedData;
                 }
             } else {
-                qDebug() << "ERROR: No passed data for command " << command;
+                qDebug() << "ERROR: No passed data to the command " << command;
                 printHelp();
                 return;
             }
@@ -45,6 +41,7 @@ CliArgHandler::CliArgHandler(QStringList val) : arguments(val)
     }
 }
 
+//////////////////////////////////////////////////////////////////////
 void CliArgHandler::printHelp()
 {
 
@@ -70,25 +67,16 @@ void CliArgHandler::printHelp()
     printf("\n\n");
 }
 
+//////////////////////////////////////////////////////////////////////
 void CliArgHandler::printHelp_wrap(QString cmd, QString argTitle)
 {
     printf("\t\t%s%s\t\t%s\n" ,
            QString(ARG_PREFIX_SHORT).toStdString().c_str(),
            cmd.toStdString().c_str(),
            argTitle.toStdString().c_str());
-
-    //    qDebug() << "\t\t" << QString(ARG_PREFIX_SHORT).toStdString().c_str() <<
-    //                           cmd.toStdString().c_str()  << "\t" << argTitle;
-
-
-    //    qDebug() << "\t\t"
-    //             << QString(ARG_PREFIX_SHORT).toStdString().c_str()
-    //             << cmd.toStdString().c_str()
-    //             << "\t\t"
-    //             << argTitle.toStdString().c_str();
 }
 
-
+//////////////////////////////////////////////////////////////////////
 bool CliArgHandler::setParam(QString command, QString passedData)
 {
     bool ok = true;
@@ -145,13 +133,9 @@ bool CliArgHandler::setParam(QString command, QString passedData)
         break;
 
     default:
-        qDebug() << "ERROR: Unknown command " << ARG_PREFIX_SHORT
+        qDebug() << "ERROR: Unrecognized command " << ARG_PREFIX_SHORT
                  << command;
         ok = false;
-    }
-
-    if (ok) {
-        qDebug() << "Setting" << command << " to " << passedData;
     }
 
     return ok;

@@ -11,9 +11,9 @@
     "Log files directory": "",
     "Network": {
         "IP address Rx": "",
-        "IP address Tx": "",
-        "Port Rx": 11199,
-        "Port Tx": 11199
+        "IP address Tx": "127.0.0.1",
+        "Port Rx": 1111,
+        "Port Tx": 1111
     },
     "Script": {
         "Data format": 0,
