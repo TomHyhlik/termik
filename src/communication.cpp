@@ -10,32 +10,27 @@
 //////////////////////////////////////////////////////////////////////
 Communication::Communication(QObject *parent) : QObject(parent)
 {
-    connType = comType_none;
-
-
-    serial = new SerialWorker();
-    connect(serial, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
-
-    network = new NetworkWorker();
-    connect(network, SIGNAL(dataReceived()), this, SLOT(dataArrived()));
-
+    communicWorker = nullptr;
 }
 /////////////////////////////////////////////////////////////////
-void Communication::dataArrived()
+void Communication::dataArrived(QByteArray rxData)
 {
-    /* get the data from apropriate class */
-    switch (connType)
-    {
-    case comType_serial:
-        displayData(data_Rx, serial->readAllRx());
-        break;
-    case comType_network:
-        displayData(data_Rx, network->readAllRx());
-        break;
-    case comType_none:
-        break;
-    }
+    emit displayData(data_Rx, rxData);
 }
+
+//////////////////////////////////////////////////////////////////////
+bool Communication::dataTransmit(QByteArray txData)
+{
+    emit displayData(data_Tx, txData);
+    return communicWorker->write(txData);
+}
+
+//////////////////////////////////////////////////////////////////////
+bool Communication::isEstablished()
+{
+    return communicWorker != nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 void Communication::establish()
 {
@@ -50,18 +45,23 @@ void Communication::establish(communicationType type)
     switch (type)
     {
     case comType_serial:
-        connectedSuccessfully = serial->open();
+        communicWorker = std::unique_ptr <SerialWorker> (new SerialWorker());
+        connectedSuccessfully = communicWorker->open();
         deviceName = SerialWParam::get().portName;
         break;
     case comType_network:
-        connectedSuccessfully = network->open();
-        deviceName = QString("%1:%2")
+        communicWorker = std::unique_ptr <NetworkWorker> (new NetworkWorker());
+        connectedSuccessfully = communicWorker->open();
+        deviceName = QString("%1 : %2")
                 .arg(NetworkWParam::get().IpAddr_Tx.toString())
                 .arg(QString::number(int(NetworkWParam::get().port_Tx)));
         break;
     case comType_none:
-        break;
+        return;
     }
+
+    connect(communicWorker.get(), SIGNAL(dataReceived(QByteArray)), this,
+            SLOT(dataArrived(QByteArray)));
 
     if (connectedSuccessfully) {    connType = type; }
 
@@ -69,24 +69,17 @@ void Communication::establish(communicationType type)
 }
 
 //////////////////////////////////////////////////////////////////////
+void Communication::suspend()
+{
+    communicWorker = nullptr;
+}
+//////////////////////////////////////////////////////////////////////
 void Communication::establishToggle()
 {
-//    switch (config.connectionType)
-//    {
-//    case serial:
-//        sw->close();
-//        config.connectionType = none;
-//        break;
-//    case network:
-//        nw->disconnect();
-//        config.connectionType = none;
-//        break;
-//    case none:
-//        showConnectionSettings();
-//        break;
-//    default:
-//        config.connectionType = none;
-//    }
+    /* todo */
+
+
+
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -38,7 +38,6 @@ public:
     bool open() override;
     bool close() override;
     bool isOpen() override;
-    QByteArray readAllRx() override;
 
     bool tcpIsConnected();
 

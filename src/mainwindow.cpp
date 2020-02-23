@@ -484,7 +484,7 @@ void MainWindow::clearOutput()
 void MainWindow::Tx_fromDataInput(int inputType)
 {
     if (communic->connType == comType_none) {
-        showMessage(error, "No connection established.");
+        showMessage(error, "Can't transmit. No connection established.");
         return;
     }
 
@@ -523,20 +523,7 @@ void MainWindow::on_Tx(QByteArray txData)
     if (config.suffix_tx_enabled)
         txData.append(config.suffix_tx);
 
-    /* transmit the data */
-    switch (communic->connType)
-    {
-    case comType_serial:
-        communic->serial->write(txData);
-        break;
-    case comType_network:
-        communic->network->write(txData);
-        break;
-    case comType_none:
-        break;
-    }
-
-    terminalOutUpdate(data_Tx, txData);
+    communic->dataTransmit(txData);
 
     if (config.clearOutputLine) {
         ui->lineEdit_in_ascii->clear();

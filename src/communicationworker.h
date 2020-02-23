@@ -13,10 +13,6 @@ public:
     virtual bool close() = 0;
     virtual bool isOpen() = 0;
 
-    QList <QByteArray> RxData;
-
-    virtual QByteArray readAllRx() = 0;
-
 
 public slots:
     virtual bool write(QByteArray) = 0;
@@ -24,7 +20,7 @@ public slots:
 
 
 signals:
-    void dataReceived();
+    void dataReceived(QByteArray);
 
 
 

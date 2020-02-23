@@ -87,19 +87,7 @@ void SerialWorker::on_dataReceived()
     qDebug() << "RX: " << data.toHex();
 #endif
 
-    RxData.append(data);
-    emit dataReceived();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-QByteArray SerialWorker::readAllRx()
-{
-    QByteArray out;
-    while (!RxData.isEmpty()) {
-        out.append(RxData.first());
-        RxData.pop_front();
-    }
-    return out;
+    emit dataReceived(data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

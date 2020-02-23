@@ -19,8 +19,7 @@ NetworkWorker::NetworkWorker()
 //////////////////////////////////////////////////
 void NetworkWorker::on_dataReceived(QByteArray data)
 {
-    RxData.append(data);
-    emit dataReceived();
+    emit dataReceived(data);
 }
 //////////////////////////////////////////////////
 bool NetworkWorker::isOpen()
@@ -87,24 +86,13 @@ void NetworkWorker::on_dataReceived()
     buffer.resize(int(udpSocket->pendingDatagramSize()));
     udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    RxData.append(buffer);
     //    qDebug() << "_____________________________________";
     //    qDebug() << "sender: " << sender;
     //    qDebug() << "sender port: " << senderPort;
     //    qDebug() << "message: " << message;
-    emit dataReceived();
+    emit dataReceived(buffer);
 }
 
-//////////////////////////////////////////////////
-QByteArray NetworkWorker::readAllRx()
-{
-    QByteArray out;
-    while (!RxData.isEmpty()) {
-        out.append(RxData.first());
-        RxData.pop_front();
-    }
-    return out;
-}
 //////////////////////////////////////////////////
 void NetworkWorker::connected()
 {

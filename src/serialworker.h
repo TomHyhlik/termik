@@ -12,16 +12,6 @@
 #define DBG_EXCHANGEDDATA   0
 
 
-
-
-
-/////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////
 class SerialWorker : public CommunicationWorker
 {
@@ -32,7 +22,6 @@ public:
     bool open() override;
     bool close() override;
     bool isOpen() override;
-    QByteArray readAllRx() override;
 
     //    SerialWorkerParameters param;
 
