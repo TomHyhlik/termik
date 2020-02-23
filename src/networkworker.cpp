@@ -52,13 +52,13 @@ bool  NetworkWorker::close()
 {
     switch (NetworkWParam::get().protocolType) {
     case UDP:
-        if (udpSocket->isOpen())
-            udpSocket->close();
+        udpSocket->close();
         break;
     case TCP:
         tcpServer->close();
         break;
     }
+    return true;
 }
 //////////////////////////////////////////////////
 bool NetworkWorker::write(QByteArray data)

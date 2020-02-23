@@ -3,14 +3,12 @@
 #include "serialwparam.h"
 #include "networkwparam.h"
 
+
 //////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::handleAppArguments
-/// \param arguments is the QStringList of terminal passed arguments
-///     This function is called in MainWindow initialization
-///     it controls the syntax of app terminal arguments and calls
-///      setParam() to use these parameters
-void CliArgHandler::handleAppArguments(QStringList arguments)
+CliArgHandler::CliArgHandler(QStringList val) : arguments(val)
 {
+    setComType = comType_none;
+
     /* the first argument is the cmd of calling the app */
     arguments.removeFirst();
 
@@ -44,11 +42,6 @@ void CliArgHandler::handleAppArguments(QStringList arguments)
             printHelp();
             return;
         }
-    }
-
-    if (communic->getLastConnType() != comType_none) {
-        qDebug() << "Trying to connect automatically";
-        communic->establish();
     }
 }
 
@@ -100,9 +93,9 @@ bool CliArgHandler::setParam(QString command, QString passedData)
 {
     bool ok = true;
 
-    AppArgs appargs;
+    QStringList validArgs = getValidArgs();
 
-    switch (appargs.indexOf(command))
+    switch (validArgs.indexOf(command))
     {
     case ARG_INDEX_NETWORK_IPADDR:
         NetworkWParam::get().IpAddr_Tx = QHostAddress(passedData);
@@ -136,10 +129,10 @@ bool CliArgHandler::setParam(QString command, QString passedData)
         break;
     case ARG_INDEX_CONNECTIONTYPE:
         if (passedData == ARG_CONNECTIONTYPE_SERIAL) {
-            communic->lastComType = comType_serial;
+            setComType = comType_serial;
         }
         else if (passedData == ARG_CONNECTIONTYPE_NETWORK) {
-            communic->lastComType = comType_network;
+            setComType = comType_network;
         }
         else {
             qDebug() << "Failed to handle arguments: " << command << " " << passedData;
@@ -149,7 +142,6 @@ bool CliArgHandler::setParam(QString command, QString passedData)
     case ARG_INDEX_HELP:
     case ARG_INDEX_HELP_LONG:
         printHelp();
-        close();
         break;
 
     default:

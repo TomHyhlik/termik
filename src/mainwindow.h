@@ -226,10 +226,6 @@ private:
 
     void portSet_fillMaps();
     void uiInit();
-    void handleAppArguments(QStringList arguments);
-    void handleAppArguments_printHelp();
-    void handleAppArguments_printHelp_wrap(QString argData, QString argTitle);
-    bool handleAppArguments_setParam(QString command, QString passedData);
 
     void writeToTextedit(QTextEdit* textEdit, QString color, QString data);
     void shortenTextEdit(QTextEdit* textEdit);

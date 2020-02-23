@@ -52,9 +52,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     configInit();
 
     currentAppConfig_load();
-    handleAppArguments(arguments);
-}
 
+
+    CliArgHandler cliArgHandler(arguments);
+    if (cliArgHandler.getComType() != comType_none) {
+        communic->establish(cliArgHandler.getComType());
+    }
+}
 //////////////////////////////////////////////////////////////////////
 void MainWindow::on_connectionEstablished(bool success, QString deviceName)
 {

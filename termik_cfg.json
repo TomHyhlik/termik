@@ -1,6 +1,5 @@
 {
     "Application": {
-        "Connection type": 2,
         "Prefix Tx data": null,
         "Prefix Tx enabled": false,
         "Save terminal output to file": false,
