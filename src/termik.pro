@@ -15,7 +15,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
-        appargs.cpp \
+        cliarghandler.cpp \
         communication.cpp \
         communicationworker.cpp \
         dataconverter.cpp \
@@ -33,7 +33,7 @@ SOURCES += \
         tcpworker.cpp
 
 HEADERS += \
-        appargs.h \
+        cliarghandler.h \
         communication.h \
         communicationworker.h \
         dataconverter.h \

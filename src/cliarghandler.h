@@ -1,5 +1,5 @@
-#ifndef APPARGS_H
-#define APPARGS_H
+#ifndef CLIARGHANDLER_H
+#define CLIARGHANDLER_H
 
 #include <QObject>
 
@@ -23,12 +23,12 @@
 #define ARG_HELP_LONG          "help"
 
 ////////////////////////////////////////////////
-
-////////////////////////////////////////////////
 #define ARG_PREFIX_SHORT        "-"
 
 #define ARG_CONNECTIONTYPE_SERIAL   "serial"
 #define ARG_CONNECTIONTYPE_NETWORK  "network"
+
+////////////////////////////////////////////////
 
 
 enum {
@@ -51,14 +51,38 @@ enum {
 
 #define ARG_ERROR       "ERROR: Failed to handle arguments."
 
+////////////////////////////////////////////////
 
-
-class AppArgs : public QStringList
+class CliArgHandler : public QObject
 {
-public:
-    AppArgs();
+    Q_OBJECT
 
+    QStringList args;
+
+    QStringList getValidArgs();
+
+public:
+    explicit CliArgHandler(QStringList val)
+        : args(val) {};
+
+
+
+    void handleAppArguments(QStringList);
+
+    void printHelp();
+
+    void printHelp_wrap(QString cmd, QString argTitle);
+
+    bool setParam(QString command, QString passedData);
+
+
+
+
+
+
+
+signals:
 
 };
 
-#endif // APPARGS_H
+#endif // CLIARGHANDLER_H
