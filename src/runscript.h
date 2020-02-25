@@ -3,65 +3,29 @@
 
 #include <QObject>
 #include <QTimer>
-
-
+#include <iostream>
+#include <memory>
 
 #define SCRIPTTIMEOUT_DEFAULT 1000
 
 class dataConverter;
 
-class ScriptConfig {
-public:
-    QString fileName;
 
-    bool repeat;
-    int timeout;
-    int dataFormat;
-};
-
-
-
-class runScript : public QObject
+class RunScript : public QObject
 {
     Q_OBJECT
-    ScriptConfig config;
-    QTimer*  timer;
+
+    std::shared_ptr <QTimer> timer;
 
     QList <QByteArray> fileContent; // each ByteArray is line
-
 
     void readFile();
 
 
 public:
-    explicit runScript(QObject *parent = nullptr);
+    explicit RunScript(QObject *parent = nullptr);
 
-    void setWholeConfig(ScriptConfig val) {
-        config = val;
-    }
-
-    ScriptConfig getWholeConfig() {
-        return config;
-    }
-
-
-    void setFile(QString arg) {
-        config.fileName = arg;
-    }
-    QString getfile() {
-        return config.fileName;
-    }
-    void setRepeat(bool state) {
-        config.repeat = state;
-    }
-    bool getRepeat() {
-        return config.repeat;
-    }
-
-    void setDataFormat(int format);
-    int getDataFormat();
-
-    void setTimeout(int);
+    void timeoutUpdate(int);
     int getTimeout();
 
     void start();

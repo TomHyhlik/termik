@@ -4,44 +4,47 @@
 #include "runscript.h"
 #include "mainwindow.h"
 #include "dataconverter.h"
+#include "runscriptparam.h"
+
+
 /////////////////////////////////////////////////////////////////
-runScript::runScript(QObject *parent) : QObject(parent)
+RunScript::RunScript(QObject *parent) : QObject(parent)
 {
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(timeouted()));
+    timer = std::make_unique <QTimer> ();
+    connect(timer.get(), SIGNAL(timeout()), this, SLOT(timeouted()));
 
-    setDataFormat(data_ascii);
-
+    RunScriptParam::get().dFormat = data_ascii;
 
 }
-bool runScript::isRunning()
+bool RunScript::isRunning()
 {
     return timer->isActive();
 }
 
 /////////////////////////////////////////////////////////////////
-void runScript::start()
+void RunScript::start()
 {
-    log(note, QString("Starting script: %1").arg(getfile()));
+    log(note, QString("Starting script: %1")
+        .arg(RunScriptParam::get().fileName));
     readFile();
-    timer->start(config.timeout);
+    timer->start(RunScriptParam::get().timeout);
 }
 
-void runScript::stop()
+void RunScript::stop()
 {
     timer->stop();
     fileContent.clear();
 }
 
 /////////////////////////////////////////////////////////////////
-void runScript::timeouted()
+void RunScript::timeouted()
 {
     if (!fileContent.isEmpty()) {
         Tx(fileContent.at(0));
         fileContent.removeFirst();
     } else {
         timer->stop();
-        if (config.repeat) {
+        if (RunScriptParam::get().repeat) {
             qDebug() << "Repeating script";
             start();
         }
@@ -49,13 +52,13 @@ void runScript::timeouted()
 }
 
 /////////////////////////////////////////////////////////////////
-void runScript::readFile()
+void RunScript::readFile()
 {
     fileContent.clear();
 
-    qDebug() << "reading file" << config.fileName;
+    qDebug() << "reading file" << RunScriptParam::get().fileName;
 
-    QFile file(config.fileName);
+    QFile file(RunScriptParam::get().fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         QString e = "Unable to open script file";
         log(error, e);
@@ -72,7 +75,7 @@ void runScript::readFile()
             break;
         } else {
             dataConverter dataConv;
-            switch (config.dataFormat) {
+            switch (RunScriptParam::get().dFormat) {
             case data_ascii:
                 dataConv.setStrAscii(line);
                 break;
@@ -90,31 +93,15 @@ void runScript::readFile()
     file.close();
 }
 /////////////////////////////////////////////////////////////////
-void runScript::setTimeout(int msecs)
+void RunScript::timeoutUpdate(int msecs)
 {
-    config.timeout = msecs;
+    RunScriptParam::get().timeout = msecs;
 
     if (timer->isActive()) {
         timer->stop();
-        timer->start(config.timeout);
+        timer->start(RunScriptParam::get().timeout);
     }
-}
-int runScript::getTimeout()
-{
-    return config.timeout;
 }
 
-/////////////////////////////////////////////////////////////////
-void runScript::setDataFormat(int format) {
-    if (format == data_ascii || format == data_hex) {
-        config.dataFormat = format;
-    } else {
-        qDebug() << "Invalid data format";
-    }
-}
-int runScript::getDataFormat()
-{
-    return config.dataFormat;
-}
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////

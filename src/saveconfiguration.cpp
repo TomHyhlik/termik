@@ -4,8 +4,10 @@
 #include <QJsonObject>
 #include <QDebug>
 
+#include "mainwindow.h"
 #include "saveconfiguration.h"
 #include "serialwparam.h"
+#include "runscriptparam.h"
 
 SaveConfiguration::SaveConfiguration(QObject *parent) : QObject(parent)
 {
@@ -18,14 +20,13 @@ bool SaveConfiguration::read()
     if (QFile::exists(filename)) {
         QFile file(filename);
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-
             QByteArray fileContent = file.readAll();
             file.close();
             if (jsonData_parse(fileContent)) {
                 return true;
             }
         } else {
-            qDebug() <<"ERROR: Failed to open file";
+            qDebug() <<"ERROR: Failed to read configuration from termik_cfg.json";
         }
     }
     return false;
@@ -89,11 +90,10 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         data.LogFileDir = jObj.value(QString(JSONTITLE_LOG_DIRECTORY)).toString();
 
         QJsonObject jObj_script;
-        data.script.fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
-
-        data.script.repeat = jObj_script.value(JSONTITLE_SCRIPT_REPEAT).toBool();
-        data.script.timeout = jObj_script.value(JSONTITLE_SCRIPT_TIMEOUT).toInt();
-        data.script.dataFormat = jObj_script.value(JSONTITLE_SCRIPT_DATAFORMAT).toInt();
+        RunScriptParam::get().fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
+        RunScriptParam::get().repeat = jObj_script.value(JSONTITLE_SCRIPT_REPEAT).toBool();
+        RunScriptParam::get().timeout = jObj_script.value(JSONTITLE_SCRIPT_TIMEOUT).toInt();
+        RunScriptParam::get().dFormat = dataFormat(jObj_script.value(JSONTITLE_SCRIPT_DATAFORMAT).toInt());
 
         return true;
     } else {
@@ -163,7 +163,7 @@ QByteArray SaveConfiguration::jsonData_make()
     jObj_script.insert(JSONTITLE_SCRIPT_TIMEOUT ,
                        QJsonValue::fromVariant(data.script.timeout));
     jObj_script.insert(JSONTITLE_SCRIPT_DATAFORMAT ,
-                       QJsonValue::fromVariant(data.script.dataFormat));
+                       QJsonValue::fromVariant(int(data.script.dFormat)));
     jObj.insert(JSONTITLE_SCRIPT, jObj_script);
 
     QJsonDocument doc(jObj);

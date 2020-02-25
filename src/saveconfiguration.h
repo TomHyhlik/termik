@@ -8,6 +8,7 @@
 #include "logfile.h"
 #include "serialwparam.h"
 #include "networkwparam.h"
+#include "runscriptparam.h"
 
 
 
@@ -54,7 +55,7 @@ public:
     NetworkWParam& network = NetworkWParam::get();
     appConfiguration app;
     QString LogFileDir;
-    ScriptConfig script;
+    RunScriptParam& script = RunScriptParam::get();
 
 };
 

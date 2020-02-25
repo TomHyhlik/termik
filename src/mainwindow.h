@@ -204,7 +204,7 @@ private:
     Communication* communic;
     LogFile* logFile;
     appConfiguration config;
-    runScript* script;
+    RunScript* script;
 
     qint64 tick_lastRx;
     QElapsedTimer tick;

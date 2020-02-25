@@ -1,5 +1,5 @@
 #include <QShortcut>
-#include <QSerialPortInfo>
+//#include <QSerialPortInfo>        // todo rm
 #include <QTimer>
 #include <QFileDialog>
 
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
 
     logFile = new LogFile(this);
-    script = new runScript(this);
+    script = new RunScript(this);
     connect(script, SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
 
     tick_lastRx = 0;
@@ -51,9 +51,10 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     uiInit();
     configInit();
 
+    /* set configuration from the json file */
     currentAppConfig_load();
 
-
+    /* set configuration from the CLI arguments */
     CliArgHandler cliArgHandler(arguments);
     if (cliArgHandler.getComType() != comType_none) {
         communic->establish(cliArgHandler.getComType());
@@ -96,11 +97,8 @@ void MainWindow::currentAppConfig_save()
     SaveConfiguration saveCfg;
 
     saveCfg.data.app = config;
-
-    saveCfg.data.script = script->getWholeConfig();
     saveCfg.data.LogFileDir = logFile->getFileDirectory();
 
-    /* save all the data into json file */
     saveCfg.write();
 }
 
@@ -110,27 +108,20 @@ void MainWindow::currentAppConfig_save()
 void MainWindow::currentAppConfig_load()
 {
     SaveConfiguration saveCfg;
-    saveCfg.read();
+    if (saveCfg.read()) {
 
-    /* load script parameters */
-    if (!saveCfg.data.script.fileName.isEmpty()) {
-        ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+        /* load script parameters */
+        if (!saveCfg.data.script.fileName.isEmpty()) {
+            ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+        }
+        if (!saveCfg.data.LogFileDir.isEmpty()) {
+            ui->lineEdit_save->setText(saveCfg.data.LogFileDir);
+        }
+        ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
+        ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
+
+        /* todo: continue here, load the saveCfg.data.app to ui */
     }
-    if (!saveCfg.data.LogFileDir.isEmpty()) {
-        ui->lineEdit_save->setText(saveCfg.data.LogFileDir);
-    }
-    ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
-    ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
-
-    switch (saveCfg.data.script.dataFormat) {
-    case data_ascii:
-    case data_hex:
-        script->setDataFormat(saveCfg.data.script.dataFormat);
-    }
-
-
-    /* todo: continue here, load the saveCfg.data.app to ui */
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -138,13 +129,14 @@ void MainWindow::selectScript()
 {
     QString openLocation;
 
-    if (!script->getfile().isEmpty()) {
-        openLocation = script->getfile().isEmpty();
+    if (!RunScriptParam::get().fileName.isEmpty()) {
+        openLocation = RunScriptParam::get().fileName;
     } else {
         openLocation = LOCATION_DEFAULT;
     }
 
-    QString scriptFileName = QFileDialog::getOpenFileName(this, openLocation);
+    QString scriptFileName = QFileDialog::getOpenFileName(this,
+                                     RunScriptParam::get().fileName);
 
     if (!scriptFileName.isEmpty()) {
         showScriptUi();
@@ -833,7 +825,7 @@ void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 }
 void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 {
-    script->setRepeat(checkboxChecked(arg1));
+    RunScriptParam::get().repeat = checkboxChecked(arg1);
 }
 void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
 {
@@ -870,12 +862,12 @@ void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
 {
-    script->setFile(arg1);
+    RunScriptParam::get().fileName = arg1;
 }
 
 void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
 {
-    script->setTimeout(arg1);
+    RunScriptParam::get().timeout = arg1;
 }
 
 void MainWindow::on_pushButton_script_run_clicked()
@@ -895,10 +887,10 @@ void MainWindow::on_pushButton_script_run_clicked()
 void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1)
 {
     if (arg1 == TITLE_DATA_HEX) {
-        script->setDataFormat(data_hex);
+        RunScriptParam::get().dFormat = data_hex;
     }
     else if (arg1 == TITLE_DATA_ASCII) {
-        script->setDataFormat(data_ascii);
+        RunScriptParam::get().dFormat = data_ascii;
     }
 }
 
@@ -913,7 +905,6 @@ void MainWindow::fillShortcutsTable()
     QList <QList <QString>> shortcuts;
 
     shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
-    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
     shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
     shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
     shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
@@ -924,7 +915,10 @@ void MainWindow::fillShortcutsTable()
     shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
     shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
     shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
+    shortcuts <<  QList <QString> { "CTRL + T" , "Show run script UI"};
+    shortcuts <<  QList <QString> { "CTRL + R" , "Run the selected script"};
     shortcuts <<  QList <QString> { "F1"       , "Open help"};
+    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
 
     while (!shortcuts.isEmpty())
     {
@@ -936,6 +930,8 @@ void MainWindow::fillShortcutsTable()
 /////////////////////////////////////////////////////////////////
 void MainWindow::setupShortcuts()
 {
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_T), this, SLOT(showScriptUi()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this, SLOT(on_pushButton_script_run_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFindUi()));
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));

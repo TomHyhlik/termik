@@ -27,6 +27,7 @@ SOURCES += \
         networkworker.cpp \
         networkwparam.cpp \
         runscript.cpp \
+        runscriptparam.cpp \
         saveconfiguration.cpp \
         serialworker.cpp \
         serialwparam.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
         networkworker.h \
         networkwparam.h \
         runscript.h \
+        runscriptparam.h \
         saveconfiguration.h \
         serialworker.h \
         serialwparam.h \
