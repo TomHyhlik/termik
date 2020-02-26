@@ -50,8 +50,13 @@ bool SaveConfiguration::write()
         file.flush();
         file.close();
 
+        qDebug() << "Configuration saved to: " << filename;
+
         return true;
     }
+
+    qDebug() << "Failet to save configuration to: " << filename;
+
     return false;
 }
 
@@ -89,7 +94,7 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
 
         data.LogFileDir = jObj.value(QString(JSONTITLE_LOG_DIRECTORY)).toString();
 
-        QJsonObject jObj_script;
+        QJsonObject jObj_script = jObj.value(QString(JSONTITLE_SCRIPT)).toObject();
         RunScriptParam::get().fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
         RunScriptParam::get().repeat = jObj_script.value(JSONTITLE_SCRIPT_REPEAT).toBool();
         RunScriptParam::get().timeout = jObj_script.value(JSONTITLE_SCRIPT_TIMEOUT).toInt();

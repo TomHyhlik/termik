@@ -66,7 +66,6 @@ void MainWindow::on_connectionEstablished(bool success, QString deviceName)
     if (success) {
         showMessage(note, QString("Connected to: %1").arg(deviceName));
         terminalInputSetFocus();
-        currentAppConfig_save();
     } else {
         showMessage(error, QString("Failed to connect to: %1").arg(deviceName));
         showConnectionSettings();
@@ -117,10 +116,18 @@ void MainWindow::currentAppConfig_load()
         if (!saveCfg.data.LogFileDir.isEmpty()) {
             ui->lineEdit_save->setText(saveCfg.data.LogFileDir);
         }
+
+        /* RunScript settings */
+        ui->comboBox_script_dataType->setCurrentIndex(saveCfg.data.script.dFormat);
+        ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+//        qDebug() << "Configuration loaded from file: " << RunScriptParam::get().fileName;
+
         ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
         ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
 
         /* todo: continue here, load the saveCfg.data.app to ui */
+
+        qDebug() << "Configuration loaded from file";
     }
 }
 
@@ -262,6 +269,10 @@ void MainWindow::uiInit()
     ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
     ui->spinBox_autoclear_maxCharCnt->setValue(AUTOCLEAR_VAL_DEFAULT);
     ui->spinBox_script_period->setValue(SCRIPT_TXPERIOD_DEFAULT);
+
+    ui->checkBox_autoclear->setChecked(true);
+    ui->checkBox_autoclear->setChecked(false);
+    ui->spinBox_script_period->setValue(10);
 
     hideFindUi();
     hideHelp();
@@ -853,16 +864,12 @@ void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
     dataConv.setStrHex(arg1);
     config.suffix_tx = dataConv.getByteArray();
 }
+
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
     dataConverter dataConv;
     dataConv.setStrHex(arg1);
     config.prefix_tx = dataConv.getByteArray();
-}
-/////////////////////////////////////////////////////////////////
-void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
-{
-    RunScriptParam::get().fileName = arg1;
 }
 
 void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
@@ -873,6 +880,7 @@ void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
 void MainWindow::on_pushButton_script_run_clicked()
 {
     if (script->isRunning()) {
+        RunScriptParam::get().fileName = ui->lineEdit_script->text();
         script->stop();
         ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_RUN);
         pushButton_runScript_setColor_green();
@@ -899,6 +907,18 @@ void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 {
     logFile->setFileDirectory(arg1);
 }
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_comboBox_script_dataType_currentTextChanged(const QString &arg1)
+{
+    if (arg1 == TITLE_DATA_ASCII) {
+        RunScriptParam::get().dFormat = data_ascii;
+    }
+    else if (arg1 == TITLE_DATA_HEX) {
+        RunScriptParam::get().dFormat = data_hex;
+    }
+}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::fillShortcutsTable()
 {

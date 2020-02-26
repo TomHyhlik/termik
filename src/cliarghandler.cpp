@@ -141,6 +141,7 @@ bool CliArgHandler::setParam(QString command, QString passedData)
     return ok;
 }
 
+//////////////////////////////////////////////////////////////////////
 QStringList CliArgHandler::getValidArgs()
 {
     QStringList validArgs;
@@ -167,5 +168,5 @@ QStringList CliArgHandler::getValidArgs()
 
 }
 
-
+//////////////////////////////////////////////////////////////////////
 

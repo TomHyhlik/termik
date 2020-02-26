@@ -122,6 +122,8 @@ class MainWindow : public QMainWindow
     int lastTerminalData;
 
     void closeEvent(QCloseEvent *event);
+    void currentAppConfig_save();
+
 
 
 public:
@@ -171,7 +173,6 @@ private slots:
     void on_checkBox_timeLog_stateChanged(int arg1);    
     void on_checkBox_clearOutputLine_stateChanged(int arg1);
     void on_checkBox_outputSave_stateChanged(int arg1);
-    void on_lineEdit_script_textChanged(const QString &arg1);
     void on_spinBox_script_period_valueChanged(int arg1);
     void on_pushButton_script_run_clicked();
     void on_comboBox_script_dataType_editTextChanged(const QString &arg1);
@@ -182,7 +183,6 @@ private slots:
 
     void moveCursorToTerminalInputLine();
 
-    void currentAppConfig_save();
     void currentAppConfig_load();
 
 
@@ -194,6 +194,8 @@ private slots:
 
     void on_connectionEstablished(bool success, QString deviceName);
 
+
+    void on_comboBox_script_dataType_currentTextChanged(const QString &arg1);
 
 public slots:
 

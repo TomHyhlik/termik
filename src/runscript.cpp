@@ -5,15 +5,14 @@
 #include "mainwindow.h"
 #include "dataconverter.h"
 #include "runscriptparam.h"
+#include <memory>
 
 
 /////////////////////////////////////////////////////////////////
 RunScript::RunScript(QObject *parent) : QObject(parent)
 {
-    timer = std::make_unique <QTimer> ();
+    timer = std::unique_ptr <QTimer> (new QTimer);
     connect(timer.get(), SIGNAL(timeout()), this, SLOT(timeouted()));
-
-    RunScriptParam::get().dFormat = data_ascii;
 
 }
 bool RunScript::isRunning()
@@ -71,9 +70,7 @@ void RunScript::readFile()
 
     while (1) {
         QString line = QString(textStream.readLine());
-        if (line.isEmpty()) {
-            break;
-        } else {
+        if (!line.isEmpty()) {
             dataConverter dataConv;
             switch (RunScriptParam::get().dFormat) {
             case data_ascii:
@@ -83,10 +80,12 @@ void RunScript::readFile()
                 dataConv.setStrHex(line);
                 break;
             default:
-                qDebug() << "ERROR: unitialized data format for the script";
+                qDebug() << "ERROR: unitialized data format of the script";
                 return;
             }
             fileContent.append(dataConv.getByteArray());
+        } else {
+            break;
         }
 
     }
