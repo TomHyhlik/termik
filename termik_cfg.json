@@ -1,11 +1,11 @@
 {
     "Application": {
         "Prefix Tx data": null,
-        "Prefix Tx enabled": false,
+        "Prefix Tx enabled": true,
         "Save terminal output to file": false,
         "Suffix Tx data": "\r\n",
         "Suffix Tx enabled": true,
-        "Time info enabled": false,
+        "Time info enabled": true,
         "Time log enabled": true
     },
     "Log files directory": "",
@@ -17,7 +17,7 @@
     },
     "Script": {
         "Data format": 0,
-        "File name": "/Users/tomashyhlik/Repozitories/termik/termik_cfg.json",
+        "File name": "/home/fuzz/Repos/termik/termik_cfg.json",
         "Repeat": false,
         "Timeout": 0
     },
@@ -26,7 +26,7 @@
         "Data bits": 8,
         "Flow control": 0,
         "Parity": 0,
-        "Port name": "tty.usbmodem14203",
+        "Port name": "ttyACM0",
         "Stop bits": 1
     }
 }

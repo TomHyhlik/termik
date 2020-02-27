@@ -197,6 +197,8 @@ private slots:
 
     void on_comboBox_script_dataType_currentTextChanged(const QString &arg1);
 
+    void on_lineEdit_script_textChanged(const QString &arg1);
+
 public slots:
 
 

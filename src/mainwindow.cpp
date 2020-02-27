@@ -920,6 +920,12 @@ void MainWindow::on_comboBox_script_dataType_currentTextChanged(const QString &a
 }
 
 /////////////////////////////////////////////////////////////////
+void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
+{
+    RunScriptParam::get().fileName = arg1;
+}
+
+/////////////////////////////////////////////////////////////////
 void MainWindow::fillShortcutsTable()
 {
     QList <QList <QString>> shortcuts;
@@ -975,3 +981,4 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
 }
 /////////////////////////////////////////////////////////////////
+
