@@ -28,7 +28,12 @@ bool Communication::dataTransmit(QByteArray txData)
 //////////////////////////////////////////////////////////////////////
 bool Communication::isEstablished()
 {
-    return communicWorker != nullptr;
+    if (communicWorker == nullptr) {
+        qDebug() << "Communication not established";
+        return false;
+    } else {
+        return true;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////

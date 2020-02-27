@@ -9,97 +9,78 @@
 
 
 /////////////////////////////////////////////////////////////////
-RunScript::RunScript(QObject *parent) : QObject(parent)
+RunScript::RunScript()
 {
-    timer = std::unique_ptr <QTimer> (new QTimer);
-    connect(timer.get(), SIGNAL(timeout()), this, SLOT(timeouted()));
-
-}
-bool RunScript::isRunning()
-{
-    return timer->isActive();
 }
 
 /////////////////////////////////////////////////////////////////
-void RunScript::start()
+void RunScript::run()
 {
-    log(note, QString("Starting script: %1")
-        .arg(RunScriptParam::get().fileName));
-    readFile();
-    timer->start(RunScriptParam::get().timeout);
-}
+    isRunning = true;
 
-void RunScript::stop()
-{
-    timer->stop();
-    fileContent.clear();
-}
+    do {
+        QList <QByteArray> fileContent;
 
-/////////////////////////////////////////////////////////////////
-void RunScript::timeouted()
-{
-    if (!fileContent.isEmpty()) {
-        Tx(fileContent.at(0));
-        fileContent.removeFirst();
-    } else {
-        timer->stop();
-        if (RunScriptParam::get().repeat) {
-            qDebug() << "Repeating script";
-            start();
+        if (readFileContent(&fileContent)) {
+            while (!fileContent.isEmpty() && isRunning) {
+                Tx(fileContent.takeFirst());
+                this->msleep(RunScriptParam::get().timeout);
+            }
+        } else {
+            isRunning = false;
         }
-    }
+    } while (RunScriptParam::get().repeat);
 }
 
 /////////////////////////////////////////////////////////////////
-void RunScript::readFile()
-{
-    fileContent.clear();
-
-    qDebug() << "reading file" << RunScriptParam::get().fileName;
-
+bool RunScript::readFileContent(QList <QByteArray> * fileContent)
+{    
     QFile file(RunScriptParam::get().fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QString e = "Unable to open script file";
-        log(error, e);
-        qDebug() << e;
-        return;
+        return false;
     }
 
     QTextStream textStream(&file);
 
+    QString line;
 
-    while (1) {
-        QString line = QString(textStream.readLine());
-        if (!line.isEmpty()) {
-            dataConverter dataConv;
-            switch (RunScriptParam::get().dFormat) {
-            case data_ascii:
-                dataConv.setStrAscii(line);
-                break;
-            case data_hex:
-                dataConv.setStrHex(line);
-                break;
-            default:
-                qDebug() << "ERROR: unitialized data format of the script";
-                return;
-            }
-            fileContent.append(dataConv.getByteArray());
-        } else {
+    while (textStream.readLineInto(&line))
+    {
+        dataConverter dataConv;
+        switch (RunScriptParam::get().dFormat)
+        {
+        case data_ascii:
+            dataConv.setStrAscii(line);
             break;
+        case data_hex:
+            dataConv.setStrHex(line);
+            break;
+        default:
+            qDebug() << "ERROR: Run script file read, selected invalid file format";
+            return false;
         }
-
+        fileContent->append(dataConv.getByteArray());
     }
     file.close();
+    return true;
 }
+
+/////////////////////////////////////////////////////////////////
+void RunScript::stop()
+{
+    isRunning = false;
+}
+
+/////////////////////////////////////////////////////////////////
+void RunScript::setTimeout(int val)
+{
+    RunScriptParam::get().timeout = val;
+}
+
 /////////////////////////////////////////////////////////////////
 void RunScript::timeoutUpdate(int msecs)
 {
     RunScriptParam::get().timeout = msecs;
-
-    if (timer->isActive()) {
-        timer->stop();
-        timer->start(RunScriptParam::get().timeout);
-    }
 }
 
 /////////////////////////////////////////////////////////////////

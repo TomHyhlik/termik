@@ -41,8 +41,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 
 
     logFile = new LogFile(this);
-    script = new RunScript(this);
-    connect(script, SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
 
     tick_lastRx = 0;
     tick.start();
@@ -120,7 +118,6 @@ void MainWindow::currentAppConfig_load()
         /* RunScript settings */
         ui->comboBox_script_dataType->setCurrentIndex(saveCfg.data.script.dFormat);
         ui->lineEdit_script->setText(saveCfg.data.script.fileName);
-//        qDebug() << "Configuration loaded from file: " << RunScriptParam::get().fileName;
 
         ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
         ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
@@ -143,7 +140,7 @@ void MainWindow::selectScript()
     }
 
     QString scriptFileName = QFileDialog::getOpenFileName(this,
-                                     RunScriptParam::get().fileName);
+                                                          RunScriptParam::get().fileName);
 
     if (!scriptFileName.isEmpty()) {
         showScriptUi();
@@ -173,74 +170,72 @@ void MainWindow::configInit()
     config.saveTerminalOutToFile = false;
 }
 
-
 /////////////////////////////////////////////////////////////////
 void MainWindow::uiInit()
 {
     /*** set colors ***/
 
     /* MainWindow background */
-    this->setStyleSheet(QString("color: %1; background-color: %2")
+    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                         .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
-    ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_GRAY4));
 
-    ui->statusBar->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->statusBar->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                  .arg(COLOR_WHITE).arg(COLOR_GRAY1));
 
-    ui->lineEdit_prefix->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_prefix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_suffix->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_suffix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->lineEdit_find_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_find_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_find_hex->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_find_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_find_dec->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_find_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->tab_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tab_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                  .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-    ui->tab_hex->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tab_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-    ui->tab_dec->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tab_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
-    ui->textEdit_out_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->textEdit_out_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->textEdit_out_hex->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->textEdit_out_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->textEdit_out_dec->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->textEdit_out_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->lineEdit_in_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_in_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_in_hex->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_in_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_in_dec->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_in_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_save->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->lineEdit_script->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_script->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_script_dataType->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_script_dataType->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-
     /* pushbuttons */
-    ui->pushButton_save->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-    ui->pushButton_fnd_dec->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_fnd_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                           .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-    ui->pushButton_fnd_hex->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_fnd_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                           .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-    ui->pushButton_fnd_ascii->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_fnd_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                             .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     pushButton_runScript_setColor_green();
 
@@ -285,14 +280,12 @@ void MainWindow::uiInit()
 /////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_green()
 {
-    ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_script_run->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                              .arg(COLOR_WHITE).arg(COLOR_GREEN));
 }
-
-/////////////////////////////////////////////////////////////////
 void MainWindow::pushButton_runScript_setColor_red()
 {
-    ui->pushButton_script_run->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->pushButton_script_run->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                              .arg(COLOR_WHITE).arg(COLOR_RED));
 }
 
@@ -874,21 +867,38 @@ void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 
 void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
 {
-    RunScriptParam::get().timeout = arg1;
+    if (script == nullptr) {
+        RunScriptParam::get().timeout = arg1;
+    } else {
+        script->setTimeout(arg1);
+    }
 }
 
 void MainWindow::on_pushButton_script_run_clicked()
 {
-    if (script->isRunning()) {
-        RunScriptParam::get().fileName = ui->lineEdit_script->text();
-        script->stop();
-        ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_RUN);
-        pushButton_runScript_setColor_green();
-    } else {
+    if (!communic->isEstablished())
+        return;
+
+    if (script == nullptr) {
+        script = std::make_unique <RunScript> ();
+        connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
+        connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
+        script->start();
+
         ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_STOP);
         pushButton_runScript_setColor_red();
-        script->start();
+
+    } else {
+        script->stop();
     }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::runScript_finished()
+{
+    ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_RUN);
+    pushButton_runScript_setColor_green();
+    script = nullptr;
 }
 
 /////////////////////////////////////////////////////////////////

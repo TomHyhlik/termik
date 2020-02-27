@@ -19,7 +19,7 @@
         "Data format": 0,
         "File name": "/home/fuzz/Repos/termik/termik_cfg.json",
         "Repeat": false,
-        "Timeout": 0
+        "Timeout": 100
     },
     "Serial": {
         "Baud rate": 9600,

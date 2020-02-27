@@ -8,7 +8,6 @@
 #include <QList>
 #include <QElapsedTimer>
 
-
 #include "serialworker.h"
 #include "networkworker.h"
 #include "logfile.h"
@@ -16,6 +15,8 @@
 #include "communication.h"
 
 
+
+#define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
 
 #define DIGIT_NUM_HEX   2
 #define DIGIT_NUM_DEC   3
@@ -39,8 +40,8 @@
 #define COLOR_ERROR     "Tomato"
 #define COLOR_PREAMBLE      "#949494"
 
-#define COLOR_GREEN     "green"
-#define COLOR_RED       "red"
+#define COLOR_GREEN     "#005000"//"green"
+#define COLOR_RED       "#500000"//"red"
 
 
 #define COLOR_TOPLINE   "#A0A0A0"
@@ -63,6 +64,7 @@
 #define TITLE_BUTTON_SCRIPT_STOP "Stop"
 
 #define LOCATION_DEFAULT    "~/"
+
 
 enum logType {
     error, note, info
@@ -144,7 +146,6 @@ private slots:
     void focus_2();
     void focus_3();
 
-
     void toggleShowSettings();
     void showHelp();
     void hideHelp();
@@ -159,12 +160,15 @@ private slots:
     void on_Tx(QByteArray);
     void Tx_fromDataInput(int);
 
-
     void historyTxUpdate();
     void selectScript();
 
     void terminalOutUpdate(int, QByteArray);
 
+    void moveCursorToTerminalInputLine();
+    void currentAppConfig_load();
+    void runScript_finished();
+    void connectOrDisconnect();
 
     void on_checkBox_prefix_stateChanged(int arg1);
     void on_checkBox_suffix_stateChanged(int arg1);
@@ -180,24 +184,12 @@ private slots:
     void on_pushButton_save_clicked();
     void on_tabWidget_currentChanged(int index);
     void on_lineEdit_save_textChanged(const QString &arg1);
-
-    void moveCursorToTerminalInputLine();
-
-    void currentAppConfig_load();
-
-
-
-    void connectOrDisconnect();
-
     void on_checkBox_autoclear_stateChanged(int arg1);
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
-
     void on_connectionEstablished(bool success, QString deviceName);
-
-
     void on_comboBox_script_dataType_currentTextChanged(const QString &arg1);
-
     void on_lineEdit_script_textChanged(const QString &arg1);
+
 
 public slots:
 
@@ -208,7 +200,7 @@ private:
     Communication* communic;
     LogFile* logFile;
     appConfiguration config;
-    RunScript* script;
+    std::unique_ptr <RunScript> script;
 
     qint64 tick_lastRx;
     QElapsedTimer tick;
@@ -247,6 +239,7 @@ private:
     QString getDataColor(int);
     QString terminalOutGetPreamble(int);
     bool checkboxChecked(int);
+
 
 };
 

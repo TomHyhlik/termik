@@ -1,8 +1,7 @@
 #ifndef RUNSCRIPT_H
 #define RUNSCRIPT_H
 
-#include <QObject>
-#include <QTimer>
+#include <QThread>
 #include <iostream>
 #include <memory>
 
@@ -11,37 +10,31 @@
 class dataConverter;
 
 
-class RunScript : public QObject
+class RunScript : public QThread
 {
     Q_OBJECT
 
-    std::shared_ptr <QTimer> timer;
-
-    QList <QByteArray> fileContent; // each ByteArray is line
-
-    void readFile();
-
+    bool readFileContent(QList <QByteArray> *fileContent);
+    bool isRunning;
 
 public:
-    explicit RunScript(QObject *parent = nullptr);
+    explicit RunScript();
+
+    void run() override;
 
     void timeoutUpdate(int);
-    int getTimeout();
 
-    void start();
     void stop();
-    bool isRunning();
+    void setTimeout(int);
 
 signals:
-
     void Tx(QByteArray data);
     void log(int, QString);
 
 public slots:
 
 
-private slots:
-    void timeouted();
+
 };
 
 #endif // RUNSCRIPT_H
