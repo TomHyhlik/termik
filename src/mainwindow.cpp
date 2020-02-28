@@ -10,7 +10,6 @@
 #include <QDateTimeEdit>
 #include <QDebug>
 
-#include <iostream>
 
 //#include <stdio.h> // todo: rm
 
@@ -33,13 +32,13 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /* first setup log */
+    Log::get().setEntities(ui->statusBar);
 
     communic = new Communication(this);
     connect(communic, SIGNAL(displayData(int, QByteArray)), this, SLOT(terminalOutUpdate(int, QByteArray)));
-    connect(communic, SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
     connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
     connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
-
 
     logFile = new LogFile(this);
 
@@ -50,10 +49,9 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     uiInit();
     configInit();
 
-    /* set configuration from the json file */
-    currentAppConfig_load();
+    currentAppConfig_loadSaved();
 
-    /* set configuration from the CLI arguments */
+    /* parse CLI arguments */
     CliArgHandler cliArgHandler(arguments);
     if (cliArgHandler.getComType() != comType_none) {
         communic->establish(cliArgHandler.getComType());
@@ -74,8 +72,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     currentAppConfig_save();
 
-    log(info, QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
-    //    event->accept(); // todo:error
+    LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -92,9 +89,9 @@ void MainWindow::currentAppConfig_save()
 }
 
 //////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::currentAppConfig_load
+/// \brief MainWindow::currentAppConfig_loadSaved
 ///     load app configuration from json file at app startup
-void MainWindow::currentAppConfig_load()
+void MainWindow::currentAppConfig_loadSaved()
 {
     SaveConfiguration saveCfg;
     if (saveCfg.read()) {
@@ -150,7 +147,7 @@ void MainWindow::saveToFile_init()
     QString fileLocation = ui->lineEdit_save->text();
 
     logFile->init(fileLocation);
-    log(info, QString("Output saved in %1").arg(fileLocation));
+    LOG(QString("Output saved in %1").arg(fileLocation));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -331,7 +328,7 @@ void MainWindow::Tx_fromDataInput(int inputType)
 void MainWindow::on_Tx(QByteArray txData)
 {
     if (!communic->isEstablished()) {
-        log(error, "Can't transmit. No connection established.");
+        LOG_T(error, "Can't transmit. No connection established.");
         return;
     }
 
@@ -510,36 +507,6 @@ void MainWindow::focus_3()
     ui->lineEdit_in_dec->setFocus();
 }
 
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::log(int type, QString messageData)
-{   
-    int timeout;
-
-    switch (type)
-    {
-    case error:
-        timeout = LOGTIMEOUT_ERROR;
-        messageData.prepend("ERROR: ");
-        break;
-
-    case note:
-        timeout = LOGTIMEOUT_NOTE;
-        messageData.prepend("NOTE: ");
-        break;
-
-    case info:
-        timeout = LOGTIMEOUT_INFO;
-        break;
-    default:
-        timeout = LOGTIMEOUT_ERROR;
-    }
-
-    ui->statusBar->showMessage(messageData, timeout);
-
-    std::cout << messageData.toStdString() << "\n";
-    //    qDebug() << messageData;
-}
 
 /////////////////////////////////////////////////////////////////
 bool MainWindow::preambleShouldBeAddrd(int dataKind)
@@ -740,6 +707,7 @@ void MainWindow::moveCursorToEnd()
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_pushButton_save_clicked()
 {
+    /* todo: tweak this feature */
     QString openLocation;
 
     if (!logFile->getFileDirectory().isEmpty()) {
@@ -749,7 +717,8 @@ void MainWindow::on_pushButton_save_clicked()
     }
 
     QString dir = QFileDialog::getExistingDirectory(
-                this, tr("Open Directory"),
+                this,
+                tr("Open Directory where the terminal output data will be stored"),
                 openLocation,
                 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
@@ -922,26 +891,24 @@ void MainWindow::fillShortcutsTable()
 {
     QList <QList <QString>> shortcuts;
 
-    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
     shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
     shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
     shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
     shortcuts <<  QList <QString> { "CTRL + P" , "Show connection settongs"};
-    shortcuts <<  QList <QString> { "CTRL + O" , "Open script"};
-    shortcuts <<  QList <QString> { "CTRL + D" , "Connect / Disconnect"};
+    shortcuts <<  QList <QString> { "CTRL + D" , "Connect/Disconnect toggle"};
     shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
     shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
     shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
-    shortcuts <<  QList <QString> { "CTRL + S" , "Save transmitted data"};
-    shortcuts <<  QList <QString> { "CTRL + T" , "Show run script UI"};
-    shortcuts <<  QList <QString> { "CTRL + R" , "Run the selected script"};
+    shortcuts <<  QList <QString> { "CTRL + S" , "Open location where the terminal output shall be saved"};
+    shortcuts <<  QList <QString> { "CTRL + O" , "Open a file \"script\"to run in terminal later"};
+    shortcuts <<  QList <QString> { "CTRL + T" , "Show UI to control and run a \"script\" in the terminal"};
+    shortcuts <<  QList <QString> { "CTRL + R" , "Run/Stop transmission of the selected \"script\""};
     shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
+    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
     shortcuts <<  QList <QString> { "F1"       , "Open help"};
 
-    while (!shortcuts.isEmpty())
-    {
-        shortcutTable_addItem(shortcuts.at(0));
-        shortcuts.pop_front();
+    while (!shortcuts.isEmpty()) {
+        shortcutTable_addItem(shortcuts.takeFirst());
     }
 }
 

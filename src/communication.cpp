@@ -6,6 +6,7 @@
 
 #include "mainwindow.h"
 #include "serialwparam.h"
+#include "log.h"
 
 //////////////////////////////////////////////////////////////////////
 Communication::Communication(QObject *parent) : QObject(parent)
@@ -46,7 +47,7 @@ void Communication::establish(communicationType type)
     bool EstablishedSuccessful = false;
     QString deviceName;
 
-    log(info,"Attempt to establish communication");
+    LOG("Attempt to establish communication");
 
     switch (type)
     {
@@ -70,11 +71,11 @@ void Communication::establish(communicationType type)
             SLOT(dataArrived(QByteArray)));
 
     if (EstablishedSuccessful) {
-        log(note, QString("Connected to: %1").arg(deviceName));
+        LOG_T(note, QString("Connected to: %1").arg(deviceName));
         lastComType = type;
         emit established_success();
     } else {
-        log(error, QString("Failed to connect to: %1").arg(deviceName));
+        LOG_T(error, QString("Failed to connect to: %1").arg(deviceName));
         emit established_failed();
 
     }
@@ -85,7 +86,7 @@ void Communication::suspend()
 {
     if (communicWorker != nullptr) {
         communicWorker = nullptr;
-        log(note, "Communication suspended");
+        LOG_T(note, "Communication suspended");
     }
 }
 

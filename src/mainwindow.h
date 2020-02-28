@@ -13,6 +13,7 @@
 #include "logfile.h"
 #include "runscript.h"
 #include "communication.h"
+#include "log.h"
 
 
 
@@ -53,9 +54,6 @@
 
 #define MAINWINDOWTITLE "Termik"
 
-#define LOGTIMEOUT_ERROR    300*1000
-#define LOGTIMEOUT_NOTE     60*1000
-#define LOGTIMEOUT_INFO     30*1000
 
 #define TITLE_DATA_ASCII    "ASCII"
 #define TITLE_DATA_HEX      "HEX"
@@ -66,9 +64,6 @@
 #define LOCATION_DEFAULT    "~/"
 
 
-enum logType {
-    error, note, info
-};
 
 enum dataToDisplay {
      data_Rx, data_Tx
@@ -159,8 +154,6 @@ private slots:
 
     void on_Tx(QByteArray);
     void Tx_fromDataInput(int);
-    void log(int, QString);
-
 
     void historyTxUpdate();
     void selectScript();
@@ -168,7 +161,7 @@ private slots:
     void terminalOutUpdate(int, QByteArray);
 
     void moveCursorToTerminalInputLine();
-    void currentAppConfig_load();
+    void currentAppConfig_loadSaved();
     void runScript_finished();
     void connectOrDisconnect();
 

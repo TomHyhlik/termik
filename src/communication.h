@@ -47,7 +47,6 @@ signals:
     void connected();
     void disconnected();
     void displayData(int, QByteArray);
-    void log(int, QString);
 
     void established_success();
     void established_failed();

@@ -19,6 +19,7 @@ SOURCES += \
         communication.cpp \
         communicationworker.cpp \
         dataconverter.cpp \
+        log.cpp \
         logfile.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
         communication.h \
         communicationworker.h \
         dataconverter.h \
+        log.h \
         logfile.h \
         mainwindow.h \
         dialog_connect.h \
