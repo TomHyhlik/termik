@@ -27,7 +27,9 @@ void RunScript::run()
                 this->msleep(RunScriptParam::get().timeout);
             }
         } else {
-            isRunning = false;
+            log(error, QString("Failed to read script content from: %1")
+                                    .arg(RunScriptParam::get().fileName));
+            break;
         }
     } while (RunScriptParam::get().repeat);
 }
@@ -56,7 +58,7 @@ bool RunScript::readFileContent(QList <QByteArray> * fileContent)
             dataConv.setStrHex(line);
             break;
         default:
-            qDebug() << "ERROR: Run script file read, selected invalid file format";
+            log(error, "Selected invalid file format");
             return false;
         }
         fileContent->append(dataConv.getByteArray());

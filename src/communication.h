@@ -16,6 +16,8 @@ class Communication : public QObject
 {
     Q_OBJECT
 
+    communicationType lastComType;
+
      std::unique_ptr <CommunicationWorker> communicWorker;
 
 
@@ -27,8 +29,7 @@ public:
     bool isEstablished();
     void suspend();
 
-    communicationType getLastConnType() { return lastComType; }
-    communicationType lastComType;
+//    communicationType getLastConnType() { return lastComType; } // todo rm, should not be needed
 
 
 public slots:
@@ -45,10 +46,12 @@ private slots:
 signals:
     void connected();
     void disconnected();
-
     void displayData(int, QByteArray);
+    void log(int, QString);
 
-    void connectionEstablished(bool, QString);
+    void established_success();
+    void established_failed();
+
 
 };
 

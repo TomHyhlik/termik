@@ -137,8 +137,8 @@ private slots:
     void moveCursorToEnd();
     void showFindUi();
     void hideFindUi();
-    void terminalInputSetFocus();
 
+    void terminalInputSetFocus();
     void showConnectionSettings();
 
     void clearOutput();
@@ -159,6 +159,8 @@ private slots:
 
     void on_Tx(QByteArray);
     void Tx_fromDataInput(int);
+    void log(int, QString);
+
 
     void historyTxUpdate();
     void selectScript();
@@ -186,7 +188,6 @@ private slots:
     void on_lineEdit_save_textChanged(const QString &arg1);
     void on_checkBox_autoclear_stateChanged(int arg1);
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
-    void on_connectionEstablished(bool success, QString deviceName);
     void on_comboBox_script_dataType_currentTextChanged(const QString &arg1);
     void on_lineEdit_script_textChanged(const QString &arg1);
 
@@ -211,7 +212,6 @@ private:
 
     void configInit();
 
-    void showMessage(int, QString);
 
     void TxHistory_add(QByteArray data);
 
@@ -229,10 +229,6 @@ private:
     void setupShortcuts();
 
     void saveToFile_init();
-
-
-    void pushButton_runScript_setColor_green();
-    void pushButton_runScript_setColor_red();
 
     bool preambleShouldBeAddrd(int);
     void preambleAdd(int);

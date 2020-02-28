@@ -50,7 +50,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     uiInit();
     configInit();
 
-    /* set configuration from the json file */
     currentAppConfig_load();
 
     /* set configuration from the CLI arguments */
@@ -92,9 +91,9 @@ void MainWindow::currentAppConfig_save()
 }
 
 //////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::currentAppConfig_load
+/// \brief MainWindow::currentAppConfig_loadSaved
 ///     load app configuration from json file at app startup
-void MainWindow::currentAppConfig_load()
+void MainWindow::currentAppConfig_loadSaved()
 {
     SaveConfiguration saveCfg;
     if (saveCfg.read()) {
@@ -532,7 +531,7 @@ void MainWindow::log(int type, QString messageData)
         timeout = LOGTIMEOUT_INFO;
         break;
     default:
-        timeout = LOGTIMEOUT_ERROR;
+        return;
     }
 
     ui->statusBar->showMessage(messageData, timeout);

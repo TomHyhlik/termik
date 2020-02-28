@@ -21,19 +21,18 @@ void Communication::dataArrived(QByteArray rxData)
 //////////////////////////////////////////////////////////////////////
 bool Communication::dataTransmit(QByteArray txData)
 {
-    emit displayData(data_Tx, txData);
-    return communicWorker->write(txData);
+    if (isEstablished()) {
+        emit displayData(data_Tx, txData);
+        return communicWorker->write(txData);
+    } else {
+        return false;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
 bool Communication::isEstablished()
 {
-    if (communicWorker == nullptr) {
-        qDebug() << "Communication not established";
-        return false;
-    } else {
-        return true;
-    }
+    return (communicWorker != nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -46,6 +45,8 @@ void Communication::establish(communicationType type)
 {
     bool EstablishedSuccessful = false;
     QString deviceName;
+
+    log(info,"Attempt to establish communication");
 
     switch (type)
     {
@@ -62,31 +63,42 @@ void Communication::establish(communicationType type)
                 .arg(QString::number(int(NetworkWParam::get().port_Tx)));
         break;
     case comType_none:
-        suspend();
         return;
     }
 
     connect(communicWorker.get(), SIGNAL(dataReceived(QByteArray)), this,
             SLOT(dataArrived(QByteArray)));
 
-    if (EstablishedSuccessful) {    lastComType = type; }
+    if (EstablishedSuccessful) {
+        log(note, QString("Connected to: %1").arg(deviceName));
+        lastComType = type;
+        emit established_success();
+    } else {
+        log(error, QString("Failed to connect to: %1").arg(deviceName));
+        emit established_failed();
 
-    emit connectionEstablished(EstablishedSuccessful, deviceName);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
 void Communication::suspend()
 {
-    if (communicWorker != nullptr)  communicWorker = nullptr;
+    if (communicWorker != nullptr) {
+        communicWorker = nullptr;
+        log(note, "Communication suspended");
+    }
 }
+
 //////////////////////////////////////////////////////////////////////
 void Communication::establishToggle()
 {
-
-    /* todo */
-
-
-
+    if (isEstablished()) {
+        suspend();
+    } else {
+        if (lastComType != comType_none) {
+            establish();
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
