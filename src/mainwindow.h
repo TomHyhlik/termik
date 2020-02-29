@@ -137,11 +137,12 @@ private slots:
     void showConnectionSettings();
 
     void clearOutput();
+    void focus_0();
     void focus_1();
     void focus_2();
-    void focus_3();
 
     void toggleShowSettings();
+    void toggleShowHelp();
     void showHelp();
     void hideHelp();
 

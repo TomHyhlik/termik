@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <QDebug>
-
+#include <memory>
 
 //#include <stdio.h> // todo: rm
 
@@ -60,8 +60,15 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 }
 
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::showHelp
-///              todo make toggle show help after press F1
+void MainWindow::toggleShowHelp()
+{
+    if (ui->tableWidget_shortcuts->isVisible()) {
+        hideHelp();
+    } else {
+        showHelp();
+    }
+}
+/////////////////////////////////////////////////////////////////
 void MainWindow::showHelp()
 {
     ui->tableWidget_shortcuts->show();
@@ -79,6 +86,7 @@ void MainWindow::hideHelp()
 {
     table_clear(ui->tableWidget_shortcuts);
     ui->tableWidget_shortcuts->hide();
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -254,7 +262,7 @@ void MainWindow::uiInit()
     ui->spinBox_script_period->setValue(10);
 
     hideFindUi();
-    hideHelp();
+    toggleShowHelp();
     hideScriptUi();
     toggleShowSettings();
     focus_1();
@@ -463,7 +471,7 @@ void MainWindow::hideScriptUi()
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::focus_1
 ///     set focus to ASCII tab
-void MainWindow::focus_1()
+void MainWindow::focus_0()
 {
     ui->tabWidget->setCurrentIndex(0);
     ui->lineEdit_in_ascii->setFocus();
@@ -471,7 +479,7 @@ void MainWindow::focus_1()
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::focus_2
 ///     set focus to HEX tab
-void MainWindow::focus_2()
+void MainWindow::focus_1()
 {
     ui->tabWidget->setCurrentIndex(1);
     ui->lineEdit_in_hex->setFocus();
@@ -480,7 +488,7 @@ void MainWindow::focus_2()
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::focus_3
 ///     set focus to DEC tab
-void MainWindow::focus_3()
+void MainWindow::focus_2()
 {
     ui->tabWidget->setCurrentIndex(2);
     ui->lineEdit_in_dec->setFocus();
@@ -800,7 +808,7 @@ void MainWindow::on_pushButton_script_run_clicked()
         return;
 
     if (script == nullptr) {
-        script = std::make_unique <RunScript> ();
+        script = std::unique_ptr <RunScript> (new RunScript());
         connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
         connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
         connect(script.get(), SIGNAL(log(int, QString)), &Log::get(), SLOT(write(int, QString)));
@@ -899,9 +907,9 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(selectScript()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(connectOrDisconnect()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_3()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_0()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), this, SLOT(focus_3()));
@@ -910,7 +918,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(pressedKey_enter()));
     new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKey_up()));
     new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKey_down()));
-    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
+    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(toggleShowHelp()));
 }
 /////////////////////////////////////////////////////////////////
 
