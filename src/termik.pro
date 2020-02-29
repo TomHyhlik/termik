@@ -32,7 +32,8 @@ SOURCES += \
         saveconfiguration.cpp \
         serialworker.cpp \
         serialwparam.cpp \
-        tcpworker.cpp
+        tcpworker.cpp \
+        utils.cpp
 
 HEADERS += \
         cliarghandler.h \

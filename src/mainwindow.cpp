@@ -20,9 +20,13 @@
 #include "dataconverter.h"
 #include "saveconfiguration.h"
 #include "cliarghandler.h"
+#include "log.h"
 
 #include "communication.h"
 #include "serialwparam.h"
+
+void table_addItem(QTableWidget* table, QStringList element);
+void table_clear(QTableWidget* table);
 
 
 /////////////////////////////////////////////////////////////////
@@ -33,7 +37,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui->setupUi(this);
 
     /* first setup log */
-    Log::get().setEntities(ui->statusBar);
+    Log::get().setOutput(ui->statusBar);
 
     communic = new Communication(this);
     connect(communic, SIGNAL(displayData(int, QByteArray)), this, SLOT(terminalOutUpdate(int, QByteArray)));
@@ -41,9 +45,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
 
     logFile = new LogFile(this);
-
-    tick_lastRx = 0;
-    tick.start();
 
     setupShortcuts();
     uiInit();
@@ -58,21 +59,26 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     }
 }
 
-//////////////////////////////////////////////////////////////////////
-void MainWindow::connectOrDisconnect()
+/////////////////////////////////////////////////////////////////
+/// \brief MainWindow::showHelp
+///              todo make toggle show help after press F1
+void MainWindow::showHelp()
 {
-    communic->establishToggle();
+    ui->tableWidget_shortcuts->show();
+
+    /* setup the help table */
+    ui->tableWidget_shortcuts->setColumnCount(2);
+    QStringList titles;
+    titles << "Shortcut" << "Description";
+    ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
+
+    fillShortcutsTable();
 }
 
-//////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::closeEvent
-/// \param event
-///     function called when the MainWindow is being closed
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::hideHelp()
 {
-    currentAppConfig_save();
-
-    LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
+    table_clear(ui->tableWidget_shortcuts);
+    ui->tableWidget_shortcuts->hide();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -113,9 +119,9 @@ void MainWindow::currentAppConfig_loadSaved()
 
         /* todo: continue here, load the saveCfg.data.app to ui */
 
-        qDebug() << "Configuration loaded from file";
+        LOG("Configuration loaded from file");
     } else {
-        qDebug() << "No previous saved configuration found";
+        LOG("No previous saved configuration found");
     }
 }
 
@@ -229,19 +235,11 @@ void MainWindow::uiInit()
 
     setWindowTitle(MAINWINDOWTITLE);
 
-    /* setup the help table */
-    ui->tableWidget_shortcuts->setColumnCount(2);
-    QStringList titles;
-    titles << "Shortcut" << "Description";
-    ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
-    ui->tableWidget_shortcuts->horizontalHeader()->setStretchLastSection(true);  // set column size to widget size
-
     ui->comboBox_script_dataType->addItem(TITLE_DATA_ASCII);
     ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
     ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
 
-    /*** UI show/hide widgets ***/
-
+    /* UI show/hide widgets */
     ui->checkBox_timeLog->setChecked(true);
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
@@ -258,11 +256,26 @@ void MainWindow::uiInit()
     hideFindUi();
     hideHelp();
     hideScriptUi();
-    fillShortcutsTable();
     toggleShowSettings();
     focus_1();
 }
 
+//////////////////////////////////////////////////////////////////////
+void MainWindow::connectOrDisconnect()
+{
+    communic->establishToggle();
+}
+
+//////////////////////////////////////////////////////////////////////
+/// \brief MainWindow::closeEvent
+/// \param event
+///     function called when the MainWindow is being closed
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    currentAppConfig_save();
+
+    LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
+}
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::showConnectionSettings()
@@ -304,7 +317,7 @@ void MainWindow::clearOutput()
 /////////////////////////////////////////////////////////////////
 void MainWindow::Tx_fromDataInput(int inputType)
 {
-    QByteArray txData;        // to be transmitted
+    QByteArray txData;
     dataConverter dataConv;
 
     /* read the data from UI */
@@ -334,7 +347,6 @@ void MainWindow::on_Tx(QByteArray txData)
 
     TxHistory_add(txData);
 
-    /* add prefix and suffix to the data */
     if (config.prefix_tx_enabled)
         txData.prepend(config.prefix_tx);
     if (config.suffix_tx_enabled)
@@ -348,24 +360,21 @@ void MainWindow::on_Tx(QByteArray txData)
         ui->lineEdit_in_dec->clear();
     }
 }
+
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::
-///     slot callet when Enter or Return key is pressed
-void MainWindow::keyEnterPressed()
+void MainWindow::pressedKey_enter()
 {
-    if (ui->lineEdit_in_ascii->hasFocus()) {
-        Tx_fromDataInput(data_ascii);
-    }
-    else if (ui->lineEdit_in_hex->hasFocus()) {
-        Tx_fromDataInput(data_hex);
-    }
-    else if (ui->lineEdit_in_dec->hasFocus()) {
-        Tx_fromDataInput(data_dec);
+    if (    ui->lineEdit_in_ascii->hasFocus() ||
+            ui->lineEdit_in_hex->hasFocus() ||
+            ui->lineEdit_in_dec->hasFocus())
+    {
+        int currentUserInput = ui->tabWidget->currentIndex();
+        Tx_fromDataInput(currentUserInput);
     }
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::keyUpPressed()
+void MainWindow::pressedKey_up()
 {
     if (!history_out.isEmpty()) {
         historyTxUpdate();
@@ -376,7 +385,7 @@ void MainWindow::keyUpPressed()
     }
 }
 /////////////////////////////////////////////////////////////////
-void MainWindow::keyDownPressed()
+void MainWindow::pressedKey_down()
 {
     if (!history_out.isEmpty()) {
         historyTxUpdate();
@@ -400,36 +409,6 @@ void MainWindow::historyTxUpdate()
         ui->lineEdit_in_ascii->setText(dataConv.getStrAscii());
         ui->lineEdit_in_hex->setText(dataConv.getStrHex());
         ui->lineEdit_in_dec->setText(dataConv.getStrDec());
-    }
-}
-/////////////////////////////////////////////////////////////////
-void MainWindow::showHelp()
-{
-    ui->tableWidget_shortcuts->show();
-}
-void MainWindow::hideHelp()
-{
-    ui->tableWidget_shortcuts->hide();
-}
-
-///////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::table_addItem
-///     creates new row in the table and puts data into the row
-/// \param element  is a List from whom are gained the data
-void MainWindow::shortcutTable_addItem(QList<QString> element)
-{
-    /* add row to the table */
-    ui->tableWidget_shortcuts->insertRow(ui->tableWidget_shortcuts->rowCount());
-    /* get number of the new row */
-    int newRow = ui->tableWidget_shortcuts->rowCount() - 1;
-    /* for each element in the row */
-    for (int i = 0; i < element.size(); i++) {
-        /* create new item to the table */
-        QTableWidgetItem *item = new QTableWidgetItem(tr("%1").arg(element.at(i)));
-        /* make the item non-editable */
-        item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-        /* add the item to specified column and row */
-        ui->tableWidget_shortcuts->setItem(newRow, i, item);
     }
 }
 
@@ -507,35 +486,30 @@ void MainWindow::focus_3()
     ui->lineEdit_in_dec->setFocus();
 }
 
-
 /////////////////////////////////////////////////////////////////
-bool MainWindow::preambleShouldBeAddrd(int dataKind)
+void MainWindow::terminalOut_addPreamble(int dataKind)
 {
-    if (config.timeLogEnabled &&
-            (((tick_lastRx + RXDATAEVENT_TIMEOUT) < tick.elapsed()) ||
-             (lastTerminalData != dataKind))) {
-        return true;
-    }    else {
-        return false;
-    }
-}
+    if (config.timeLogEnabled)
+    {
+        if ((RXDATAEVENT_TIMEOUT < sinceLastTermOutUpdate.restart()) ||
+                (lastTerminalData != dataKind))
+        {
+            lastTerminalData = dataKind;
 
-/////////////////////////////////////////////////////////////////
-void MainWindow::preambleAdd(int dataKind)
-{
-    lastTerminalData = dataKind;
+            QString preamble = terminalOutGetPreamble(dataKind);
 
-    QString preamble = terminalOutGetPreamble(dataKind);
+            /* put the preamble into text edits */
+            writeToTextedit(ui->textEdit_out_ascii, COLOR_PREAMBLE, preamble);
+            writeToTextedit(ui->textEdit_out_hex, COLOR_PREAMBLE, preamble);
+            writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
 
-    /* put the preamble into text edits */
-    writeToTextedit(ui->textEdit_out_ascii, COLOR_PREAMBLE, preamble);
-    writeToTextedit(ui->textEdit_out_hex, COLOR_PREAMBLE, preamble);
-    writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
+            /* put the preamble into text file */
+            if (config.saveTerminalOutToFile) {
+                logFile->writeData_ascii(preamble);
+                logFile->writeData_hex(preamble);
+            }
+        }
 
-    /* put the preamble into text file */
-    if (config.saveTerminalOutToFile) {
-        logFile->writeData_ascii(preamble);
-        logFile->writeData_hex(preamble);
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -568,13 +542,8 @@ QString MainWindow::terminalOutGetPreamble(int dataKind)
 /// update the terminal output event
 void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
 {
-    if (preambleShouldBeAddrd(dataKind)) {
-        preambleAdd(dataKind);
-    }
+    terminalOut_addPreamble(dataKind);
 
-    tick_lastRx = tick.elapsed();
-
-    /* update terminal output logs - textEdits */
     QString dataColor = getDataColor(dataKind);
 
     dataConverter dataConv;
@@ -641,7 +610,7 @@ void MainWindow::writeToTextedit(QTextEdit *textEdit, QString color, QString dat
     /* return cursor where it was */
     textEdit->setTextCursor(prev_cursor);
 
-    //    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
+    //    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom); todo, look at pagersystem project
 }
 
 /////////////////////////////////////////////////////////////////
@@ -657,10 +626,10 @@ void MainWindow::TxHistory_add(QByteArray data)
 }
 
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::EscPressed
+/// \brief MainWindow::pressedKey_esc
 ///     slot emited when ESC key is pressed
 ///     It hides all config UIs
-void MainWindow::EscPressed()
+void MainWindow::pressedKey_esc()
 {
     hideFindUi();
     hideHelp();
@@ -785,6 +754,8 @@ void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
     config.autoclerTermOut = checkboxChecked(arg1);
 }
 /////////////////////////////////////////////////////////////////
+/// \brief MainWindow::checkboxChecked
+///      todo: get rid of this helper function
 bool MainWindow::checkboxChecked(int state)
 {
     switch (state)
@@ -832,7 +803,8 @@ void MainWindow::on_pushButton_script_run_clicked()
         script = std::make_unique <RunScript> ();
         connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
         connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
-        connect(script.get(), SIGNAL(log(int, QString)), this, SLOT(log(int, QString)));
+        connect(script.get(), SIGNAL(log(int, QString)), &Log::get(), SLOT(write(int, QString)));
+
         script->start();
 
         ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_STOP);
@@ -850,6 +822,7 @@ void MainWindow::runScript_finished()
     ui->pushButton_script_run->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                              .arg(COLOR_WHITE).arg(COLOR_GREEN));
     script = nullptr;
+    LOG("");
 }
 
 /////////////////////////////////////////////////////////////////
@@ -908,7 +881,7 @@ void MainWindow::fillShortcutsTable()
     shortcuts <<  QList <QString> { "F1"       , "Open help"};
 
     while (!shortcuts.isEmpty()) {
-        shortcutTable_addItem(shortcuts.takeFirst());
+        table_addItem(ui->tableWidget_shortcuts, shortcuts.takeFirst());
     }
 }
 
@@ -919,7 +892,7 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this, SLOT(on_pushButton_script_run_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFindUi()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(pressedKey_esc()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
@@ -933,10 +906,10 @@ void MainWindow::setupShortcuts()
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), this, SLOT(focus_3()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(on_pushButton_save_clicked()));
-    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(keyEnterPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(keyEnterPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(keyUpPressed()));
-    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(keyDownPressed()));
+    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(pressedKey_enter()));
+    new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(pressedKey_enter()));
+    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKey_up()));
+    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKey_down()));
     new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(showHelp()));
 }
 /////////////////////////////////////////////////////////////////

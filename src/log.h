@@ -23,54 +23,26 @@ enum logType {
 
 
 
-class Log
+class Log : public QObject
 {
+    Q_OBJECT
+
     Log(){}
     static Log s_Instance;
 
     QStatusBar *statusBar = nullptr;
 
-    /////////////////////////////////
-public:
 
+public:
     Log(const Log&) = delete;
     static Log& get() { return s_Instance; }
 
-    void setEntities(QStatusBar *val) { statusBar = val; }
+    void setOutput(QStatusBar *val) { statusBar = val; }
 
 
-    void write(int type, QString messageData)
-    {
-        int timeout;
-
-        switch (type)
-        {
-        case error:
-            timeout = LOGTIMEOUT_ERROR;
-            messageData.prepend("ERROR: ");
-            break;
-
-        case note:
-            timeout = LOGTIMEOUT_NOTE;
-            messageData.prepend("NOTE: ");
-            break;
-
-        case info:
-            timeout = LOGTIMEOUT_INFO;
-            break;
-        default:
-            return;
-        }
-        if (statusBar != nullptr) {
-            statusBar->showMessage(messageData, timeout);
-        }
-        std::cout << messageData.toStdString() << "\n";
-    }
-
-    void write(QString message) {
-        write(info, message);
-    }
-
+public slots:
+    void write(int type, QString messageData);
+    void write(QString message);
 
 
 

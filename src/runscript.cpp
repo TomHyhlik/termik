@@ -1,11 +1,12 @@
-#include <QTimer>
 #include <QFile>
+#include <memory>
+
 
 #include "runscript.h"
 #include "mainwindow.h"
 #include "dataconverter.h"
 #include "runscriptparam.h"
-#include <memory>
+#include "log.h"
 
 
 /////////////////////////////////////////////////////////////////
@@ -18,18 +19,23 @@ void RunScript::run()
 {
     isRunning = true;
 
-    do {
-        QList <QByteArray> fileContent;
+    log(info, QString("Reading file content: %1")
+        .arg(RunScriptParam::get().fileName));
 
-        if (readFileContent(&fileContent)) {
-            while (!fileContent.isEmpty() && isRunning) {
-                Tx(fileContent.takeFirst());
-                this->msleep(RunScriptParam::get().timeout);
-            }
-        } else {
-            log(error, QString("Failed to read script content from: %1")
-                                    .arg(RunScriptParam::get().fileName));
-            break;
+    QList <QByteArray> fileContent;
+
+    if (!readFileContent(&fileContent)) {
+        log(error, QString("Failed to read the file content"));
+        return;
+    }
+
+    log(info, "Transmitting the script...");
+
+    do {
+        for (const QByteArray& line : fileContent) {
+            if (!isRunning) return;
+            Tx(line);
+            this->msleep(RunScriptParam::get().timeout);
         }
     } while (RunScriptParam::get().repeat);
 }
@@ -58,7 +64,7 @@ bool RunScript::readFileContent(QList <QByteArray> * fileContent)
             dataConv.setStrHex(line);
             break;
         default:
-            log(error, "Selected invalid file format");
+            LOG_T(error, "Selected invalid file format");
             return false;
         }
         fileContent->append(dataConv.getByteArray());

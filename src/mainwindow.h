@@ -128,7 +128,7 @@ public:
     ~MainWindow();
 
 private slots:   
-    void EscPressed();
+    void pressedKey_esc();
     void moveCursorToEnd();
     void showFindUi();
     void hideFindUi();
@@ -148,9 +148,9 @@ private slots:
     void showScriptUi();
     void hideScriptUi();
 
-    void keyUpPressed();
-    void keyDownPressed();
-    void keyEnterPressed();
+    void pressedKey_up();
+    void pressedKey_down();
+    void pressedKey_enter();
 
     void on_Tx(QByteArray);
     void Tx_fromDataInput(int);
@@ -196,8 +196,7 @@ private:
     appConfiguration config;
     std::unique_ptr <RunScript> script;
 
-    qint64 tick_lastRx;
-    QElapsedTimer tick;
+    QElapsedTimer sinceLastTermOutUpdate;
 
 
     QList <QByteArray> history_out;
@@ -211,7 +210,6 @@ private:
     bool stringList_find(QList<QString> list, QString data);
 
     void fillShortcutsTable();
-    void shortcutTable_addItem(QList<QString> element);
 
     void portSet_fillMaps();
     void uiInit();
@@ -223,8 +221,7 @@ private:
 
     void saveToFile_init();
 
-    bool preambleShouldBeAddrd(int);
-    void preambleAdd(int);
+    void terminalOut_addPreamble(int);
     QString getDataColor(int);
     QString terminalOutGetPreamble(int);
     bool checkboxChecked(int);

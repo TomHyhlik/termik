@@ -86,9 +86,7 @@ private:
     void table_network_init();
     void table_serial_init();
     void table_addHost(QTableWidget* table, QHostInfo host);
-    void table_clear(QTableWidget* table);
     void table_serial_add(QSerialPortInfo);
-    void table_addItem(QTableWidget* table, QStringList l);
 
     void table_updateHosts(QTableWidget* tableWidget, const QList <QHostInfo> hosts);
 

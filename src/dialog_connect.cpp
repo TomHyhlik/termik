@@ -13,7 +13,8 @@
 #include "networkscan.h"
 #include "serialwparam.h"
 
-
+void table_addItem(QTableWidget* table, QStringList element);
+void table_clear(QTableWidget* table);
 
 
 Dialog_connect::Dialog_connect(QWidget *parent) :
@@ -144,42 +145,42 @@ void Dialog_connect::blockAllsignals(bool state)
 ///////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
 {
-    this->setStyleSheet(QString("color: %1; background-color: %2")
+    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                         .arg(COLOR_WHITE).arg(COLOR_GRAY1));
 
-    ui->tab_serial->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tab_serial->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                   .arg(COLOR_WHITE).arg(COLOR_GRAY2));
-    ui->tab_network->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tab_network->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                    .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
-    ui->comboBox_baudRate->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_baudRate->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_dataBits->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_dataBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_flowControl->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_flowControl->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                             .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_parity->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_parity->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_serialPortName->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_serialPortName->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_stopBits->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_stopBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_networkProtocol->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->comboBox_networkProtocol->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->spinBox_ipPort_Tx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->spinBox_ipPort_Tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->spinBox_ipPort_Rx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->spinBox_ipPort_Rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                          .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_serialPorts->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tableWidget_serialPorts->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_addr_rx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tableWidget_addr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_addr_tx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->tableWidget_addr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_selectedAddr_tx->setStyleSheet(QString("color: %1; background-color: %2")
+    ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
@@ -188,17 +189,6 @@ void Dialog_connect::refreshDevices()
 {
     serialPort_nameRefresh();
     networkScan->start();
-}
-
-///////////////////////////////////////////////////////////////////////
-void Dialog_connect::table_clear(QTableWidget* table)
-{
-    table->clearContents();
-    while (table->rowCount()) {
-        table->removeRow(0);
-    }
-    /* set column size to widget size */
-    table->horizontalHeader()->setStretchLastSection(true);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -306,28 +296,7 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
 
     table_addItem(ui->tableWidget_serialPorts, element);
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::table_addItem(QTableWidget* table, QStringList element)
-{
-    table->insertRow(table->rowCount());
-    /* get number of the new row */
-    int newRow =  table->rowCount() - 1;
 
-    /* for each element in the row */
-    for (int column = 0; column < element.size(); column++){
-        /* create new item to the table */
-        QTableWidgetItem *item = new QTableWidgetItem(tr("%1").arg(element.at(column)));
-        /* make the item non-editable */
-        item->setFlags(item->flags() ^ Qt::ItemIsEditable);
-        item->setTextAlignment(Qt::AlignVCenter);
-        /* add the item to specified column and row */
-        table->setItem(newRow, column, item);
-    }
-    /* resize the columns to be optimized for the content */
-    for (int i = 0; i <  table->columnCount(); i++){
-        table->resizeColumnToContents(i);
-    }
-}
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::tab_port_init()
 {
