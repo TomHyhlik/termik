@@ -5,7 +5,7 @@
 #include "serialworker.h"
 #include "networkworker.h"
 #include "mainwindow.h"
-#include "logfile.h"
+#include "outputfile.h"
 #include "serialwparam.h"
 #include "networkwparam.h"
 #include "runscriptparam.h"

@@ -10,11 +10,11 @@
 
 #include "serialworker.h"
 #include "networkworker.h"
-#include "logfile.h"
+#include "outputfile.h"
 #include "runscript.h"
 #include "communication.h"
 #include "log.h"
-
+#include "outputfile.h"
 
 
 #define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
@@ -61,6 +61,11 @@
 #define TITLE_BUTTON_SCRIPT_RUN "Run"
 #define TITLE_BUTTON_SCRIPT_STOP "Stop"
 
+#define TITLE_HELPTABLE_SHORTCUT        "Shortcut"
+#define TITLE_HELPTABLE_DESCRIPTION     "Description"
+
+
+
 #define LOCATION_DEFAULT    "~/"
 
 
@@ -100,6 +105,9 @@ public:
 
     bool autoclerTermOut;
     int autoclerTermOut_maxChars;
+
+    QString outputFileDir;
+
 
 
 };
@@ -142,6 +150,8 @@ private slots:
     void focus_2();
 
     void toggleShowSettings();
+    void showSettings();
+    void hideSettings();
     void toggleShowHelp();
     void showHelp();
     void hideHelp();
@@ -193,7 +203,9 @@ private:
     Ui::MainWindow *ui;
 
     Communication* communic;
-    LogFile* logFile;
+
+    std::unique_ptr <OutputFile> outputFile;
+
     appConfiguration config;
     std::unique_ptr <RunScript> script;
 
@@ -210,22 +222,17 @@ private:
 
     bool stringList_find(QList<QString> list, QString data);
 
-    void fillShortcutsTable();
-
     void portSet_fillMaps();
     void uiInit();
 
     void writeToTextedit(QTextEdit* textEdit, QString color, QString data);
     void shortenTextEdit(QTextEdit* textEdit);
 
-    void setupShortcuts();
-
     void saveToFile_init();
 
     void terminalOut_addPreamble(int);
     QString getDataColor(int);
     QString terminalOutGetPreamble(int);
-    bool checkboxChecked(int);
 
 
 };

@@ -20,20 +20,19 @@ SOURCES += \
         communicationworker.cpp \
         dataconverter.cpp \
         log.cpp \
-        logfile.cpp \
         main.cpp \
         mainwindow.cpp \
         dialog_connect.cpp \
         networkscan.cpp \
         networkworker.cpp \
         networkwparam.cpp \
+        outputfile.cpp \
         runscript.cpp \
         runscriptparam.cpp \
         saveconfiguration.cpp \
         serialworker.cpp \
         serialwparam.cpp \
-        tcpworker.cpp \
-        utils.cpp
+        tcpworker.cpp
 
 HEADERS += \
         cliarghandler.h \
@@ -41,18 +40,20 @@ HEADERS += \
         communicationworker.h \
         dataconverter.h \
         log.h \
-        logfile.h \
         mainwindow.h \
         dialog_connect.h \
         networkscan.h \
         networkworker.h \
         networkwparam.h \
+        outputfile.h \
         runscript.h \
         runscriptparam.h \
         saveconfiguration.h \
         serialworker.h \
         serialwparam.h \
-        tcpworker.h
+        shortcuts.h \
+        tcpworker.h \
+        utils_tabWidget.h
 
 FORMS += \
         mainwindow.ui \

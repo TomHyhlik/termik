@@ -2,18 +2,17 @@
 #include <QDateTime>
 
 
-#include "logfile.h"
+#include "outputfile.h"
 #include "mainwindow.h"
 
 
 /////////////////////////////////////////////////////////////////
-LogFile::LogFile(QObject *parent) : QObject(parent)
+OutputFile::OutputFile()
 {
-    initialized = false;
 }
 
 /////////////////////////////////////////////////////////////////
-void LogFile::writeData_ascii(QString data)
+void OutputFile::writeData_ascii(QString data)
 {
     QString fileName_ascii;
     fileName_ascii = QString("%1/%2_ascii%3")
@@ -25,7 +24,7 @@ void LogFile::writeData_ascii(QString data)
 }
 
 /////////////////////////////////////////////////////////////////
-void LogFile::writeData_hex(QString data)
+void OutputFile::writeData_hex(QString data)
 {
     QString fileName_hex;
     fileName_hex = QString("%1/%2_hex%3")
@@ -36,7 +35,7 @@ void LogFile::writeData_hex(QString data)
     writeDataToFile(fileName_hex, data);
 }
 /////////////////////////////////////////////////////////////////
-bool LogFile::writeDataToFile(QString thisFileName, QString data)
+bool OutputFile::writeDataToFile(QString thisFileName, QString data)
 {
     QFile file(thisFileName);
 
@@ -55,7 +54,7 @@ bool LogFile::writeDataToFile(QString thisFileName, QString data)
 }
 
 /////////////////////////////////////////////////////////////////
-void LogFile::init(QString directory)
+void OutputFile::init(QString directory)
 {
     fileDirectory = directory;
 

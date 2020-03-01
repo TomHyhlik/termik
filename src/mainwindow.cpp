@@ -1,17 +1,8 @@
-#include <QShortcut>
-#include <QTimer>
 #include <QFileDialog>
-
-#include <QTextStream>
-#include <QFile>
-#include <QDataStream>
 
 #include <QDateTime>
 #include <QDateTimeEdit>
-#include <QDebug>
 #include <memory>
-
-//#include <stdio.h> // todo: rm
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -21,12 +12,12 @@
 #include "saveconfiguration.h"
 #include "cliarghandler.h"
 #include "log.h"
+#include "shortcuts.h"
+#include "utils_tabWidget.h"
 
 #include "communication.h"
 #include "serialwparam.h"
 
-void table_addItem(QTableWidget* table, QStringList element);
-void table_clear(QTableWidget* table);
 
 
 /////////////////////////////////////////////////////////////////
@@ -40,16 +31,14 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     Log::get().setOutput(ui->statusBar);
 
     communic = new Communication(this);
-    connect(communic, SIGNAL(displayData(int, QByteArray)), this, SLOT(terminalOutUpdate(int, QByteArray)));
+    connect(communic, SIGNAL(displayData(int, QByteArray)),
+            this, SLOT(terminalOutUpdate(int, QByteArray)));
     connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
     connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
 
-    logFile = new LogFile(this);
-
-    setupShortcuts();
+    setupShortcuts_MainWindow(this);
     uiInit();
     configInit();
-
     currentAppConfig_loadSaved();
 
     /* parse CLI arguments */
@@ -69,24 +58,25 @@ void MainWindow::toggleShowHelp()
     }
 }
 /////////////////////////////////////////////////////////////////
+/// \brief MainWindow::showHelp
+///     actually just show shortcuts table
 void MainWindow::showHelp()
 {
     ui->tableWidget_shortcuts->show();
 
-    /* setup the help table */
     ui->tableWidget_shortcuts->setColumnCount(2);
-    QStringList titles;
-    titles << "Shortcut" << "Description";
-    ui->tableWidget_shortcuts->setHorizontalHeaderLabels(titles);
+    ui->tableWidget_shortcuts->setHorizontalHeaderLabels(
+    {TITLE_HELPTABLE_SHORTCUT, TITLE_HELPTABLE_DESCRIPTION});
 
-    fillShortcutsTable();
+    for (const auto shortcut : SHORTCUTS_CONTENT_MAINWINDOW) {
+        table_addItem(ui->tableWidget_shortcuts, shortcut);
+    }
 }
 
 void MainWindow::hideHelp()
 {
     table_clear(ui->tableWidget_shortcuts);
     ui->tableWidget_shortcuts->hide();
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -97,7 +87,7 @@ void MainWindow::currentAppConfig_save()
     SaveConfiguration saveCfg;
 
     saveCfg.data.app = config;
-    saveCfg.data.LogFileDir = logFile->getFileDirectory();
+    saveCfg.data = outputFile->getFileDirectory();
 
     saveCfg.write();
 }
@@ -160,7 +150,8 @@ void MainWindow::saveToFile_init()
     ui->checkBox_outputSave->setCheckState(Qt::Checked);
     QString fileLocation = ui->lineEdit_save->text();
 
-    logFile->init(fileLocation);
+
+    outputFile = std::unique_ptr <OutputFile> (new OutputFile());
     LOG(QString("Output saved in %1").arg(fileLocation));
 }
 
@@ -218,6 +209,7 @@ void MainWindow::uiInit()
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_in_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
     ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
@@ -247,7 +239,6 @@ void MainWindow::uiInit()
     ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
     ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
 
-    /* UI show/hide widgets */
     ui->checkBox_timeLog->setChecked(true);
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
@@ -262,10 +253,10 @@ void MainWindow::uiInit()
     ui->spinBox_script_period->setValue(10);
 
     hideFindUi();
-    toggleShowHelp();
+    hideHelp();
     hideScriptUi();
-    toggleShowSettings();
-    focus_1();
+    hideSettings();
+    focus_0();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -513,8 +504,8 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
 
             /* put the preamble into text file */
             if (config.saveTerminalOutToFile) {
-                logFile->writeData_ascii(preamble);
-                logFile->writeData_hex(preamble);
+                outputFile->writeData_ascii(preamble);
+                outputFile->writeData_hex(preamble);
             }
         }
 
@@ -564,8 +555,8 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
 
     /* update terminal output log files */
     if (config.saveTerminalOutToFile) {
-        logFile->writeData_ascii(dataConv.getStrAscii());
-        logFile->writeData_hex(dataConv.getStrHex());
+        outputFile->writeData_ascii(dataConv.getStrAscii());
+        outputFile->writeData_hex(dataConv.getStrHex());
     }
 
     /* clear part of the text in the text edits */
@@ -617,8 +608,6 @@ void MainWindow::writeToTextedit(QTextEdit *textEdit, QString color, QString dat
 
     /* return cursor where it was */
     textEdit->setTextCursor(prev_cursor);
-
-    //    textEdit->setAlignment(Qt::AlignLeft | Qt::AlignBottom); todo, look at pagersystem project
 }
 
 /////////////////////////////////////////////////////////////////
@@ -641,7 +630,7 @@ void MainWindow::pressedKey_esc()
 {
     hideFindUi();
     hideHelp();
-    toggleShowSettings();
+    hideSettings();
     moveCursorToTerminalInputLine();
     hideScriptUi();
 }
@@ -661,14 +650,22 @@ void MainWindow::moveCursorToTerminalInputLine()
     }
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::showSettings
-///     toggle show / hide
+void MainWindow::hideSettings()
+{
+    ui->groupBox_settings->hide();
+}
+/////////////////////////////////////////////////////////////////
+void MainWindow::showSettings()
+{
+    ui->groupBox_settings->show();
+}
+/////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowSettings()
 {
-    if (ui->groupBox_settings->isHidden()) {
-        ui->groupBox_settings->show();
+    if (ui->groupBox_settings->isVisible()) {
+        hideSettings();
     } else {
-        ui->groupBox_settings->hide();
+        showSettings();
     }
 }
 
@@ -684,20 +681,15 @@ void MainWindow::moveCursorToEnd()
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_pushButton_save_clicked()
 {
-    /* todo: tweak this feature */
-    QString openLocation;
-
-    if (!logFile->getFileDirectory().isEmpty()) {
-        openLocation = logFile->getFileDirectory();
-    } else {
-        openLocation = LOCATION_DEFAULT;
-    }
+    QString openLocation =  (config.outputFileDir.isEmpty()) ?
+                LOCATION_DEFAULT : config.outputFileDir;
 
     QString dir = QFileDialog::getExistingDirectory(
                 this,
                 tr("Open Directory where the terminal output data will be stored"),
                 openLocation,
                 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
     if (!dir.isEmpty()) {
         ui->lineEdit_save->setText(dir);
         saveToFile_init();
@@ -735,47 +727,31 @@ void MainWindow::on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
 {
-    config.prefix_tx_enabled = checkboxChecked(arg1);
+    config.prefix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
 {
-    config.suffix_tx_enabled = checkboxChecked(arg1);
+    config.suffix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
 {
-    config.timeLogEnabled = checkboxChecked(arg1);
+    config.timeLogEnabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
 {
-    config.clearOutputLine = checkboxChecked(arg1);
+    config.clearOutputLine = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 {
-    config.saveTerminalOutToFile = checkboxChecked(arg1);
+    config.saveTerminalOutToFile = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 {
-    RunScriptParam::get().repeat = checkboxChecked(arg1);
+    RunScriptParam::get().repeat = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
 {
-    config.autoclerTermOut = checkboxChecked(arg1);
-}
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::checkboxChecked
-///      todo: get rid of this helper function
-bool MainWindow::checkboxChecked(int state)
-{
-    switch (state)
-    {
-    case Qt::Checked:
-    case Qt::PartiallyChecked:
-        return  true;
-
-    case Qt::Unchecked:
-    default:
-        return false;
-    }
+    config.autoclerTermOut = (arg1 == Qt::Checked) ? true : false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -847,7 +823,7 @@ void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 {
-    logFile->setFileDirectory(arg1);
+    outputFile->setFileDirectory(arg1);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -868,57 +844,18 @@ void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::fillShortcutsTable()
-{
-    QList <QList <QString>> shortcuts;
 
-    shortcuts <<  QList <QString> { "CTRL + L" , "Move cursor to the end of the terminal output"};
-    shortcuts <<  QList <QString> { "CTRL + SHIFT + L" , "Clear terminal output"};
-    shortcuts <<  QList <QString> { "CTRL + ," , "Show main settongs"};
-    shortcuts <<  QList <QString> { "CTRL + P" , "Show connection settongs"};
-    shortcuts <<  QList <QString> { "CTRL + D" , "Connect/Disconnect toggle"};
-    shortcuts <<  QList <QString> { "CTRL + 1" , "Set focus to ASCII tab"};
-    shortcuts <<  QList <QString> { "CTRL + 2" , "Set focus to Hex tab"};
-    shortcuts <<  QList <QString> { "CTRL + 3" , "Set focus to DEC tab"};
-    shortcuts <<  QList <QString> { "CTRL + S" , "Open location where the terminal output shall be saved"};
-    shortcuts <<  QList <QString> { "CTRL + O" , "Open a file \"script\"to run in terminal later"};
-    shortcuts <<  QList <QString> { "CTRL + T" , "Show UI to control and run a \"script\" in the terminal"};
-    shortcuts <<  QList <QString> { "CTRL + R" , "Run/Stop transmission of the selected \"script\""};
-    shortcuts <<  QList <QString> { "Esc"      , "Hide evrything"};
-    shortcuts <<  QList <QString> { "CTRL + Q" , "Quit this app"};
-    shortcuts <<  QList <QString> { "F1"       , "Open help"};
 
-    while (!shortcuts.isEmpty()) {
-        table_addItem(ui->tableWidget_shortcuts, shortcuts.takeFirst());
-    }
-}
 
-/////////////////////////////////////////////////////////////////
-void MainWindow::setupShortcuts()
-{
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_T), this, SLOT(showScriptUi()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this, SLOT(on_pushButton_script_run_clicked()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFindUi()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(pressedKey_esc()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(selectScript()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(connectOrDisconnect()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_0()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), this, SLOT(focus_3()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(on_pushButton_save_clicked()));
-    new QShortcut(QKeySequence(Qt::Key_Enter), this, SLOT(pressedKey_enter()));
-    new QShortcut(QKeySequence(Qt::Key_Return), this, SLOT(pressedKey_enter()));
-    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKey_up()));
-    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKey_down()));
-    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(toggleShowHelp()));
-}
-/////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
 

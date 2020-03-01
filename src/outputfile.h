@@ -1,37 +1,25 @@
-#ifndef LOGFILE_H
-#define LOGFILE_H
+#ifndef OUTPUTFILE_H
+#define OUTPUTFILE_H
 
 #include <QObject>
 #include <QFile>
-
-
 
 #define  LOGFILE_EXTENSION         ".txt"
 
 
 
 
-class LogFile : public QObject
+class OutputFile : public QObject
 {
     Q_OBJECT
 
-    QString fileDirectory;
 
     QString fileName;
     bool initialized;
     bool writeDataToFile(QString fileName, QString data);
 
 public:
-    explicit LogFile(QObject *parent = nullptr);
-
-    void setFileDirectory(QString val) {
-        fileDirectory = val;
-    }
-
-    QString getFileDirectory() {
-        return fileDirectory;
-    }
-
+    OutputFile();
 
 
 signals:
@@ -47,4 +35,4 @@ public slots:
 
 };
 
-#endif // LOGFILE_H
+#endif // OUTPUTFILE_H
