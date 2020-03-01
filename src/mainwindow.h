@@ -83,38 +83,6 @@ enum dataFormat {
 };
 
 
-
-
-class appConfiguration {
-public:
-
-//    int connectionType;       todo: rmLater
-
-    bool timeLogEnabled;
-
-    bool suffix_tx_enabled;
-    bool prefix_tx_enabled;
-
-    QByteArray suffix_tx;
-    QByteArray prefix_tx;
-
-    bool timeInfoEnabled;
-    bool clearOutputLine;
-
-    bool saveTerminalOutToFile;
-
-    bool autoclerTermOut;
-    int autoclerTermOut_maxChars;
-
-    QString outputFileDir;
-
-
-
-};
-
-
-
-
 /////////////////////////////////////////////////////////
 namespace Ui {
 class MainWindow;
@@ -201,12 +169,8 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-
     Communication* communic;
-
     std::unique_ptr <OutputFile> outputFile;
-
-    appConfiguration config;
     std::unique_ptr <RunScript> script;
 
     QElapsedTimer sinceLastTermOutUpdate;

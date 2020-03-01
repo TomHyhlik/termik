@@ -15,6 +15,7 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+        appcfgparam.cpp \
         cliarghandler.cpp \
         communication.cpp \
         communicationworker.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
         tcpworker.cpp
 
 HEADERS += \
+        appcfgparam.h \
         cliarghandler.h \
         communication.h \
         communicationworker.h \

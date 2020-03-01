@@ -9,6 +9,7 @@
 #include "serialwparam.h"
 #include "networkwparam.h"
 #include "runscriptparam.h"
+#include "appcfgparam.h"
 
 
 
@@ -37,8 +38,7 @@
 #define JSONTITLE_APP_PREFIXTXDATA      "Prefix Tx data"
 #define JSONTITLE_APP_TIMEINFOENABLED   "Time info enabled"
 #define JSONTITLE_APP_SAVEOUTPUTTOFILE  "Save terminal output to file"
-
-#define JSONTITLE_LOG_DIRECTORY         "Log files directory"
+#define JSONTITLE_APP_LOGDIRECTORY         "Log files directory"
 
 #define JSONTITLE_SCRIPT                "Script"
 #define JSONTITLE_SCRIPT_FILENAME       "File name"
@@ -49,16 +49,13 @@
 
 
 //////////////////////////////////////////////////////////////////////////////
-class SaveConfigurationData {
-public:
+struct SaveConfigurationData
+{
     SerialWParam& serial = SerialWParam::get();
     NetworkWParam& network = NetworkWParam::get();
-    appConfiguration app;
-    QString LogFileDir;
+    AppCfgParam& app = AppCfgParam::get();
     RunScriptParam& script = RunScriptParam::get();
-
 };
-
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -155,10 +155,9 @@ QByteArray SaveConfiguration::jsonData_make()
                     QJsonValue::fromVariant(data.app.prefix_tx_enabled));
     jObj_app.insert(JSONTITLE_APP_SAVEOUTPUTTOFILE ,
                     QJsonValue::fromVariant(data.app.saveTerminalOutToFile));
+    jObj.insert(QString(JSONTITLE_APP_LOGDIRECTORY),
+                QJsonValue::fromVariant(data.app.outputFileDir));
     jObj.insert(JSONTITLE_APP, jObj_app);
-
-    jObj.insert(QString(JSONTITLE_LOG_DIRECTORY),
-                QJsonValue::fromVariant(data.LogFileDir));
 
     QJsonObject jObj_script;
     jObj_script.insert(JSONTITLE_SCRIPT_FILENAME ,

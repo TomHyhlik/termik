@@ -3,8 +3,6 @@
 
 #include <QSerialPortInfo>
 #include <QSerialPort>
-#include <QDebug>
-
 
 class SerialWParam
 {

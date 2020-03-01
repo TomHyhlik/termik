@@ -85,10 +85,6 @@ void MainWindow::hideHelp()
 void MainWindow::currentAppConfig_save()
 {
     SaveConfiguration saveCfg;
-
-    saveCfg.data.app = config;
-    saveCfg.data = outputFile->getFileDirectory();
-
     saveCfg.write();
 }
 
@@ -158,10 +154,10 @@ void MainWindow::saveToFile_init()
 //////////////////////////////////////////////////////////////////////
 void MainWindow::configInit()
 {
-    config.timeInfoEnabled = false;
-    config.timeLogEnabled = true;
-    config.clearOutputLine = true;
-    config.saveTerminalOutToFile = false;
+    AppCfgParam::get().timeInfoEnabled = false;
+    AppCfgParam::get().timeLogEnabled = true;
+    AppCfgParam::get().clearOutputLine = true;
+    AppCfgParam::get().saveTerminalOutToFile = false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -346,14 +342,14 @@ void MainWindow::on_Tx(QByteArray txData)
 
     TxHistory_add(txData);
 
-    if (config.prefix_tx_enabled)
-        txData.prepend(config.prefix_tx);
-    if (config.suffix_tx_enabled)
-        txData.append(config.suffix_tx);
+    if (AppCfgParam::get().prefix_tx_enabled)
+        txData.prepend(AppCfgParam::get().prefix_tx);
+    if (AppCfgParam::get().suffix_tx_enabled)
+        txData.append(AppCfgParam::get().suffix_tx);
 
     communic->dataTransmit(txData);
 
-    if (config.clearOutputLine) {
+    if (AppCfgParam::get().clearOutputLine) {
         ui->lineEdit_in_ascii->clear();
         ui->lineEdit_in_hex->clear();
         ui->lineEdit_in_dec->clear();
@@ -488,7 +484,7 @@ void MainWindow::focus_2()
 /////////////////////////////////////////////////////////////////
 void MainWindow::terminalOut_addPreamble(int dataKind)
 {
-    if (config.timeLogEnabled)
+    if (AppCfgParam::get().timeLogEnabled)
     {
         if ((RXDATAEVENT_TIMEOUT < sinceLastTermOutUpdate.restart()) ||
                 (lastTerminalData != dataKind))
@@ -503,7 +499,7 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
             writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
 
             /* put the preamble into text file */
-            if (config.saveTerminalOutToFile) {
+            if (AppCfgParam::get().saveTerminalOutToFile) {
                 outputFile->writeData_ascii(preamble);
                 outputFile->writeData_hex(preamble);
             }
@@ -554,13 +550,13 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
     writeToTextedit(ui->textEdit_out_dec,    dataColor, dataConv.getStrDec());
 
     /* update terminal output log files */
-    if (config.saveTerminalOutToFile) {
+    if (AppCfgParam::get().saveTerminalOutToFile) {
         outputFile->writeData_ascii(dataConv.getStrAscii());
         outputFile->writeData_hex(dataConv.getStrHex());
     }
 
     /* clear part of the text in the text edits */
-    if (config.autoclerTermOut) {
+    if (AppCfgParam::get().autoclerTermOut) {
         shortenTextEdit(ui->textEdit_out_ascii);
         shortenTextEdit(ui->textEdit_out_hex);
         shortenTextEdit(ui->textEdit_out_dec);
@@ -586,7 +582,8 @@ QString MainWindow::getDataColor(int dataKind)
 /////////////////////////////////////////////////////////////////
 void MainWindow::shortenTextEdit(QTextEdit* textEdit)
 {
-    if (textEdit->document()->blockCount() > config.autoclerTermOut_maxChars) {
+    if (textEdit->document()->blockCount() >
+            AppCfgParam::get().autoclerTermOut_maxChars) {
 
         textEdit->clear();
         /* todo autoclear should do better then this */
@@ -681,8 +678,8 @@ void MainWindow::moveCursorToEnd()
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_pushButton_save_clicked()
 {
-    QString openLocation =  (config.outputFileDir.isEmpty()) ?
-                LOCATION_DEFAULT : config.outputFileDir;
+    QString openLocation =  (AppCfgParam::get().outputFileDir.isEmpty()) ?
+                LOCATION_DEFAULT : AppCfgParam::get().outputFileDir;
 
     QString dir = QFileDialog::getExistingDirectory(
                 this,
@@ -722,28 +719,28 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1)
 {
-    config.autoclerTermOut_maxChars = arg1;
+    AppCfgParam::get().autoclerTermOut_maxChars = arg1;
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_checkBox_prefix_stateChanged(int arg1)
 {
-    config.prefix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().prefix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_suffix_stateChanged(int arg1)
 {
-    config.suffix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().suffix_tx_enabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_timeLog_stateChanged(int arg1)
 {
-    config.timeLogEnabled = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().timeLogEnabled = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
 {
-    config.clearOutputLine = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().clearOutputLine = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 {
-    config.saveTerminalOutToFile = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().saveTerminalOutToFile = (arg1 == Qt::Checked) ? true : false;
 }
 void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 {
@@ -751,7 +748,7 @@ void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 }
 void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
 {
-    config.autoclerTermOut = (arg1 == Qt::Checked) ? true : false;
+    AppCfgParam::get().autoclerTermOut = (arg1 == Qt::Checked) ? true : false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -759,14 +756,14 @@ void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
     dataConverter dataConv;
     dataConv.setStrHex(arg1);
-    config.suffix_tx = dataConv.getByteArray();
+    AppCfgParam::get().suffix_tx = dataConv.getByteArray();
 }
 
 void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 {
     dataConverter dataConv;
     dataConv.setStrHex(arg1);
-    config.prefix_tx = dataConv.getByteArray();
+    AppCfgParam::get().prefix_tx = dataConv.getByteArray();
 }
 
 void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
