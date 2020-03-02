@@ -7,32 +7,32 @@
 
 
 /////////////////////////////////////////////////////////////////
-OutputFile::OutputFile()
+OutputFile::OutputFile(QString val) : dir(val)
 {
+    QDateTime dt = QDateTime::currentDateTime();
+    QString timeStr = dt.toString(TIME_FORMAT);
+
+    fileName = QString("termik_log_%1").arg(timeStr);
 }
 
 /////////////////////////////////////////////////////////////////
-void OutputFile::writeData_ascii(QString data)
+bool OutputFile::writeData_ascii(QString data)
 {
-    QString fileName_ascii;
-    fileName_ascii = QString("%1/%2_ascii%3")
-            .arg(fileDirectory)
-            .arg(fileName)
-            .arg(LOGFILE_EXTENSION);
-
-    writeDataToFile(fileName_ascii, data);
+    return writeDataToFile(QString("%1/%2_ascii%3")
+                           .arg(dir)
+                           .arg(fileName)
+                           .arg(LOGFILE_EXTENSION),
+                           data);
 }
 
 /////////////////////////////////////////////////////////////////
-void OutputFile::writeData_hex(QString data)
+bool OutputFile::writeData_hex(QString data)
 {
-    QString fileName_hex;
-    fileName_hex = QString("%1/%2_hex%3")
-            .arg(fileDirectory)
-            .arg(fileName)
-            .arg(LOGFILE_EXTENSION);
-
-    writeDataToFile(fileName_hex, data);
+    return writeDataToFile(QString("%1/%2_hex%3")
+                           .arg(dir)
+                           .arg(fileName)
+                           .arg(LOGFILE_EXTENSION),
+                           data);
 }
 /////////////////////////////////////////////////////////////////
 bool OutputFile::writeDataToFile(QString thisFileName, QString data)
@@ -51,17 +51,6 @@ bool OutputFile::writeDataToFile(QString thisFileName, QString data)
     } else {
         return false;
     }
-}
-
-/////////////////////////////////////////////////////////////////
-void OutputFile::init(QString directory)
-{
-    fileDirectory = directory;
-
-    QDateTime dt = QDateTime::currentDateTime();
-    QString timeStr = dt.toString(TIME_FORMAT);
-
-    fileName = QString("termik_log_%1").arg(timeStr);
 }
 
 /////////////////////////////////////////////////////////////////

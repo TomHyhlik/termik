@@ -2,22 +2,21 @@
     "Application": {
         "Prefix Tx data": null,
         "Prefix Tx enabled": true,
-        "Save terminal output to file": false,
         "Suffix Tx data": "\r\n",
         "Suffix Tx enabled": true,
         "Time info enabled": true,
         "Time log enabled": true
     },
-    "Log files directory": "",
+    "Log files directory": "/Users/tomashyhlik/Repozitories/termik",
     "Network": {
         "IP address Rx": "",
-        "IP address Tx": "",
-        "Port Rx": 0,
-        "Port Tx": 0
+        "IP address Tx": "127.0.0.1",
+        "Port Rx": 1111,
+        "Port Tx": 1111
     },
     "Script": {
         "Data format": 0,
-        "File name": "/home/fuzz/Repos/termik/termik_cfg.json",
+        "File name": "/Users/tomashyhlik/Repozitories/termik/termik_cfg.json",
         "Repeat": true,
         "Timeout": 200
     },

@@ -90,9 +90,8 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         data.app.suffix_tx = jObj_app.value(QString(JSONTITLE_APP_SUFFIXTXDATA)).toString().toUtf8();
         data.app.prefix_tx = jObj_app.value(QString(JSONTITLE_APP_PREFIXTXDATA)).toString().toUtf8();
         data.app.timeInfoEnabled = jObj_app.value(QString(JSONTITLE_APP_TIMEINFOENABLED)).toBool();
-        data.app.saveTerminalOutToFile = jObj_app.value(QString(JSONTITLE_APP_SAVEOUTPUTTOFILE)).toBool();
-
-        data.LogFileDir = jObj.value(QString(JSONTITLE_LOG_DIRECTORY)).toString();
+//        data.app.saveTerminalOutToFile = jObj_app.value(QString(JSONTITLE_APP_SAVEOUTPUTTOFILE)).toBool(); todo rm
+        data.app.outputFileDir = jObj_app.value(QString(JSONTITLE_APP_LOGDIRECTORY)).toString();
 
         QJsonObject jObj_script = jObj.value(QString(JSONTITLE_SCRIPT)).toObject();
         RunScriptParam::get().fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
@@ -153,8 +152,8 @@ QByteArray SaveConfiguration::jsonData_make()
                     QJsonValue::fromVariant(data.app.prefix_tx));
     jObj_app.insert(JSONTITLE_APP_TIMEINFOENABLED ,
                     QJsonValue::fromVariant(data.app.prefix_tx_enabled));
-    jObj_app.insert(JSONTITLE_APP_SAVEOUTPUTTOFILE ,
-                    QJsonValue::fromVariant(data.app.saveTerminalOutToFile));
+//    jObj_app.insert(JSONTITLE_APP_SAVEOUTPUTTOFILE ,
+//                    QJsonValue::fromVariant(data.app.saveTerminalOutToFile));  todo rm
     jObj.insert(QString(JSONTITLE_APP_LOGDIRECTORY),
                 QJsonValue::fromVariant(data.app.outputFileDir));
     jObj.insert(JSONTITLE_APP, jObj_app);

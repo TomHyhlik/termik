@@ -13,25 +13,18 @@ class OutputFile : public QObject
 {
     Q_OBJECT
 
-
+    QString dir;
     QString fileName;
     bool initialized;
     bool writeDataToFile(QString fileName, QString data);
 
 public:
-    OutputFile();
+    OutputFile(QString val);
 
-
-signals:
 
 public slots:
-
-    void writeData_ascii(QString data);
-    void writeData_hex(QString data);
-
-    void init(QString directory);
-
-
+    bool writeData_ascii(QString data);
+    bool writeData_hex(QString data);
 
 };
 

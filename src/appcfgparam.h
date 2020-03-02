@@ -29,7 +29,7 @@ public:
     bool timeInfoEnabled;
     bool clearOutputLine;
 
-    bool saveTerminalOutToFile;
+//    bool saveTerminalOutToFile;   // todo rm
 
     bool autoclerTermOut;
     int autoclerTermOut_maxChars;

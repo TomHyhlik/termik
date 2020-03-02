@@ -170,7 +170,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     Communication* communic;
-    std::unique_ptr <OutputFile> outputFile;
+    std::unique_ptr <OutputFile> outputFile = nullptr;
     std::unique_ptr <RunScript> script;
 
     QElapsedTimer sinceLastTermOutUpdate;
@@ -191,8 +191,6 @@ private:
 
     void writeToTextedit(QTextEdit* textEdit, QString color, QString data);
     void shortenTextEdit(QTextEdit* textEdit);
-
-    void saveToFile_init();
 
     void terminalOut_addPreamble(int);
     QString getDataColor(int);

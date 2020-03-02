@@ -100,9 +100,6 @@ void MainWindow::currentAppConfig_loadSaved()
         if (!saveCfg.data.script.fileName.isEmpty()) {
             ui->lineEdit_script->setText(saveCfg.data.script.fileName);
         }
-        if (!saveCfg.data.LogFileDir.isEmpty()) {
-            ui->lineEdit_save->setText(saveCfg.data.LogFileDir);
-        }
 
         /* RunScript settings */
         ui->comboBox_script_dataType->setCurrentIndex(saveCfg.data.script.dFormat);
@@ -130,8 +127,8 @@ void MainWindow::selectScript()
         openLocation = LOCATION_DEFAULT;
     }
 
-    QString scriptFileName = QFileDialog::getOpenFileName(this,
-                                                          RunScriptParam::get().fileName);
+    QString scriptFileName = QFileDialog::getOpenFileName(
+                this, RunScriptParam::get().fileName);
 
     if (!scriptFileName.isEmpty()) {
         showScriptUi();
@@ -140,16 +137,6 @@ void MainWindow::selectScript()
     }
 
 }
-//////////////////////////////////////////////////////////////////////
-void MainWindow::saveToFile_init()
-{
-    ui->checkBox_outputSave->setCheckState(Qt::Checked);
-    QString fileLocation = ui->lineEdit_save->text();
-
-
-    outputFile = std::unique_ptr <OutputFile> (new OutputFile());
-    LOG(QString("Output saved in %1").arg(fileLocation));
-}
 
 //////////////////////////////////////////////////////////////////////
 void MainWindow::configInit()
@@ -157,7 +144,6 @@ void MainWindow::configInit()
     AppCfgParam::get().timeInfoEnabled = false;
     AppCfgParam::get().timeLogEnabled = true;
     AppCfgParam::get().clearOutputLine = true;
-    AppCfgParam::get().saveTerminalOutToFile = false;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -499,7 +485,7 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
             writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
 
             /* put the preamble into text file */
-            if (AppCfgParam::get().saveTerminalOutToFile) {
+            if (outputFile) {
                 outputFile->writeData_ascii(preamble);
                 outputFile->writeData_hex(preamble);
             }
@@ -550,7 +536,7 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
     writeToTextedit(ui->textEdit_out_dec,    dataColor, dataConv.getStrDec());
 
     /* update terminal output log files */
-    if (AppCfgParam::get().saveTerminalOutToFile) {
+    if (outputFile) {
         outputFile->writeData_ascii(dataConv.getStrAscii());
         outputFile->writeData_hex(dataConv.getStrHex());
     }
@@ -689,7 +675,8 @@ void MainWindow::on_pushButton_save_clicked()
 
     if (!dir.isEmpty()) {
         ui->lineEdit_save->setText(dir);
-        saveToFile_init();
+        ui->checkBox_outputSave->setCheckState(Qt::Unchecked);
+        ui->checkBox_outputSave->setCheckState(Qt::Checked);
     }
 }
 
@@ -740,7 +727,14 @@ void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
 }
 void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 {
-    AppCfgParam::get().saveTerminalOutToFile = (arg1 == Qt::Checked) ? true : false;
+    bool state = (arg1 == Qt::Checked) ? true : false;
+    // todo
+    if (state) {
+        outputFile = std::unique_ptr <OutputFile>
+                (new OutputFile(AppCfgParam::get().outputFileDir));
+    } else {
+        outputFile = nullptr;
+    }
 }
 void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
 {
@@ -820,7 +814,7 @@ void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 {
-    outputFile->setFileDirectory(arg1);
+    AppCfgParam::get().outputFileDir = arg1;
 }
 
 /////////////////////////////////////////////////////////////////
