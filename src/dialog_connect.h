@@ -32,6 +32,13 @@
 #define TITLE_NAME      "Name"
 #define TITLE_ADDR      "Address"
 
+#define TAB_INDEX_SERIAL        0
+#define TAB_INDEX_NETWORK       1
+
+enum {
+  tableAction_up, tableAction_down
+};
+
 
 namespace Ui {
 class Dialog_connect;
@@ -106,9 +113,18 @@ private slots:
 
     void networkScanFinished();
 
-    void on_tableWidget_addr_tx_cellClicked(int row, int column);
-    void on_tableWidget_addr_rx_cellClicked(int row, int column);
-    void on_tableWidget_serialPorts_cellClicked(int row, int column);
+    void on_tableWidget_addr_tx_currentCellChanged(int row, int column);
+    void on_tableWidget_addr_rx_currentCellChanged(int row, int column);
+    void on_tableWidget_serialPorts_currentCellChanged(int row, int column);
+
+    void pressedKeyUp();
+    void pressedKeyDown();
+    void table_makeAction(QTableWidget*, int);
+    void lineEdit_updateToTableRow(QLineEdit* lineEdit, QTableWidget *table, int row);
+    void pressedKeyLeft();
+    void pressedKeyRight();
+
+
 
 signals:
 

@@ -52,6 +52,88 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 }
 
 /////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyUp()
+{
+    switch (ui->tabWidget->currentIndex())
+    {
+    case TAB_INDEX_SERIAL:
+        table_makeAction(ui->tableWidget_serialPorts, tableAction_up);
+        break;
+    case TAB_INDEX_NETWORK:
+        if (ui->tableWidget_addr_tx->hasFocus())
+            table_makeAction(ui->tableWidget_addr_tx, tableAction_up);
+//        else if (ui->tableWidget_addr_tx->hasFocus())
+        else
+            table_makeAction(ui->tableWidget_addr_rx, tableAction_up);
+
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyDown()
+{
+    switch (ui->tabWidget->currentIndex())
+    {
+    case TAB_INDEX_SERIAL:
+        table_makeAction(ui->tableWidget_serialPorts, tableAction_down);
+        break;
+    case TAB_INDEX_NETWORK:
+        if (ui->tableWidget_addr_tx->hasFocus())
+            table_makeAction(ui->tableWidget_addr_tx, tableAction_down);
+//        else if (ui->tableWidget_addr_tx->hasFocus())
+        else
+            table_makeAction(ui->tableWidget_addr_rx, tableAction_down);
+
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyLeft()
+{
+    switch (ui->tabWidget->currentIndex())
+    {
+    case TAB_INDEX_NETWORK:
+        ui->tableWidget_addr_rx->setFocus();
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyRight()
+{
+    switch (ui->tabWidget->currentIndex())
+    {
+    case TAB_INDEX_NETWORK:
+        ui->tableWidget_addr_tx->setFocus();
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_makeAction(QTableWidget* tableWidget, int actionType)
+{
+    switch (actionType)
+    {
+    case tableAction_up:
+        if (tableWidget->currentRow() > 0)
+            tableWidget->selectRow(tableWidget->currentRow() - 1);
+        break;
+    case tableAction_down:
+        if (tableWidget->currentRow() < tableWidget->rowCount())
+            tableWidget->selectRow(tableWidget->currentRow() + 1);
+        break;
+    }
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::lineEdit_updateToTableRow(QLineEdit* lineEdit, QTableWidget *table, int row)
+{
+    QString name = table->item(row, 0)->text();
+    lineEdit->setText(name);
+}
+
+/////////////////////////////////////////////////////////////////
 void Dialog_connect::shortcuts_init()
 {
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
@@ -59,6 +141,12 @@ void Dialog_connect::shortcuts_init()
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
     new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
+
+    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKeyUp()));
+    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKeyDown()));
+    new QShortcut(QKeySequence(Qt::Key_Left), this, SLOT(pressedKeyLeft()));
+    new QShortcut(QKeySequence(Qt::Key_Right), this, SLOT(pressedKeyRight()));
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -182,8 +270,8 @@ void Dialog_connect::initColors()
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
 }
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::refreshDevices()
 {
@@ -481,22 +569,21 @@ void Dialog_connect::focus_2()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void Dialog_connect::on_tableWidget_addr_rx_cellClicked(int row, int column)
+void Dialog_connect::on_tableWidget_addr_rx_currentCellChanged(int row, int column)
 {
-    QString hostName = ui->tableWidget_addr_rx->item(row, 0)->text();
-    ui->lineEdit_selectedAddr_rx->setText(hostName);
+    lineEdit_updateToTableRow(ui->lineEdit_selectedAddr_rx, ui->tableWidget_addr_rx, row);
+    (void)column;
 }
 
-void Dialog_connect::on_tableWidget_addr_tx_cellClicked(int row, int column)
+void Dialog_connect::on_tableWidget_addr_tx_currentCellChanged(int row, int column)
 {
-    QString hostName = ui->tableWidget_addr_tx->item(row, 0)->text();
-    ui->lineEdit_selectedAddr_tx->setText(hostName);
+    lineEdit_updateToTableRow(ui->lineEdit_selectedAddr_tx, ui->tableWidget_addr_tx, row);
+    (void)column;
 }
-//////////////////////////////////////////////////////////////////////////////
 
-void Dialog_connect::on_tableWidget_serialPorts_cellClicked(int row, int column)
+void Dialog_connect::on_tableWidget_serialPorts_currentCellChanged(int row, int column)
 {
-    QString portName = ui->tableWidget_serialPorts->item(row, 0)->text();
-    ui->lineEdit_serialPortName->setText(portName);
+    lineEdit_updateToTableRow(ui->lineEdit_serialPortName, ui->tableWidget_serialPorts, row);
+    (void)column;
 }
 //////////////////////////////////////////////////////////////////////////////

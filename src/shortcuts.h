@@ -46,12 +46,15 @@ void setupShortcuts_MainWindow(QWidget *uiThis)
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), uiThis, SLOT(showConnectionSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), uiThis, SLOT(connectOrDisconnect()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), uiThis, SLOT(selectScript()));
+
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), uiThis, SLOT(focus_0()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), uiThis, SLOT(focus_1()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), uiThis, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), uiThis, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), uiThis, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), uiThis, SLOT(focus_3()));
+
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), uiThis, SLOT(focus_0()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), uiThis, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), uiThis, SLOT(focus_2()));
+
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), uiThis, SLOT(on_pushButton_save_clicked()));
     new QShortcut(QKeySequence(Qt::Key_Enter), uiThis, SLOT(pressedKey_enter()));
     new QShortcut(QKeySequence(Qt::Key_Return), uiThis, SLOT(pressedKey_enter()));
