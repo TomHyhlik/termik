@@ -49,6 +49,8 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
 
     refreshDevices();
+
+    pressedKeyDown();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -270,6 +272,10 @@ void Dialog_connect::initColors()
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+
 }
 
 /////////////////////////////////////////////////////////////////

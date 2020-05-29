@@ -254,7 +254,7 @@ void MainWindow::connectOrDisconnect()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     currentAppConfig_save();
-
+    (void)event;
     LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
 }
 

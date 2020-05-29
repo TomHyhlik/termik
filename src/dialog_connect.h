@@ -36,7 +36,7 @@
 #define TAB_INDEX_NETWORK       1
 
 enum {
-  tableAction_up, tableAction_down
+  tableAction_up, tableAction_down,
 };
 
 

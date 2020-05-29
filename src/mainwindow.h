@@ -46,11 +46,13 @@
 
 
 #define COLOR_TOPLINE   "#A0A0A0"
+
 #define COLOR_GRAY0     "#404040"
-#define COLOR_GRAY1     "#202020"
-#define COLOR_GRAY2     "#151515"
+#define COLOR_GRAY1     "#303030"
+#define COLOR_GRAY2     "#202020"
 #define COLOR_GRAY3     "#101010"
 #define COLOR_GRAY4     "#050505"
+
 
 #define MAINWINDOWTITLE "Termik"
 
