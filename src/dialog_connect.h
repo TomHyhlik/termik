@@ -9,6 +9,7 @@
 
 #include "networkscan.h"
 #include "mainwindow.h"
+#include "communication.h"
 
 #define PORT_RANGE  65535
 #define TITLE_THIS_WINDOW   "Connect"
@@ -36,7 +37,7 @@
 #define TAB_INDEX_NETWORK       1
 
 enum {
-  tableAction_up, tableAction_down,
+  tableAction_up, tableAction_down
 };
 
 
@@ -61,6 +62,8 @@ public:
 private:
     Ui::Dialog_connect *ui;
 
+    bool networkHostsFirstRefresh;
+
     void initColors();
 
     int getFirstMapVal(QMap<int,QString> m, QString label);
@@ -68,18 +71,19 @@ private:
 
     void blockAllsignals(bool state);
 
-    /* tab port init */
     void tab_port_init();
-    QMap<int,QString> baudRateS;    // create maps
+    QMap<int,QString> baudRateS;
     QMap<int,QString> dataBitsS;
     QMap<int,QString> parityS;
     QMap<int,QString> stopBitsS;
     QMap<int,QString> flowControlS;
+    QMap<int,QString> networkProtocol;
     void fillBaudRate();            // fill maps
     void fillDataBits();
     void fillParity();
     void fillstopBits();
     void fillflowControl();
+    void fillNetworkProtocol();
 
     QSharedPointer <QTimer> timer_updatePorts;
     QSharedPointer <NetworkScan> networkScan;
@@ -89,7 +93,6 @@ private:
     void shortcuts_init();
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);
-    int getSelectedNetworkProtocol();
     void table_network_init();
     void table_serial_init();
     void table_addHost(QTableWidget* table, QHostInfo host);

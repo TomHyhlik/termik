@@ -23,7 +23,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
     shortcuts_init();
 
     table_network_init();
@@ -49,8 +48,8 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
 
     refreshDevices();
-
     pressedKeyDown();
+    networkHostsFirstRefresh = true;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -188,13 +187,15 @@ void Dialog_connect::loadParametersToUi()
     ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, SerialWParam::get().stopBits));
     ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, SerialWParam::get().flowControl));
 
-    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
+//    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
         ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
-    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
+//    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
         ui->lineEdit_selectedAddr_tx->setText(NetworkWParam::get().IpAddr_Tx.toString());
 
     ui->spinBox_ipPort_Tx->setValue(NetworkWParam::get().port_Tx);
     ui->spinBox_ipPort_Rx->setValue(NetworkWParam::get().port_Rx);
+
+    ui->comboBox_networkProtocol->setCurrentText(networkProtocol.value(NetworkWParam::get().protocolType));
 }
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_network_init()
@@ -232,6 +233,7 @@ void Dialog_connect::blockAllsignals(bool state)
     ui->comboBox_stopBits->blockSignals(state);
     ui->comboBox_flowControl->blockSignals(state);
 }
+
 ///////////////////////////////////////////////////////////
 void Dialog_connect::initColors()
 {
@@ -339,6 +341,16 @@ void Dialog_connect::networkScanFinished()
 {
     table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
     table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
+
+    if (networkHostsFirstRefresh)
+    {
+        networkHostsFirstRefresh = false;
+        if (ui->lineEdit_selectedAddr_rx->text().isEmpty())
+            ui->tableWidget_addr_rx->selectRow(ui->tableWidget_addr_rx->rowCount() -1);
+        if (ui->lineEdit_selectedAddr_tx->text().isEmpty())
+            ui->tableWidget_addr_tx->selectRow(ui->tableWidget_addr_tx->rowCount() -1);
+    }
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -400,6 +412,7 @@ void Dialog_connect::tab_port_init()
     fillParity();
     fillstopBits();
     fillflowControl();
+    fillNetworkProtocol();
 
     /* fill comboboxes */
     for (auto e :  baudRateS.toStdMap() ) {
@@ -416,6 +429,9 @@ void Dialog_connect::tab_port_init()
     }
     for (auto e :  flowControlS.toStdMap() ) {
         ui->comboBox_flowControl->addItem(e.second);
+    }
+    for (auto e :  networkProtocol.toStdMap() ) {
+        ui->comboBox_networkProtocol->addItem(e.second);
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -464,6 +480,13 @@ void Dialog_connect::fillflowControl()
 }
 
 /////////////////////////////////////////////////////////////////
+void Dialog_connect::fillNetworkProtocol()
+{
+    networkProtocol.insert(QSerialPort::NoFlowControl , NETWORKPROTOCOL_UDP);
+    networkProtocol.insert(QSerialPort::HardwareControl , NETWORKPROTOCOL_TCP);
+}
+
+/////////////////////////////////////////////////////////////////
 int Dialog_connect::getFirstMapVal(QMap<int,QString> m, QString label)
 {
     for (auto e : m.toStdMap())
@@ -507,7 +530,7 @@ void Dialog_connect::on_buttonBox_accepted()
     NetworkWParam::get().IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
     NetworkWParam::get().port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     NetworkWParam::get().port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
-    NetworkWParam::get().protocolType = getSelectedNetworkProtocol();
+    NetworkWParam::get().protocolType = getFirstMapVal(networkProtocol, ui->comboBox_networkProtocol->currentText());
 
     /* connect */
     switch (ui->tabWidget->currentIndex())
@@ -525,18 +548,6 @@ void Dialog_connect::on_buttonBox_accepted()
 void Dialog_connect::on_buttonBox_rejected()
 {
     this->close();
-}
-/////////////////////////////////////////////////////////////////////
-int Dialog_connect::getSelectedNetworkProtocol()
-{
-    if (ui->comboBox_networkProtocol->currentText() == NETWORKPROTOCOL_UDP) {
-        return UDP;
-    }
-    else if (ui->comboBox_networkProtocol->currentText() == NETWORKPROTOCOL_TCP) {
-        return TCP;
-    } else {
-        return TCP;
-    }
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -593,3 +604,15 @@ void Dialog_connect::on_tableWidget_serialPorts_currentCellChanged(int row, int 
     (void)column;
 }
 //////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
