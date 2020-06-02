@@ -67,7 +67,7 @@ void Communication::establish(communicationType type)
         return;
     }
 
-    connect(communicWorker.get(), SIGNAL(dataReceived(QByteArray)), this,
+    connect(communicWorker.get(), SIGNAL(received(QByteArray)), this,
             SLOT(dataArrived(QByteArray)));
 
     if (EstablishedSuccessful) {

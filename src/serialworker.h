@@ -20,17 +20,15 @@ public:
     explicit SerialWorker();
 
     bool open() override;
-    bool close() override;
+    void close() override;
     bool isOpen() override;
-
-    //    SerialWorkerParameters param;
 
 private:
 
     QSerialPort* serial;
 
 public slots:
-    void on_dataReceived() override;
+    void on_dataReceived();
     bool write(QByteArray) override;
 
 signals:

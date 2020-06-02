@@ -81,6 +81,8 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         NetworkWParam::get().IpAddr_Tx = QHostAddress(jObj_network.value(QString(JSONTITLE_NETWORK_IPADDRESS_TX)).toString());
         NetworkWParam::get().port_Tx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTTX)).toInt());
         NetworkWParam::get().port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
+        NetworkWParam::get().protocolType = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PROTOCOL)).toInt());
+
 
         QJsonObject jObj_app = jObj.value(QString(JSONTITLE_APP)).toObject();
 //        data.app.connectionType = jObj_app.value(QString(JSONTITLE_APP_CONNECTIONTYPE)).toBool(); // todo
@@ -135,6 +137,8 @@ QByteArray SaveConfiguration::jsonData_make()
                         QJsonValue::fromVariant(NetworkWParam::get().port_Tx));
     jObj_network.insert(JSONTITLE_NETWORK_PORTRX ,
                         QJsonValue::fromVariant(NetworkWParam::get().port_Rx));
+    jObj_network.insert(JSONTITLE_NETWORK_PROTOCOL ,
+                        QJsonValue::fromVariant(NetworkWParam::get().protocolType));
     jObj.insert(JSONTITLE_NETWORK, jObj_network);
 
     QJsonObject jObj_app;

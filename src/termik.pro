@@ -24,16 +24,20 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
         dialog_connect.cpp \
+        networkprotocol.cpp \
         networkscan.cpp \
         networkworker.cpp \
         networkwparam.cpp \
         outputfile.cpp \
+        protocol_tcp.cpp \
+        protocol_udp.cpp \
         runscript.cpp \
         runscriptparam.cpp \
         saveconfiguration.cpp \
         serialworker.cpp \
         serialwparam.cpp \
-        tcpworker.cpp
+        tcpclient.cpp \
+        tcpserver.cpp \
 
 HEADERS += \
         appcfgparam.h \
@@ -44,17 +48,21 @@ HEADERS += \
         log.h \
         mainwindow.h \
         dialog_connect.h \
+        networkprotocol.h \
         networkscan.h \
         networkworker.h \
         networkwparam.h \
         outputfile.h \
+        protocol_tcp.h \
+        protocol_udp.h \
         runscript.h \
         runscriptparam.h \
         saveconfiguration.h \
         serialworker.h \
         serialwparam.h \
         shortcuts.h \
-        tcpworker.h \
+        tcpclient.h \
+        tcpserver.h \
         utils_tabWidget.h
 
 FORMS += \

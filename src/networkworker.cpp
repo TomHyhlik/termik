@@ -1,110 +1,59 @@
-
 #include "networkworker.h"
-#include "tcpworker.h"
+
+#include "protocol_udp.h"
+#include "protocol_tcp.h"
 
 
 NetworkWorker::NetworkWorker()
 {
-    udpSocket = new QUdpSocket(this);
-    connect(udpSocket, SIGNAL(readyRead()),this, SLOT(on_dataReceived()));
-
-    tcpServer = new TcpServer();
-    connect(tcpServer, SIGNAL(dataReceived(QByteArray)),
-            this, SLOT(on_dataReceived(QByteArray)));
-    tcpClient = new TcpClient();
-    connect(tcpClient, &TcpClient::dataReceived, this, &NetworkWorker::dataReceived);
-
-
+    communicProtocol = nullptr;
 }
 
 //////////////////////////////////////////////////
-void NetworkWorker::on_dataReceived(QByteArray data)
+void NetworkWorker::close()
 {
-    emit dataReceived(data);
+    if (communicProtocol != nullptr) {
+        communicProtocol->close();
+        communicProtocol = nullptr;
+    }
 }
+
 //////////////////////////////////////////////////
 bool NetworkWorker::isOpen()
 {
-    return tcpServer->isListening();
+    return communicProtocol != nullptr;
 }
 
 //////////////////////////////////////////////////
 bool NetworkWorker::open()
 {
-    if (isOpen()) {
-        disconnect();
-    }
-    bool opened = false;
-    switch (NetworkWParam::get().protocolType) {
-    case UDP:
-        opened = udpSocket->bind(NetworkWParam::get().IpAddr_Rx, NetworkWParam::get().port_Rx);
+    close();
+
+    switch (NetworkWParam::get().protocolType)
+    {
+    case networkProtocolType_tcp:
+        communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_tcp());
         break;
-    case TCP:
-        opened = tcpServer->listen(NetworkWParam::get().IpAddr_Rx, NetworkWParam::get().port_Rx);
-        if (opened) {
-            opened = tcpClient->connectToHost(NetworkWParam::get().IpAddr_Tx, NetworkWParam::get().port_Tx);
-        }
+    case networkProtocolType_udp:
+        communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_udp());
         break;
     }
-    return opened;
+
+    if (communicProtocol->open()) {
+        connect(communicProtocol.get(), &NetworkProtocol::received,
+                this, &NetworkWorker::received);
+    } else {
+        close();
+    }
+
+    return isOpen();
 }
 
-//////////////////////////////////////////////////
-bool  NetworkWorker::close()
-{
-    switch (NetworkWParam::get().protocolType) {
-    case UDP:
-        udpSocket->close();
-        break;
-    case TCP:
-        tcpServer->close();
-        break;
-    }
-    return true;
-}
 //////////////////////////////////////////////////
 bool NetworkWorker::write(QByteArray data)
 {
-    bool success = false;
-    switch (NetworkWParam::get().protocolType) {
-    case UDP:
-        success = udpSocket->writeDatagram(data, NetworkWParam::get().IpAddr_Tx, NetworkWParam::get().port_Tx);
-        break;
-    case TCP:
-        success = tcpClient->writeData(data);
-        break;
-    }
-    return success;
+    if (isOpen())
+        return communicProtocol->write(data);
+    else return false;
 }
 
-//////////////////////////////////////////////////
-void NetworkWorker::on_dataReceived()
-{
-    QByteArray buffer;
-    QHostAddress sender;
-    quint16 senderPort;
-
-    buffer.resize(int(udpSocket->pendingDatagramSize()));
-    udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
-
-    qDebug() << "_____________________________________";
-    qDebug() << "sender: " << sender;
-    qDebug() << "sender port: " << senderPort;
-    qDebug() << "message: " << buffer;
-    emit dataReceived(buffer);
-}
-
-//////////////////////////////////////////////////
-void NetworkWorker::connected()
-{
-    tcpConnected = true;
-}
-void NetworkWorker::disconnected()
-{
-    tcpConnected = false;
-}
-bool NetworkWorker::tcpIsConnected()
-{
-    return tcpConnected;
-}
-//////////////////////////////////////////////////

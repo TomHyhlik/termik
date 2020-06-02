@@ -28,6 +28,7 @@
 #define JSONTITLE_NETWORK_IPADDRESS_TX  "IP address Tx"
 #define JSONTITLE_NETWORK_PORTTX        "Port Tx"
 #define JSONTITLE_NETWORK_PORTRX        "Port Rx"
+#define JSONTITLE_NETWORK_PROTOCOL      "Protocol"
 
 #define JSONTITLE_APP                   "Application"
 #define JSONTITLE_APP_CONNECTIONTYPE    "Connection type"

@@ -10,17 +10,16 @@ public:
     explicit CommunicationWorker(QObject *parent = nullptr);
 
     virtual bool open() = 0;
-    virtual bool close() = 0;
+    virtual void close() = 0;
     virtual bool isOpen() = 0;
 
 
 public slots:
     virtual bool write(QByteArray) = 0;
-    virtual void on_dataReceived() = 0;
 
 
 signals:
-    void dataReceived(QByteArray);
+    void received(QByteArray);
 
 
 

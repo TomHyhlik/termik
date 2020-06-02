@@ -3,10 +3,8 @@
 
 #include <QtSerialPort/QSerialPort>
 #include <QSerialPortInfo>
-#include <QThread>
 
 #include <QDebug>
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,14 +39,10 @@ bool SerialWorker::open()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool SerialWorker::close()
+void SerialWorker::close()
 {
-    if (serial->isOpen()){
+    if (serial->isOpen())
         serial->close();
-        return true;
-    } else {
-        return false;
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +81,7 @@ void SerialWorker::on_dataReceived()
     qDebug() << "RX: " << data.toHex();
 #endif
 
-    emit dataReceived(data);
+    emit received(data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

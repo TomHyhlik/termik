@@ -1,34 +1,10 @@
-#ifndef TCPWORKER_H
-#define TCPWORKER_H
+#ifndef TCPSERVER_H
+#define TCPSERVER_H
 
 #include <QObject>
 
 #include <QtCore>
 #include <QtNetwork>
-
-
-
-
-
-class TcpClient : public QObject
-{
-    Q_OBJECT
-public:
-    explicit TcpClient(QObject *parent = 0);
-
-public slots:
-    bool connectToHost(QHostAddress host, quint16 port);
-    bool writeData(QByteArray data);
-    void on_readyRead();
-
-private:
-    QTcpSocket *socket;
-
-signals:
-    void dataReceived(QByteArray);
-};
-
-
 
 class TcpServer : public QObject
 {
@@ -55,7 +31,4 @@ private:
 };
 
 
-
-
-
-#endif // TCPWORKER_H
+#endif // TCPSERVER_H
