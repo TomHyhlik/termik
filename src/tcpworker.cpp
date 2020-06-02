@@ -15,6 +15,7 @@ void TcpClient::on_readyRead()
 {
     QByteArray data = socket->readAll();
     qDebug() << "Client received: " << data;
+    emit dataReceived(data);
 }
 
 bool TcpClient::connectToHost(QHostAddress host, quint16 port)

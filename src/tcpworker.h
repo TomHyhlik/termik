@@ -23,6 +23,9 @@ public slots:
 
 private:
     QTcpSocket *socket;
+
+signals:
+    void dataReceived(QByteArray);
 };
 
 

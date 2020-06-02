@@ -12,6 +12,7 @@ NetworkWorker::NetworkWorker()
     connect(tcpServer, SIGNAL(dataReceived(QByteArray)),
             this, SLOT(on_dataReceived(QByteArray)));
     tcpClient = new TcpClient();
+    connect(tcpClient, &TcpClient::dataReceived, this, &NetworkWorker::dataReceived);
 
 
 }
@@ -47,6 +48,7 @@ bool NetworkWorker::open()
     }
     return opened;
 }
+
 //////////////////////////////////////////////////
 bool  NetworkWorker::close()
 {
@@ -82,14 +84,13 @@ void NetworkWorker::on_dataReceived()
     QHostAddress sender;
     quint16 senderPort;
 
-
     buffer.resize(int(udpSocket->pendingDatagramSize()));
     udpSocket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    //    qDebug() << "_____________________________________";
-    //    qDebug() << "sender: " << sender;
-    //    qDebug() << "sender port: " << senderPort;
-    //    qDebug() << "message: " << message;
+    qDebug() << "_____________________________________";
+    qDebug() << "sender: " << sender;
+    qDebug() << "sender port: " << senderPort;
+    qDebug() << "message: " << buffer;
     emit dataReceived(buffer);
 }
 

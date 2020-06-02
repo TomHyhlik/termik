@@ -43,7 +43,7 @@ public:
 
 signals:
     void packetArrived(QString, quint32,  QString);
-
+    void dataReceived(QByteArray);
 
 
 public slots:
