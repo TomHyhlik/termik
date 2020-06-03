@@ -29,7 +29,6 @@ SOURCES += \
         networkworker.cpp \
         networkwparam.cpp \
         outputfile.cpp \
-        protocol_tcp.cpp \
         protocol_udp.cpp \
         runscript.cpp \
         runscriptparam.cpp \
@@ -38,6 +37,9 @@ SOURCES += \
         serialwparam.cpp \
         tcpclient.cpp \
         tcpserver.cpp \
+        protocol_tcp_client.cpp \
+        protocol_tcp_server.cpp \
+
 
 HEADERS += \
         appcfgparam.h \
@@ -53,7 +55,6 @@ HEADERS += \
         networkworker.h \
         networkwparam.h \
         outputfile.h \
-        protocol_tcp.h \
         protocol_udp.h \
         runscript.h \
         runscriptparam.h \
@@ -63,7 +64,11 @@ HEADERS += \
         shortcuts.h \
         tcpclient.h \
         tcpserver.h \
-        utils_tabWidget.h
+        utils_tabWidget.h \
+        protocol_tcp_client.h \
+        protocol_tcp_server.h \
+
+
 
 FORMS += \
         mainwindow.ui \

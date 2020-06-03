@@ -1,29 +1,34 @@
-#include "protocol_tcp.h"
+#include "protocol_tcp_client.h"
 #include "networkwparam.h"
 
-protocol_tcp::protocol_tcp()
+protocol_tcp_client::protocol_tcp_client()
 {
     tcpClient = std::make_unique <TcpClient> ();
 
-    connect(tcpClient.get(), &TcpClient::dataReceived,
-            this, &protocol_tcp::received);
+    connect(tcpClient.get(), &TcpClient::received,
+            this, &protocol_tcp_client::received);
 }
 
 //////////////////////////////////////////////////
-bool protocol_tcp::open()
+bool protocol_tcp_client::isOpen()
+{
+    return true; // todo
+}
+//////////////////////////////////////////////////
+bool protocol_tcp_client::open()
 {
     return tcpClient->connectToHost(NetworkWParam::get().IpAddr_Tx,
                                       NetworkWParam::get().port_Tx);
 }
 
 //////////////////////////////////////////////////
-bool protocol_tcp::write(QByteArray data)
+bool protocol_tcp_client::write(QByteArray data)
 {
     return tcpClient->writeData(data);
 }
 
 //////////////////////////////////////////////////
-void protocol_tcp::close()
+void protocol_tcp_client::close()
 {
     tcpClient = nullptr;
 }

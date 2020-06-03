@@ -10,7 +10,7 @@ class TcpClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit TcpClient(QObject *parent = 0);
+    TcpClient();
 
 public slots:
     bool connectToHost(QHostAddress host, quint16 port);
@@ -21,7 +21,7 @@ private:
     QTcpSocket *socket;
 
 signals:
-    void dataReceived(QByteArray);
+    void received(QByteArray);
 };
 
 

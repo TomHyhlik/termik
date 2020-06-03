@@ -14,6 +14,9 @@ public:
     virtual void close() = 0;
     virtual bool open() = 0;
 
+    virtual bool isOpen() = 0;
+
+
 signals:
     void received(QByteArray);
 

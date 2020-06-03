@@ -1,7 +1,8 @@
 #include "networkworker.h"
 
 #include "protocol_udp.h"
-#include "protocol_tcp.h"
+#include "protocol_tcp_client.h"
+#include "protocol_tcp_server.h"
 
 
 NetworkWorker::NetworkWorker()
@@ -21,7 +22,7 @@ void NetworkWorker::close()
 //////////////////////////////////////////////////
 bool NetworkWorker::isOpen()
 {
-    return communicProtocol != nullptr;
+    return (communicProtocol != nullptr && communicProtocol->isOpen());
 }
 
 //////////////////////////////////////////////////
@@ -31,11 +32,14 @@ bool NetworkWorker::open()
 
     switch (NetworkWParam::get().protocolType)
     {
-    case networkProtocolType_tcp:
-        communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_tcp());
-        break;
     case networkProtocolType_udp:
         communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_udp());
+        break;
+    case networkProtocolType_tcp_client:
+        communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_tcp_client());
+        break;
+    case networkProtocolType_tcp_server:
+        communicProtocol = std::unique_ptr <NetworkProtocol> (new protocol_tcp_server());
         break;
     }
 

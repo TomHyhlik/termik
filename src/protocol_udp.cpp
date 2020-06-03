@@ -2,6 +2,7 @@
 
 #include "networkwparam.h"
 
+#include <memory>
 
 //////////////////////////////////////////////////
 protocol_udp::protocol_udp()
@@ -12,6 +13,13 @@ protocol_udp::protocol_udp()
             this, &protocol_udp::on_dataReceived);
 
 }
+
+//////////////////////////////////////////////////
+bool protocol_udp::isOpen()
+{
+    return true;    // todo
+}
+
 
 //////////////////////////////////////////////////
 bool protocol_udp::open()

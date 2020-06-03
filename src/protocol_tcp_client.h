@@ -5,18 +5,19 @@
 
 #include "tcpclient.h"
 
-class protocol_tcp : public NetworkProtocol
+class protocol_tcp_client : public NetworkProtocol
 {
     Q_OBJECT
 
     std::unique_ptr <TcpClient> tcpClient;
 
 public:
-    protocol_tcp();
+    protocol_tcp_client();
 
     bool open() override;
     bool write(QByteArray) override;
     void close() override;
+    bool isOpen() override;
 
 
 signals:

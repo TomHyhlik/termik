@@ -27,8 +27,10 @@
 
 #define SERIALPORT_REFRESH_PERIOD  500
 
-#define NETWORKPROTOCOL_UDP     "UDP"
-#define NETWORKPROTOCOL_TCP     "TCP"
+
+#define NETWORKPROTOCOL_UDP             "UDP"
+#define NETWORKPROTOCOL_TCP_SERVER      "TCP Server"
+#define NETWORKPROTOCOL_TCP_CLIENT      "TCP Client"
 
 #define TITLE_NAME      "Name"
 #define TITLE_ADDR      "Address"

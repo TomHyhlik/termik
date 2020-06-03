@@ -13,7 +13,7 @@
 
 
 enum protocolType {
-    networkProtocolType_udp, networkProtocolType_tcp
+    networkProtocolType_udp, networkProtocolType_tcp_client, networkProtocolType_tcp_server
 };
 
 /////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@ public:
     bool write(QByteArray) override;
     bool open() override;
     void close() override;
+    bool isOpen() override;
 
 private slots:
 

@@ -74,18 +74,18 @@ void TcpServer::on_readyRead()
                 buffer->remove(0, size);
                 size = 0;
                 *s = size;
-                emit dataReceived(data);
+                emit received(data);
 //                socket->write("Respond 1");
             }
         }
     }
 }
 
-void TcpServer::send(QByteArray data)
+bool TcpServer::send(QByteArray data)
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    socket->write(data);
+    return socket->write(data);
 }
 
 qint32 ArrayToInt(QByteArray source)

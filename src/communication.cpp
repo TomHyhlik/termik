@@ -6,7 +6,7 @@
 
 #include "mainwindow.h"
 #include "serialwparam.h"
-#include "log.h"
+
 
 //////////////////////////////////////////////////////////////////////
 Communication::Communication(QObject *parent) : QObject(parent)
@@ -45,7 +45,6 @@ void Communication::establish()
 void Communication::establish(communicationType type)
 {
     bool EstablishedSuccessful = false;
-    QString deviceName;
 
     LOG("Attempt to establish communication");
 
@@ -54,31 +53,59 @@ void Communication::establish(communicationType type)
     case comType_serial:
         communicWorker = std::unique_ptr <SerialWorker> (new SerialWorker());
         EstablishedSuccessful = communicWorker->open();
-        deviceName = SerialWParam::get().portName;
         break;
     case comType_network:
         communicWorker = std::unique_ptr <NetworkWorker> (new NetworkWorker());
         EstablishedSuccessful = communicWorker->open();
-        deviceName = QString("%1 : %2")
-                .arg(NetworkWParam::get().IpAddr_Tx.toString())
-                .arg(QString::number(int(NetworkWParam::get().port_Tx)));
         break;
     case comType_none:
         return;
     }
 
-    connect(communicWorker.get(), SIGNAL(received(QByteArray)), this,
-            SLOT(dataArrived(QByteArray)));
+    connect(communicWorker.get(), &SerialWorker::received,
+            this, &Communication::dataArrived);
 
-    if (EstablishedSuccessful) {
-        LOG_T(note, QString("Connected to: %1").arg(deviceName));
+    if (EstablishedSuccessful)
+    {
         lastComType = type;
-        emit established_success();
+        switch (type)
+        {
+        case comType_serial:
+            LOG_T(note, QString("Opened Serial posrt: %1")
+                  .arg(SerialWParam::get().portName));
+            break;
+        case comType_network:
+            switch (NetworkWParam::get().protocolType)
+            {
+            case networkProtocolType_udp:
+                LOG(QString("Rx: %1 : %2")
+                        .arg(NetworkWParam::get().IpAddr_Rx.toString())
+                        .arg(QString::number(int(NetworkWParam::get().port_Rx))));
+                LOG(QString("Tx: %1 : %2")
+                        .arg(NetworkWParam::get().IpAddr_Tx.toString())
+                        .arg(QString::number(int(NetworkWParam::get().port_Tx))));
+                LOG_T(note, "Opened UDP port");
+                break;
+            case networkProtocolType_tcp_client:
+                LOG_T(note, QString("Connected to TCP server: %1 : %2")
+                        .arg(NetworkWParam::get().IpAddr_Tx.toString())
+                        .arg(QString::number(int(NetworkWParam::get().port_Tx))));
+                break;
+            case networkProtocolType_tcp_server:
+                LOG_T(note, QString("TCP Server listening at: %1 : %2")
+                        .arg(NetworkWParam::get().IpAddr_Rx.toString())
+                        .arg(QString::number(int(NetworkWParam::get().port_Rx))));
+                break;
+            }
+            break;
+        case comType_none:
+            return;
+        }
     } else {
-        LOG_T(error, QString("Failed to connect to: %1").arg(deviceName));
-        emit established_failed();
-
+        LOG_T(error, "Failed to establish communication");
     }
+
+    EstablishedSuccessful ? emit established_success() : emit established_failed();
 }
 
 //////////////////////////////////////////////////////////////////////

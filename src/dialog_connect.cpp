@@ -32,8 +32,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
     ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
     ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
-    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_UDP);
-    ui->comboBox_networkProtocol->addItem(NETWORKPROTOCOL_TCP);
 
     initColors();
     tab_port_init();
@@ -482,12 +480,13 @@ void Dialog_connect::fillflowControl()
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::fillNetworkProtocol()
 {
-    networkProtocol.insert(QSerialPort::NoFlowControl , NETWORKPROTOCOL_UDP);
-    networkProtocol.insert(QSerialPort::HardwareControl , NETWORKPROTOCOL_TCP);
+    networkProtocol.insert(0 , NETWORKPROTOCOL_UDP);
+    networkProtocol.insert(1 , NETWORKPROTOCOL_TCP_CLIENT);
+    networkProtocol.insert(2 , NETWORKPROTOCOL_TCP_SERVER);
 }
 
 /////////////////////////////////////////////////////////////////
-int Dialog_connect::getFirstMapVal(QMap<int,QString> m, QString label)
+int Dialog_connect::getFirstMapVal(QMap<int, QString> m, QString label)
 {
     for (auto e : m.toStdMap())
     {
@@ -604,7 +603,6 @@ void Dialog_connect::on_tableWidget_serialPorts_currentCellChanged(int row, int 
     (void)column;
 }
 //////////////////////////////////////////////////////////////////////////////
-
 
 
 
