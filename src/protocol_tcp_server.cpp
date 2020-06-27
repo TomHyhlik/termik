@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////
 protocol_tcp_server::protocol_tcp_server()
 {
-    tcpServer = std::make_unique <TcpServer> ();
+    tcpServer = std::unique_ptr <TcpServer> (new TcpServer());
 
     connect(tcpServer.get(), &TcpServer::received,
             this, &protocol_tcp_server::received);

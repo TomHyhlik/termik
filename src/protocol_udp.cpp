@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////
 protocol_udp::protocol_udp()
 {
-    udpSocket = std::make_unique <QUdpSocket> ();
+    udpSocket = std::unique_ptr <QUdpSocket> (new QUdpSocket());
 
     connect(udpSocket.get(), &QUdpSocket::readyRead,
             this, &protocol_udp::on_dataReceived);

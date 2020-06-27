@@ -3,7 +3,7 @@
 
 protocol_tcp_client::protocol_tcp_client()
 {
-    tcpClient = std::make_unique <TcpClient> ();
+    tcpClient = std::unique_ptr <TcpClient> (new TcpClient());
 
     connect(tcpClient.get(), &TcpClient::received,
             this, &protocol_tcp_client::received);
