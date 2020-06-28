@@ -9,11 +9,11 @@
     },
     "Log files directory": "",
     "Network": {
-        "IP address Rx": "10.0.0.191",
+        "IP address Rx": "127.0.0.1",
         "IP address Tx": "127.0.0.1",
         "Port Rx": 1111,
         "Port Tx": 1111,
-        "Protocol": 2
+        "Protocol": 1
     },
     "Script": {
         "Data format": 0,
