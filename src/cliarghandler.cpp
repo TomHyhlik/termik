@@ -165,7 +165,6 @@ QStringList CliArgHandler::getValidArgs()
     validArgs.append(ARG_HELP_LONG);
 
     return validArgs;
-
 }
 
 //////////////////////////////////////////////////////////////////////

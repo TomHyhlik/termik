@@ -59,28 +59,20 @@ class CliArgHandler : public QObject
     Q_OBJECT
 
     QStringList arguments;
-
     QStringList getValidArgs();
 
     communicationType setComType;
-
 
 
 public:
     explicit CliArgHandler(QStringList val);
 
 
-
     communicationType getComType() { return setComType; }
-
     void handleAppArguments(QStringList);
-
     void printHelp();
-
     void printHelp_wrap(QString cmd, QString argTitle);
-
     bool setParam(QString command, QString passedData);
-
 
 
 signals:
