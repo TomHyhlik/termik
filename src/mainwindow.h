@@ -13,7 +13,7 @@
 #include "outputfile.h"
 #include "runscript.h"
 #include "communication.h"
-#include "log.h"
+#include "uilog.h"
 #include "outputfile.h"
 
 

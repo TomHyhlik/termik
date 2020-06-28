@@ -6,7 +6,7 @@
 #include "mainwindow.h"
 #include "dataconverter.h"
 #include "runscriptparam.h"
-#include "log.h"
+#include "uilog.h"
 
 
 /////////////////////////////////////////////////////////////////

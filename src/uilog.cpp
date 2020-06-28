@@ -1,11 +1,11 @@
 #include "uilog.h"
 
 
-Log Log::s_Instance;
+UiLog UiLog::s_Instance;
 
 
 /////////////////////////////////////////////////////////////////
-void Log::write(int type, QString messageData)
+void UiLog::write(int type, QString messageData)
 {
     int timeout;
 
@@ -34,7 +34,7 @@ void Log::write(int type, QString messageData)
 }
 
 /////////////////////////////////////////////////////////////////
-void Log::write(QString message) {
+void UiLog::write(QString message) {
     write(info, message);
 }
 

@@ -11,7 +11,7 @@
 #include "dataconverter.h"
 #include "saveconfiguration.h"
 #include "cliarghandler.h"
-#include "log.h"
+#include "uilog.h"
 #include "shortcuts.h"
 #include "utils_tabWidget.h"
 
@@ -28,7 +28,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     ui->setupUi(this);
 
     /* first setup log */
-    Log::get().setOutput(ui->statusBar);
+    UiLog::get().setOutput(ui->statusBar);
 
     communic = new Communication(this);
     connect(communic, SIGNAL(displayData(int, QByteArray)),
@@ -778,7 +778,7 @@ void MainWindow::on_pushButton_script_run_clicked()
         script = std::unique_ptr <RunScript> (new RunScript());
         connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
         connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
-        connect(script.get(), SIGNAL(log(int, QString)), &Log::get(), SLOT(write(int, QString)));
+        connect(script.get(), SIGNAL(Uilog(int, QString)), &UiLog::get(), SLOT(write(int, QString)));
 
         script->start();
 

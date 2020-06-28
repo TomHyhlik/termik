@@ -7,8 +7,8 @@
 #include <iostream>
 
 
-#define LOG(x)      Log::get().write(x)
-#define LOG_T(x, y) Log::get().write(x, y)
+#define LOG(x)      UiLog::get().write(x)
+#define LOG_T(x, y) UiLog::get().write(x, y)
 
 
 
@@ -23,19 +23,19 @@ enum logType {
 
 
 
-class Log : public QObject
+class UiLog : public QObject
 {
     Q_OBJECT
 
-    Log(){}
-    static Log s_Instance;
+    UiLog(){}
+    static UiLog s_Instance;
 
     QStatusBar *statusBar = nullptr;
 
 
 public:
-    Log(const Log&) = delete;
-    static Log& get() { return s_Instance; }
+    UiLog(const UiLog&) = delete;
+    static UiLog& get() { return s_Instance; }
 
     void setOutput(QStatusBar *val) { statusBar = val; }
 

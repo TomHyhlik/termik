@@ -1,5 +1,5 @@
 #include "tcpserver.h"
-#include "log.h"
+#include "uilog.h"
 
 TcpServer::TcpServer(QObject *parent) : QObject(parent)
 {
