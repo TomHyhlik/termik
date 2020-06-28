@@ -1,36 +1,52 @@
 #include "protocol_tcp_client.h"
 #include "networkwparam.h"
 
+//////////////////////////////////////////////////
 protocol_tcp_client::protocol_tcp_client()
 {
-    tcpClient = std::unique_ptr <TcpClient> (new TcpClient());
+    socket = std::unique_ptr <QTcpSocket> (new QTcpSocket());
+    connect(socket.get(), SIGNAL(readyRead()), SLOT(on_readyRead()));
 
-    connect(tcpClient.get(), &TcpClient::received,
-            this, &protocol_tcp_client::received);
 }
+
+//////////////////////////////////////////////////
+void protocol_tcp_client::on_readyRead()
+{
+    QByteArray data = socket->readAll();
+//    qDebug() << "Client Rx: " << data.toHex(' ').toUpper();
+    emit received(data);
+}
+
 
 //////////////////////////////////////////////////
 bool protocol_tcp_client::isOpen()
 {
-    return true; // todo
+    return (socket != nullptr);
 }
 //////////////////////////////////////////////////
 bool protocol_tcp_client::open()
 {
-    return tcpClient->connectToHost(NetworkWParam::get().IpAddr_Tx,
+    socket->connectToHost(NetworkWParam::get().IpAddr_Tx,
                                       NetworkWParam::get().port_Tx);
+    return socket->waitForConnected();
 }
 
 //////////////////////////////////////////////////
 bool protocol_tcp_client::write(QByteArray data)
 {
-    return tcpClient->writeData(data);
+    if(socket->state() == QAbstractSocket::ConnectedState)
+    {
+//        qDebug() << "Client Tx: " << data.toHex(' ').toUpper();
+        socket->write(data);
+        return socket->waitForBytesWritten();
+    }
+    else return false;
 }
 
 //////////////////////////////////////////////////
 void protocol_tcp_client::close()
 {
-    tcpClient = nullptr;
+    socket = nullptr;
 }
 
 //////////////////////////////////////////////////

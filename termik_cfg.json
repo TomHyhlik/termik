@@ -26,7 +26,7 @@
         "Data bits": 8,
         "Flow control": 0,
         "Parity": 0,
-        "Port name": "cu.WI-XB400-serialport-9",
+        "Port name": "",
         "Stop bits": 1
     }
 }

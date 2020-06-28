@@ -3,13 +3,13 @@
 
 #include "networkprotocol.h"
 
-#include "tcpclient.h"
+#include <QTcpSocket>
 
 class protocol_tcp_client : public NetworkProtocol
 {
     Q_OBJECT
 
-    std::unique_ptr <TcpClient> tcpClient;
+    std::unique_ptr <QTcpSocket> socket;
 
 public:
     protocol_tcp_client();
@@ -18,6 +18,10 @@ public:
     bool write(QByteArray) override;
     void close() override;
     bool isOpen() override;
+
+
+ public slots:
+    void on_readyRead();
 
 
 signals:
