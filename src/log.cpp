@@ -30,7 +30,7 @@ void Log::write(int type, QString messageData)
     if (statusBar != nullptr) {
         statusBar->showMessage(messageData, timeout);
     }
-    std::cout << messageData.toStdString() << "\n";
+//    std::cout << messageData.toStdString() << "\n";
 }
 
 /////////////////////////////////////////////////////////////////
