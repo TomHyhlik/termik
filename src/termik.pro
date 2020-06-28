@@ -35,7 +35,6 @@ SOURCES += \
         saveconfiguration.cpp \
         serialworker.cpp \
         serialwparam.cpp \
-        tcpserver.cpp \
         protocol_tcp_client.cpp \
         protocol_tcp_server.cpp \
 
@@ -61,7 +60,6 @@ HEADERS += \
         serialworker.h \
         serialwparam.h \
         shortcuts.h \
-        tcpserver.h \
         utils_tabWidget.h \
         protocol_tcp_client.h \
         protocol_tcp_server.h \
