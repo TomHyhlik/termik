@@ -35,8 +35,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     initColors();
     tab_port_init();
 
-    ui->tabWidget->setCurrentIndex(0);
-
     timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
     connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
@@ -50,7 +48,7 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 
 
     /* todo rm */
-    NetworkWParam::get().protocolType = 2;
+//    NetworkWParam::get().protocolType = 2;
     ui->tabWidget->setCurrentIndex(1);
 }
 
@@ -639,8 +637,6 @@ void Dialog_connect::on_comboBox_networkProtocol_currentIndexChanged(int index)
         break;
     }
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 
