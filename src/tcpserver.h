@@ -14,10 +14,13 @@ class TcpServer : public QObject
     QHash<QTcpSocket*, QByteArray*> buffers; //We need a buffer to store data until block has completely received
     QHash<QTcpSocket*, qint32*> sizes; //We need to store the size to verify if a block has received completely
 
+
+    QTcpSocket *currentSocket;
+
 private slots:
     void newConnection();
     void disconnected();
-    void on_readyRead();
+    void readyRead();
 
 
 public:

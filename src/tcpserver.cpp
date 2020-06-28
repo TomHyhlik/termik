@@ -1,17 +1,20 @@
 #include "tcpserver.h"
-
-
-static inline qint32 ArrayToInt(QByteArray source);
+#include "log.h"
 
 TcpServer::TcpServer(QObject *parent) : QObject(parent)
 {
-    server = new QTcpServer(this);
-    connect(server, SIGNAL(newConnection()), SLOT(newConnection()));
 }
+
 
 bool TcpServer::listen(QHostAddress addr, quint16 port)
 {
-    return server->listen(addr, port);
+    currentSocket = nullptr;
+
+    server = new QTcpServer(this);
+    connect(server, SIGNAL(newConnection()), SLOT(newConnection()));
+//    qDebug() << "Listening:" << server->listen(QHostAddress::Any, 1024);
+    qDebug() << "Listening:" << server->listen(addr, port);
+    return isListening();
 }
 
 bool TcpServer::isListening()
@@ -22,17 +25,20 @@ bool TcpServer::isListening()
 void TcpServer::close()
 {
     server->close();
-
-//    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
-//    socket->close();
+    //    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+    //    socket->close();
 }
 
 void TcpServer::newConnection()
 {
     while (server->hasPendingConnections())
     {
+        LOG_T(note, "New TCP Client was connected");
+
         QTcpSocket *socket = server->nextPendingConnection();
-        connect(socket, SIGNAL(readyRead()), SLOT(on_readyRead()));
+        currentSocket = socket;
+
+        connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
         connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
         QByteArray *buffer = new QByteArray();
         qint32 *s = new qint32(0);
@@ -43,55 +49,32 @@ void TcpServer::newConnection()
 
 void TcpServer::disconnected()
 {
+    LOG_T(note, "TCP Client disconnected from server");
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
-    QByteArray *buffer = buffers.value(socket);
-    qint32 *s = sizes.value(socket);
     socket->deleteLater();
-    delete buffer;
-    delete s;
+
+    currentSocket = nullptr;
 }
 
-void TcpServer::on_readyRead()
+void TcpServer::readyRead()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
-    QByteArray *buffer = buffers.value(socket);
-    qint32 *s = sizes.value(socket);
-    qint32 size = *s;
     while (socket->bytesAvailable() > 0)
     {
-        buffer->append(socket->readAll());
-        while ((size == 0 && buffer->size() >= 4) || (size > 0 && buffer->size() >= size)) //While can process data, process it
-        {
-            if (size == 0 && buffer->size() >= 4) //if size of data has received completely, then store it on our global variable
-            {
-                size = ArrayToInt(buffer->mid(0, 4));
-                *s = size;
-                buffer->remove(0, 4);
-            }
-            if (size > 0 && buffer->size() >= size) // If data has received completely, then emit our SIGNAL with the data
-            {
-                QByteArray data = buffer->mid(0, size);
-                buffer->remove(0, size);
-                size = 0;
-                *s = size;
-                emit received(data);
-//                socket->write("Respond 1");
-            }
-        }
+        QByteArray data = socket->readAll();
+        emit received(data);
+        qDebug() << "server Rx: " << data.toHex(' ').toUpper();
+
     }
 }
 
 bool TcpServer::send(QByteArray data)
-{
-    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+{  
+    if (currentSocket != nullptr && currentSocket->isOpen())
+    {
+        return currentSocket->write(data);
+    }
 
-    return socket->write(data);
-}
-
-qint32 ArrayToInt(QByteArray source)
-{
-    qint32 temp;
-    QDataStream data(&source, QIODevice::ReadWrite);
-    data >> temp;
-    return temp;
+    LOG("The TCP client is not connected");
+    return false;
 }

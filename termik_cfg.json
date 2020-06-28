@@ -7,12 +7,13 @@
         "Time info enabled": true,
         "Time log enabled": true
     },
-    "Log files directory": "/Users/tomashyhlik/Repozitories/termik",
+    "Log files directory": "",
     "Network": {
-        "IP address Rx": "",
+        "IP address Rx": "10.0.0.191",
         "IP address Tx": "127.0.0.1",
         "Port Rx": 1111,
-        "Port Tx": 1111
+        "Port Tx": 1111,
+        "Protocol": 2
     },
     "Script": {
         "Data format": 0,
@@ -25,7 +26,7 @@
         "Data bits": 8,
         "Flow control": 0,
         "Parity": 0,
-        "Port name": "ttyACM0",
+        "Port name": "cu.WI-XB400-serialport-9",
         "Stop bits": 1
     }
 }
