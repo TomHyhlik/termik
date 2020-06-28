@@ -26,11 +26,10 @@ bool protocol_udp::open()
     if (binded) {
         connect(udpSocket.get(), &QUdpSocket::readyRead,
                 this, &protocol_udp::on_dataReceived);
-        return true;
     } else {
         udpSocket = nullptr;
-        return false;
     }
+    return binded;
 }
 
 //////////////////////////////////////////////////
