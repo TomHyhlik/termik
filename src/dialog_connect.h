@@ -25,8 +25,7 @@
 #define TITLE_TAB_SERIAL_VENDORIDENTIFIER          "Vendor identifier"
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
-#define SERIALPORT_REFRESH_PERIOD  500
-
+#define PERIOD_REFRESHDEVICES  600
 
 #define NETWORKPROTOCOL_UDP             "UDP"
 #define NETWORKPROTOCOL_TCP_SERVER      "TCP Server"
@@ -130,6 +129,8 @@ private slots:
     void pressedKeyRight();
 
 
+
+    void on_comboBox_networkProtocol_currentIndexChanged(int index);
 
 signals:
 

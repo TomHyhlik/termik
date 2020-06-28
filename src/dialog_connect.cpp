@@ -24,7 +24,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     ui->setupUi(this);
 
     shortcuts_init();
-
     table_network_init();
     table_serial_init();
     setWindowTitle(TITLE_THIS_WINDOW);
@@ -43,11 +42,16 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
 
     networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
     connect(networkScan.data(), SIGNAL(finished()), this, SLOT(networkScanFinished()));
-    timer_updatePorts->start(SERIALPORT_REFRESH_PERIOD);
+    timer_updatePorts->start(PERIOD_REFRESHDEVICES);
 
     refreshDevices();
     pressedKeyDown();
     networkHostsFirstRefresh = true;
+
+
+    /* todo rm */
+    NetworkWParam::get().protocolType = 2;
+    ui->tabWidget->setCurrentIndex(1);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -276,6 +280,28 @@ void Dialog_connect::initColors()
     ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
+
+#if PLATFORM_WINDOWS
+    ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                           .arg(COLOR_BLACK).arg(COLOR_BLACK));
+
+    ui->tableWidget_serialPorts->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_serialPorts->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+    ui->tableWidget_addr_rx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_addr_rx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+    ui->tableWidget_addr_tx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_addr_tx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+#endif
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -283,6 +309,7 @@ void Dialog_connect::refreshDevices()
 {
     serialPort_nameRefresh();
     networkScan->start();
+    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
 }
 
 /////////////////////////////////////////////////////////////////
@@ -337,7 +364,6 @@ void Dialog_connect::table_updateHosts(QTableWidget* tableWidget,
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::networkScanFinished()
 {
-    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
     table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
 
     if (networkHostsFirstRefresh)
@@ -603,13 +629,23 @@ void Dialog_connect::on_tableWidget_serialPorts_currentCellChanged(int row, int 
     (void)column;
 }
 //////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::on_comboBox_networkProtocol_currentIndexChanged(int index)
+{
+    switch (index)
+    {
+    case networkProtocolType_udp:
+    case networkProtocolType_tcp_client:
+        ui->groupBox_network_tx->show();
+        break;
+    case networkProtocolType_tcp_server:
+        ui->groupBox_network_tx->hide();
+        break;
+    }
+}
 
 
 
-
-
-
-
+//////////////////////////////////////////////////////////////////////////////
 
 
 
