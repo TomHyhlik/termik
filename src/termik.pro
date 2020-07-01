@@ -20,6 +20,7 @@ SOURCES += \
         communication.cpp \
         communicationworker.cpp \
         dataconverter.cpp \
+    form_termio.cpp \
         uilog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
         communication.h \
         communicationworker.h \
         dataconverter.h \
+    form_termio.h \
         uilog.h \
         mainwindow.h \
         dialog_connect.h \
@@ -67,6 +69,7 @@ HEADERS += \
 
 
 FORMS += \
+        form_termio.ui \
         mainwindow.ui \
         dialog_connect.ui
 

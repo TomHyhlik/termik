@@ -126,36 +126,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QTextEdit" name="textEdit_out_ascii"/>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <item>
-               <widget class="QLineEdit" name="lineEdit_find_ascii"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_fnd_ascii">
-                <property name="text">
-                 <string>Find</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QLineEdit" name="lineEdit_in_ascii"/>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         <layout class="QVBoxLayout" name="verticalLayout_tabwidget_ascii"/>
         </item>
        </layout>
       </widget>
@@ -165,36 +136,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QTextEdit" name="textEdit_out_hex"/>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
-              <item>
-               <widget class="QLineEdit" name="lineEdit_find_hex"/>
-              </item>
-              <item>
-               <widget class="QPushButton" name="pushButton_fnd_hex">
-                <property name="text">
-                 <string>Find</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="QLineEdit" name="lineEdit_in_hex"/>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         <layout class="QVBoxLayout" name="verticalLayout_tabwidget_hex"/>
         </item>
        </layout>
       </widget>
@@ -204,32 +146,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
-         <widget class="QTextEdit" name="textEdit_out_dec"/>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_9">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLineEdit" name="lineEdit_find_dec"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_fnd_dec">
-              <property name="text">
-               <string>Find</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLineEdit" name="lineEdit_in_dec"/>
-            </item>
-           </layout>
-          </item>
-         </layout>
+         <layout class="QVBoxLayout" name="verticalLayout_tabwidget_dec"/>
         </item>
        </layout>
       </widget>

@@ -15,6 +15,7 @@
 #include "communication.h"
 #include "uilog.h"
 #include "outputfile.h"
+#include "form_termio.h"
 
 
 #define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
@@ -44,7 +45,6 @@
 #define COLOR_GREEN     "#005000"//"green"
 #define COLOR_RED       "#500000"//"red"
 
-
 #define COLOR_TOPLINE   "#A0A0A0"
 
 #define COLOR_GRAY0     "#404040"
@@ -53,9 +53,7 @@
 #define COLOR_GRAY3     "#101010"
 #define COLOR_GRAY4     "#050505"
 
-
 #define MAINWINDOWTITLE "Termik"
-
 
 #define TITLE_DATA_ASCII    "ASCII"
 #define TITLE_DATA_HEX      "HEX"
@@ -66,10 +64,14 @@
 #define TITLE_HELPTABLE_SHORTCUT        "Shortcut"
 #define TITLE_HELPTABLE_DESCRIPTION     "Description"
 
+#define TABWIDGET_TABCNT        3
+
+#define TABWIDGET_INDEX_ASCII   0
+#define TABWIDGET_INDEX_HEX     1
+#define TABWIDGET_INDEX_DEC     2
 
 
 #define LOCATION_DEFAULT    "~/"
-
 
 
 enum dataToDisplay {
@@ -99,6 +101,11 @@ class MainWindow : public QMainWindow
     void closeEvent(QCloseEvent *event);
     void currentAppConfig_save();
 
+    Form_termIO termIO[TABWIDGET_TABCNT];
+
+
+    QTextEdit textEdit_out;
+    QLineEdit lineEdit_in;
 
 
 public:
