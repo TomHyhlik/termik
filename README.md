@@ -1,28 +1,21 @@
 # termik
-Open source GUI terminal for data transmission via serial or network based on [Qt](https://www.qt.io/). The project can be compiled for Linux, Mac and also Windows or whatever Qt supports.
+Thi is desktop GUI terminal app for data transmission via serial or network based on [Qt](https://www.qt.io/). The project can be compiled for Linux, Mac and Windows or whatever Qt supports.
 
-I made this app, cause none of the available terminals for data transmission does not suits my needs.
+I made this app, because none of the available terminals for data transmission does not suit my needs.
+
+
+## features
+* Communication via serial or network (TCP client, TCP server, UDP)
+* Scan of network devices 
+* Scan of available serial ports
+* Terminal input and output data are supported in ASCII, HEX and DEC data formats
+* Option of of app runing from CLI with configuration arguments and possible auto connection to a device
+* Log terminal output into txt file
+* Log of time events
+* Option of prefix and suffix added to every transmitted data
+* Script of Tx data supported, where each line of a file is transmitted with adjustable period in repetitive or single shot mode
+
 
 ## usage
 Everything is done using shortcuts which is shown after pressing F1.
 Transmit data in the terminal is done by pressing Enter.
-
-
-## features
-* Communication via serial or network (TCP/UDP)
-* Terminal input and output is supported in ASCII, HEX and DEC data formats
-* Option of of app runing from CLI with configuration arguments and possible auto connection to a device
-* Logging into txt file
-* Logging time of events
-* Option of prefix and suffix added to every transmitted data
-* Script of Tx data supported, where each line of a file is transmitted with adjustable period in repetitive or single shot mode
-* autoscan of all devices in the network
-
-
-
-## todo:
-	* put each widget of terminal output and input into list of widgets and put each one into tabWidget
-	* autoclear tweak a bit 
-	* tweak NetworkWorker class
-	* network Protocol add to config json save file
-
