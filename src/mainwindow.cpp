@@ -19,7 +19,6 @@
 #include "serialwparam.h"
 
 
-
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     QMainWindow(parent),
@@ -27,18 +26,11 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /* first setup log */
-    UiLog::get().setOutput(ui->statusBar);
-
-    communic = new Communication(this);
-    connect(communic, SIGNAL(displayData(int, QByteArray)),
-            this, SLOT(terminalOutUpdate(int, QByteArray)));
-    connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
-    connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
-
+    init_ui();
+    init_communication();
+    init_colors();
     setupShortcuts(this);
-    uiInit();
-    configInit();
+    init_appParams();
     currentAppConfig_loadSaved();
 
     /* parse CLI arguments */
@@ -46,8 +38,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     if (cliArgHandler.getComType() != comType_none) {
         communic->establish(cliArgHandler.getComType());
     }
-
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -59,6 +49,7 @@ void MainWindow::toggleShowHelp()
         showHelp();
     }
 }
+
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::showHelp
 ///     actually just show shortcuts table
@@ -70,7 +61,7 @@ void MainWindow::showHelp()
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(
     {TITLE_HELPTABLE_SHORTCUT, TITLE_HELPTABLE_DESCRIPTION});
 
-    for (const auto shortcut : SHORTCUTS_CONTENT_MAINWINDOW) {
+    for (const auto &shortcut : SHORTCUTS_CONTENT_MAINWINDOW) {
         table_addItem(ui->tableWidget_shortcuts, shortcut);
     }
 }
@@ -140,93 +131,6 @@ void MainWindow::selectScript()
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::configInit()
-{
-    AppCfgParam::get().timeInfoEnabled = false;
-    AppCfgParam::get().timeLogEnabled = true;
-    AppCfgParam::get().clearOutputLine = true;
-}
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::uiInit()
-{    
-
-    ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[TABWIDGET_INDEX_ASCII]);
-    ui->verticalLayout_tabwidget_hex->addWidget(&termIO[TABWIDGET_INDEX_HEX]);
-    ui->verticalLayout_tabwidget_dec->addWidget(&termIO[TABWIDGET_INDEX_DEC]);
-
-    /* MainWindow background */
-    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                        .arg(COLOR_WHITE).arg(COLOR_GRAY2));
-
-    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                     .arg(COLOR_WHITE).arg(COLOR_GRAY4));
-
-    ui->statusBar->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY1));
-
-    ui->lineEdit_prefix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_suffix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    ui->tab_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-    ui->tab_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-    ui->tab_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-
-    for (int i = 0; i < TABWIDGET_TABCNT; i++)
-    {
-        termIO[i].textEdit_out.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-        termIO[i].lineEdit_in.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    }
-
-    /* pushbuttons */
-    ui->pushButton_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    ui->lineEdit_script->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_script_dataType->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    runScript_finished();
-
-    setWindowTitle(MAINWINDOWTITLE);
-
-    ui->comboBox_script_dataType->addItem(TITLE_DATA_ASCII);
-    ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
-    ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
-
-    ui->checkBox_timeLog->setChecked(true);
-    ui->checkBox_prefix->setChecked(false);
-    ui->checkBox_suffix->setChecked(true);
-    ui->checkBox_clearOutputLine->setChecked(true);
-    ui->checkBox_script_repeat->setChecked(true);
-    ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
-    ui->spinBox_autoclear_maxCharCnt->setValue(AUTOCLEAR_VAL_DEFAULT);
-    ui->spinBox_script_period->setValue(SCRIPT_TXPERIOD_DEFAULT);
-
-    ui->checkBox_autoclear->setChecked(true);
-    ui->checkBox_autoclear->setChecked(false);
-    ui->spinBox_script_period->setValue(10);
-
-    hideHelp();
-    hideScriptUi();
-    hideSettings();
-    focus_0();
-}
-
-//////////////////////////////////////////////////////////////////////
 void MainWindow::connectOrDisconnect()
 {
     communic->establishToggle();
@@ -252,7 +156,6 @@ void MainWindow::showConnectionSettings()
 
     dialog_connect->show();
     /* the dialog_connect deletes itself, when closed */
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -330,20 +233,17 @@ void MainWindow::pressedKey_up()
     if (!history_out.isEmpty()) {
         historyTxUpdate();
 
-        if (history_out.size() > history_out_ptr + 1) {
+        if (history_out.size() > history_out_ptr + 1)
             history_out_ptr++;
-        }
     }
 }
-/////////////////////////////////////////////////////////////////
 void MainWindow::pressedKey_down()
 {
     if (!history_out.isEmpty()) {
         historyTxUpdate();
 
-        if (history_out_ptr > 0) {
+        if (history_out_ptr > 0)
             history_out_ptr--;
-        }
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -358,7 +258,7 @@ void MainWindow::historyTxUpdate()
         dataConv.setByteArray(history_out.at(history_out_ptr));
 
         for (int i = 0; i < TABWIDGET_TABCNT; i++)
-           termIO[i].lineEdit_in.setText(dataConv.getStrOfIndex(i));
+            termIO[i].lineEdit_in.setText(dataConv.getStrOfIndex(i));
     }
 }
 
@@ -388,8 +288,6 @@ void MainWindow::hideScriptUi()
     ui->spinBox_script_period->hide();
 }
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::focus_1
-///     set focus to ASCII tab
 void MainWindow::focus_0()
 {
     ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_ASCII);
@@ -741,13 +639,106 @@ void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
     RunScriptParam::get().fileName = arg1;
 }
 
+//////////////////////////////////////////////////////////////////////
+void MainWindow::init_appParams()
+{
+    AppCfgParam::get().timeInfoEnabled = false;
+    AppCfgParam::get().timeLogEnabled = true;
+    AppCfgParam::get().clearOutputLine = true;
+}
+
 /////////////////////////////////////////////////////////////////
+void MainWindow::init_colors()
+{
+    /* MainWindow background */
+    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                        .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
+    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                     .arg(COLOR_WHITE).arg(COLOR_GRAY4));
 
+    ui->statusBar->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY1));
 
+    ui->lineEdit_prefix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_suffix->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->tab_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+    ui->tab_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+    ui->tab_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                               .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+    {
+        termIO[i].textEdit_out.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                             .arg(COLOR_WHITE).arg(COLOR_BLACK));
+        termIO[i].lineEdit_in.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    }
 
+    /* pushbuttons */
+    ui->pushButton_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->lineEdit_script->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_script_dataType->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+}
 
+/////////////////////////////////////////////////////////////////
+void MainWindow::init_ui()
+{
+    UiLog::get().setOutput(ui->statusBar);
+
+    runScript_finished();
+
+    ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[TABWIDGET_INDEX_ASCII]);
+    ui->verticalLayout_tabwidget_hex->addWidget(&termIO[TABWIDGET_INDEX_HEX]);
+    ui->verticalLayout_tabwidget_dec->addWidget(&termIO[TABWIDGET_INDEX_DEC]);
+
+    setWindowTitle(MAINWINDOWTITLE);
+
+    ui->comboBox_script_dataType->addItem(TITLE_DATA_ASCII);
+    ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
+    ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
+
+    ui->checkBox_timeLog->setChecked(true);
+    ui->checkBox_prefix->setChecked(false);
+    ui->checkBox_suffix->setChecked(true);
+    ui->checkBox_clearOutputLine->setChecked(true);
+    ui->checkBox_script_repeat->setChecked(true);
+    ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
+    ui->spinBox_autoclear_maxCharCnt->setValue(AUTOCLEAR_VAL_DEFAULT);
+    ui->spinBox_script_period->setValue(SCRIPT_TXPERIOD_DEFAULT);
+
+    ui->checkBox_autoclear->setChecked(true);
+    ui->checkBox_autoclear->setChecked(false);
+    ui->spinBox_script_period->setValue(10);
+
+    hideHelp();
+    hideScriptUi();
+    hideSettings();
+    focus_0();
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::init_communication()
+{
+    communic = new Communication(this);
+    connect(communic, SIGNAL(displayData(int, QByteArray)),
+            this, SLOT(terminalOutUpdate(int, QByteArray)));
+    connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
+    connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
+}
+
+/////////////////////////////////////////////////////////////////

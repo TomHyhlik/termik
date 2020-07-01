@@ -179,19 +179,19 @@ private:
 
     QElapsedTimer sinceLastTermOutUpdate;
 
-
     QList <QByteArray> history_out;
     int history_out_ptr;
 
-    void configInit();
-
+    void init_appParams();
+    void init_colors();
+    void init_ui();
+    void init_communication();
 
     void TxHistory_add(QByteArray data);
 
     bool stringList_find(QList<QString> list, QString data);
 
     void portSet_fillMaps();
-    void uiInit();
 
     void writeToTextedit(QTextEdit* textEdit, QString color, QString data);
     void shortenTextEdit(QTextEdit* textEdit);
