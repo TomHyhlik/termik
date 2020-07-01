@@ -18,7 +18,6 @@ public:
     /* the data */
     QHostAddress IpAddr_Tx;
     QHostAddress IpAddr_Rx;
-
     quint16 port_Tx;
     quint16 port_Rx;
     int protocolType;
