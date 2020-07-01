@@ -6,6 +6,13 @@
 #include <QByteArray>
 #include <QString>
 
+
+
+enum dataFormat {
+    data_ascii = 0, data_hex, data_dec, //data_bin
+};
+
+
 class dataConverter
 {
     QByteArray pureData;
@@ -17,6 +24,7 @@ public:
     void setStrAscii(QString arg);
     void setStrHex(QString);
     void setStrDec(QString);
+    void setStrOfIndex(int index, QString data);
 
 
     void setByteArray(QByteArray);
@@ -27,7 +35,7 @@ public:
     QString getStrHex();
     QString getStrDec();
 
-
+    QString getStrOfIndex(int);
 
 
 

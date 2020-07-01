@@ -33,7 +33,7 @@ const QList <QList <QString>> SHORTCUTS_CONTENT_MAINWINDOW = {
 };
 
 /////////////////////////////////////////////////////////////////
-void setupShortcuts_MainWindow(QWidget *uiThis)
+void setupShortcuts(QWidget *uiThis)
 {
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_T), uiThis, SLOT(showScriptUi()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), uiThis, SLOT(on_pushButton_script_run_clicked()));

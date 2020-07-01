@@ -82,9 +82,6 @@ enum addLine{
     before, after, beforeAndAfter
 };
 
-enum dataFormat {
-    data_ascii, data_hex, data_dec, //data_bin
-};
 
 
 /////////////////////////////////////////////////////////
@@ -115,10 +112,9 @@ public:
 private slots:   
     void pressedKey_esc();
     void moveCursorToEnd();
-    void showFindUi();
-    void hideFindUi();
 
     void terminalInputSetFocus();
+    int terminalInputHasFocus();
     void showConnectionSettings();
 
     void clearOutput();
@@ -148,7 +144,6 @@ private slots:
 
     void terminalOutUpdate(int, QByteArray);
 
-    void moveCursorToTerminalInputLine();
     void currentAppConfig_loadSaved();
     void runScript_finished();
     void connectOrDisconnect();

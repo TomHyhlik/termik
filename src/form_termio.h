@@ -18,11 +18,11 @@ public:
     explicit Form_termIO(QWidget *parent = nullptr);
     ~Form_termIO();
 
-
-//    QTextEdit textEdit_out;
-//    QLineEdit lineEdit_in;
-
     Ui::Form_termIO *ui;
+
+    QTextEdit textEdit_out;
+    QLineEdit lineEdit_in;
+
 
 
 };

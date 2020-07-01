@@ -33,6 +33,23 @@ void dataConverter::setStrDec(QString arg)
         }
     }
 }
+
+/////////////////////////////////////////////////////////////////
+void dataConverter::setStrOfIndex(int index, QString data)
+{
+    switch (index)
+    {
+    case data_ascii:
+        this->setStrAscii(data);
+        break;
+    case data_hex:
+        this->setStrHex(data);
+        break;
+    case data_dec:
+        this->setStrDec(data);
+        break;
+    }
+}
 /////////////////////////////////////////////////////////////////
 QByteArray dataConverter::getByteArray()
 {
@@ -81,10 +98,25 @@ QString dataConverter::getStrDec()
 }
 
 /////////////////////////////////////////////////////////////////
+QString dataConverter::getStrOfIndex(int index)
+{
+    switch (index)
+    {
+    case data_ascii:
+        return this->getStrAscii();
+        break;
+    case data_hex:
+        return this->getStrHex();
+        break;
+    case data_dec:
+        return this->getStrDec();
+        break;
+    default:
+        return "";
+    }
+}
 
-
-
-
+/////////////////////////////////////////////////////////////////
 
 
 

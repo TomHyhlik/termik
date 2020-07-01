@@ -9,9 +9,8 @@ Form_termIO::Form_termIO(QWidget *parent) :
     ui->setupUi(this);
 
 
-
-//    ui->verticalLayout->addWidget(&textEdit_out);
-//    ui->verticalLayout->addWidget(&lineEdit_in);
+    ui->verticalLayout->addWidget(&textEdit_out);
+    ui->verticalLayout->addWidget(&lineEdit_in);
 
 
 
@@ -20,9 +19,9 @@ Form_termIO::Form_termIO(QWidget *parent) :
 //    ui->lineEdit_in->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
 //                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-//    textEdit_out->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+//    textEdit_out.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
 //                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
-//    lineEdit_in->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+//    lineEdit_in.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
 //                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 

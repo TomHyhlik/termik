@@ -2,7 +2,7 @@
 #define RUNSCRIPTPARAM_H
 
 #include <QObject>
-#include "mainwindow.h"
+#include "dataconverter.h"
 
 class RunScriptParam
 {

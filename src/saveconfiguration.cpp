@@ -8,6 +8,7 @@
 #include "saveconfiguration.h"
 #include "serialwparam.h"
 #include "runscriptparam.h"
+#include "dataconverter.h"
 
 SaveConfiguration::SaveConfiguration(QObject *parent) : QObject(parent)
 {

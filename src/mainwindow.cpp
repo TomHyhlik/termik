@@ -36,7 +36,7 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
     connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
 
-    setupShortcuts_MainWindow(this);
+    setupShortcuts(this);
     uiInit();
     configInit();
     currentAppConfig_loadSaved();
@@ -46,9 +46,6 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     if (cliArgHandler.getComType() != comType_none) {
         communic->establish(cliArgHandler.getComType());
     }
-
-
-
 
 
 }
@@ -77,7 +74,6 @@ void MainWindow::showHelp()
         table_addItem(ui->tableWidget_shortcuts, shortcut);
     }
 }
-
 void MainWindow::hideHelp()
 {
     table_clear(ui->tableWidget_shortcuts);
@@ -154,6 +150,7 @@ void MainWindow::configInit()
 /////////////////////////////////////////////////////////////////
 void MainWindow::uiInit()
 {    
+
     ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[TABWIDGET_INDEX_ASCII]);
     ui->verticalLayout_tabwidget_hex->addWidget(&termIO[TABWIDGET_INDEX_HEX]);
     ui->verticalLayout_tabwidget_dec->addWidget(&termIO[TABWIDGET_INDEX_DEC]);
@@ -180,28 +177,17 @@ void MainWindow::uiInit()
     ui->tab_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
-//    for (int i = 0; i < TABWIDGET_TABCNT; i++)
-//    {
-//        termIO[i].textEdit_out.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-//        termIO[i].lineEdit_in.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-//    }
-
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+    {
+        termIO[i].textEdit_out.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
+        termIO[i].lineEdit_in.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    }
 
     /* pushbuttons */
     ui->pushButton_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-
-//    ui->pushButton_fnd_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                          .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-//    ui->pushButton_fnd_hex->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                          .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-//    ui->pushButton_fnd_ascii->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                            .arg(COLOR_WHITE).arg(COLOR_GRAY0));
-//    ui->lineEdit_find_dec->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
     ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
@@ -234,7 +220,6 @@ void MainWindow::uiInit()
     ui->checkBox_autoclear->setChecked(false);
     ui->spinBox_script_period->setValue(10);
 
-    hideFindUi();
     hideHelp();
     hideScriptUi();
     hideSettings();
@@ -273,26 +258,25 @@ void MainWindow::showConnectionSettings()
 /////////////////////////////////////////////////////////////////
 void MainWindow::terminalInputSetFocus()
 {
-//    switch (ui->tabWidget->currentIndex())
-//    {
-//    case data_ascii:
-//        ui->lineEdit_in_ascii->setFocus();
-//        break;
-//    case data_hex:
-//        ui->lineEdit_in_hex->setFocus();
-//        break;
-//    case data_dec:
-//        ui->lineEdit_in_dec->setFocus();
-//        break;
-//    }
+    termIO[ui->tabWidget->currentIndex()].lineEdit_in.setFocus();
+}
+
+/////////////////////////////////////////////////////////////////
+int MainWindow::terminalInputHasFocus()
+{
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+        if (termIO[i].lineEdit_in.hasFocus())
+            return i;
+    return -1;
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::clearOutput()
 {
-//    ui->textEdit_out_ascii->clear();
-//    ui->textEdit_out_hex->clear();
-//    ui->textEdit_out_dec->clear();
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+    {
+        termIO[i].textEdit_out.clear();
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -300,21 +284,13 @@ void MainWindow::Tx_fromDataInput(int inputType)
 {
     QByteArray txData;
     dataConverter dataConv;
+    QString termInData;
 
-    /* read the data from UI */
-//    switch (inputType)
-//    {
-//    case data_ascii:
-//        dataConv.setStrAscii(ui->lineEdit_in_ascii->text());
-//        break;
-//    case data_hex:
-//        dataConv.setStrHex(ui->lineEdit_in_hex->text());
-//        break;
-//    case data_dec:
-//        dataConv.setStrDec(ui->lineEdit_in_dec->text());
-//        break;
-//    }
+    termInData = termIO[inputType].lineEdit_in.text();
+
+    dataConv.setStrOfIndex(inputType, termInData);
     txData = dataConv.getByteArray();
+
     on_Tx(txData);
 }
 
@@ -335,23 +311,17 @@ void MainWindow::on_Tx(QByteArray txData)
 
     communic->dataTransmit(txData);
 
-//    if (AppCfgParam::get().clearOutputLine) {
-//        ui->lineEdit_in_ascii->clear();
-//        ui->lineEdit_in_hex->clear();
-//        ui->lineEdit_in_dec->clear();
-//    }
+    if (AppCfgParam::get().clearOutputLine)
+        for (int i = 0; i < TABWIDGET_TABCNT; i++)
+            termIO[i].lineEdit_in.clear();
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::pressedKey_enter()
-{
-//    if (    ui->lineEdit_in_ascii->hasFocus() ||
-//            ui->lineEdit_in_hex->hasFocus() ||
-//            ui->lineEdit_in_dec->hasFocus())
-//    {
-//        int currentUserInput = ui->tabWidget->currentIndex();
-//        Tx_fromDataInput(currentUserInput);
-//    }
+{            
+    int index = terminalInputHasFocus();
+    if (index != -1)
+        Tx_fromDataInput(index);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -387,9 +357,8 @@ void MainWindow::historyTxUpdate()
         dataConverter dataConv;
         dataConv.setByteArray(history_out.at(history_out_ptr));
 
-//        ui->lineEdit_in_ascii->setText(dataConv.getStrAscii());
-//        ui->lineEdit_in_hex->setText(dataConv.getStrHex());
-//        ui->lineEdit_in_dec->setText(dataConv.getStrDec());
+        for (int i = 0; i < TABWIDGET_TABCNT; i++)
+           termIO[i].lineEdit_in.setText(dataConv.getStrOfIndex(i));
     }
 }
 
@@ -400,29 +369,6 @@ MainWindow::~MainWindow()
 }
 
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::showFindUi
-///     show UI for searching in the text terminal output of all tabs
-void MainWindow::showFindUi()
-{
-//    ui->pushButton_fnd_ascii->show();
-//    ui->pushButton_fnd_hex->show();
-//    ui->pushButton_fnd_dec->show();
-//    ui->lineEdit_find_dec->show();
-//    ui->lineEdit_find_hex->show();
-//    ui->lineEdit_find_ascii->show();
-}
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::hideFindUi
-///     hide UI for searching in the text terminal output of all tabs
-void MainWindow::hideFindUi()
-{
-//    ui->pushButton_fnd_ascii->hide();
-//    ui->pushButton_fnd_hex->hide();
-//    ui->pushButton_fnd_dec->hide();
-//    ui->lineEdit_find_dec->hide();
-//    ui->lineEdit_find_hex->hide();
-//    ui->lineEdit_find_ascii->hide();
-}
 void MainWindow::showScriptUi()
 {
     ui->label_script->show();
@@ -446,25 +392,18 @@ void MainWindow::hideScriptUi()
 ///     set focus to ASCII tab
 void MainWindow::focus_0()
 {
-//    ui->tabWidget->setCurrentIndex(0);
-//    ui->lineEdit_in_ascii->setFocus();
+    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_ASCII);
+    termIO[TABWIDGET_INDEX_ASCII].lineEdit_in.setFocus();
 }
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::focus_2
-///     set focus to HEX tab
 void MainWindow::focus_1()
 {
-//    ui->tabWidget->setCurrentIndex(1);
-//    ui->lineEdit_in_hex->setFocus();
+    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_HEX);
+    termIO[TABWIDGET_INDEX_HEX].lineEdit_in.setFocus();
 }
-
-/////////////////////////////////////////////////////////////////
-/// \brief MainWindow::focus_3
-///     set focus to DEC tab
 void MainWindow::focus_2()
 {
-//    ui->tabWidget->setCurrentIndex(2);
-//    ui->lineEdit_in_dec->setFocus();
+    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_DEC);
+    termIO[TABWIDGET_INDEX_DEC].lineEdit_in.setFocus();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -479,10 +418,9 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
 
             QString preamble = terminalOutGetPreamble(dataKind);
 
-//            /* put the preamble into text edits */
-//            writeToTextedit(ui->textEdit_out_ascii, COLOR_PREAMBLE, preamble);
-//            writeToTextedit(ui->textEdit_out_hex, COLOR_PREAMBLE, preamble);
-//            writeToTextedit(ui->textEdit_out_dec, COLOR_PREAMBLE, preamble);
+            /* put the preamble into text edits */
+            for (int i = 0; i < TABWIDGET_TABCNT; i++)
+                writeToTextedit(&termIO[i].textEdit_out, COLOR_PREAMBLE, preamble);
 
             /* put the preamble into text file */
             if (outputFile) {
@@ -493,6 +431,7 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
 
     }
 }
+
 /////////////////////////////////////////////////////////////////
 QString MainWindow::terminalOutGetPreamble(int dataKind)
 {
@@ -516,6 +455,7 @@ QString MainWindow::terminalOutGetPreamble(int dataKind)
     }
     return preamble;
 }
+
 /////////////////////////////////////////////////////////////////
 /// \brief MainWindow::terminalOutUpdate
 /// \param dataKind
@@ -530,10 +470,10 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
     dataConverter dataConv;
     dataConv.setByteArray(data);
 
-//    /* update terminal output text edits */
-//    writeToTextedit(ui->textEdit_out_ascii,  dataColor, dataConv.getStrAscii());
-//    writeToTextedit(ui->textEdit_out_hex,    dataColor, dataConv.getStrHex());
-//    writeToTextedit(ui->textEdit_out_dec,    dataColor, dataConv.getStrDec());
+    /* update terminal output text edits */
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+        writeToTextedit(&termIO[i].textEdit_out,
+                        dataColor, dataConv.getStrOfIndex(i));
 
     /* update terminal output log files */
     if (outputFile) {
@@ -541,12 +481,11 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
         outputFile->writeData_hex(dataConv.getStrHex());
     }
 
-//    /* clear part of the text in the text edits */
-//    if (AppCfgParam::get().autoclerTermOut) {
-//        shortenTextEdit(ui->textEdit_out_ascii);
-//        shortenTextEdit(ui->textEdit_out_hex);
-//        shortenTextEdit(ui->textEdit_out_dec);
-//    }
+    /* clear part of the text in the text edits */
+    if (AppCfgParam::get().autoclerTermOut)
+        for (int i = 0; i < TABWIDGET_TABCNT; i++)
+            shortenTextEdit(&termIO[i].textEdit_out);
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -611,27 +550,12 @@ void MainWindow::TxHistory_add(QByteArray data)
 ///     It hides all config UIs
 void MainWindow::pressedKey_esc()
 {
-    hideFindUi();
     hideHelp();
     hideSettings();
-    moveCursorToTerminalInputLine();
+    terminalInputSetFocus();
     hideScriptUi();
 }
-/////////////////////////////////////////////////////////////////
-void MainWindow::moveCursorToTerminalInputLine()
-{
-//    switch (ui->tabWidget->currentIndex())
-//    {
-//    case data_ascii:
-//        ui->lineEdit_in_ascii->setFocus();
-//        break;
-//    case data_hex:
-//        ui->lineEdit_in_hex->setFocus();
-//        break;
-//    case data_dec:
-//        ui->lineEdit_in_dec->setFocus();
-//    }
-}
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::hideSettings()
 {
@@ -657,9 +581,8 @@ void MainWindow::toggleShowSettings()
 // slot generated by hotkey moves cursor to end of text edit in all tabs
 void MainWindow::moveCursorToEnd()
 {
-//    ui->textEdit_out_ascii->moveCursor(QTextCursor::End);
-//    ui->textEdit_out_hex->moveCursor(QTextCursor::End);
-//    ui->textEdit_out_dec->moveCursor(QTextCursor::End);
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+        termIO[i].textEdit_out.moveCursor(QTextCursor::End);
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_pushButton_save_clicked()
@@ -681,26 +604,10 @@ void MainWindow::on_pushButton_save_clicked()
 }
 
 /////////////////////////////////////////////////////////////////
-/// \brief MainWindow::on_tabWidget_currentChanged
-/// \param index of data type
 ///     switch focus to corresponding lineedit data input
-///     according to selected tabwidget data type
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
-//    switch (index)
-//    {
-//    case data_ascii:
-//        ui->lineEdit_in_ascii->setFocus();
-//        break;
-//    case data_hex:
-//        ui->lineEdit_in_hex->setFocus();
-//        break;
-//    case data_dec:
-//        ui->lineEdit_in_dec->setFocus();
-//        break;
-//    default:
-//        ui->lineEdit_in_ascii->setFocus();
-//    }
+    termIO[index].lineEdit_in.setFocus();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -835,12 +742,6 @@ void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
 }
 
 /////////////////////////////////////////////////////////////////
-
-
-
-
-
-
 
 
 
