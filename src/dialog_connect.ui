@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>958</width>
+    <width>1017</width>
     <height>369</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <property name="windowIcon">
-   <iconset>
+   <iconset resource="resources.qrc">
     <normaloff>:/icons/images/terminal.png</normaloff>:/icons/images/terminal.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -194,6 +194,13 @@
           </layout>
          </item>
          <item>
+          <widget class="QCheckBox" name="checkBox_enableNetworkScan">
+           <property name="text">
+            <string>Enable network scan</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -286,7 +293,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

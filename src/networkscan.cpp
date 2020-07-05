@@ -1,92 +1,102 @@
 #include "networkscan.h"
 
-#include <QNetworkInterface>
+void addrAdd(QList <QHostInfo> * addrs, QHostInfo host);
 
+
+//////////////////////////////////////////////////
 NetworkScan::NetworkScan()
 {
 
+    ScanAddrDevThis_running = false;
+    ScanAddrDevAll_running = false;
+}
+
+//////////////////////////////////////////////////
+void NetworkScan::startScan_addrs_devThis()
+{
+    if (ScanAddrDevThis_running) return;
+
+    ScanAddrDevThis_running = true;
+
+    ScanAddrDevThis* scan = new ScanAddrDevThis();
+
+    qRegisterMetaType<QHostInfo>("QHostInfo");
+    connect(scan, &ScanAddr::foundAddr,
+            this, &NetworkScan::addrs_devThis_add);
+
+    connect(scan, &ScanAddr::finished,
+            this, &NetworkScan::devThis_finished);
+
+    connect(scan, &ScanAddr::finished,
+            this, &NetworkScan::ScanAddrDevThis_finished);
+
+    connect(scan, &ScanAddr::finished,
+            scan, &QObject::deleteLater);
+
+    scan->start();
+}
+
+//////////////////////////////////////////////////
+void NetworkScan::ScanAddrDevThis_finished()
+{
+    ScanAddrDevThis_running = false;
 }
 
 
 //////////////////////////////////////////////////
-void NetworkScan::scanNetwork_addHost(QHostInfo host)
+void NetworkScan::startScan_addrs_devAll()
+{
+    if (ScanAddrDevAll_running) return;
+
+    ScanAddrDevAll_running = true;
+
+    ScanAddrDevAll* scan = new ScanAddrDevAll(addrs_devThis);
+
+    qRegisterMetaType<QHostInfo>("QHostInfo");
+    connect(scan, &ScanAddr::foundAddr,
+            this, &NetworkScan::addrs_devAll_add);
+
+    connect(scan, &ScanAddr::finished,
+            this, &NetworkScan::devAll_finished);
+
+    connect(scan, &ScanAddr::finished,
+            this, &NetworkScan::ScanAddrDevAll_finished);
+
+    connect(scan, &ScanAddr::finished,
+            scan, &QObject::deleteLater);
+
+    scan->start();
+}
+
+//////////////////////////////////////////////////
+void NetworkScan::ScanAddrDevAll_finished()
+{
+    ScanAddrDevAll_running = false;
+}
+
+//////////////////////////////////////////////////
+void NetworkScan::addrs_devThis_add(QHostInfo host) {
+    addrAdd(&addrs_devThis, host);
+}
+void NetworkScan::addrs_devAll_add(QHostInfo host) {
+    addrAdd(&addrs_devAll, host);
+}
+
+
+//////////////////////////////////////////////////
+void addrAdd(QList <QHostInfo> * addrs, QHostInfo host)
 {
     bool isHere = false;
-    for (int i = 0; i < addrs_devAll.size(); i++) {
-        if (addrs_devAll.at(i).hostName() == host.hostName()) {
+    for (QHostInfo addr : *addrs)
+    {
+        if (addr.addresses().first() == host.addresses().first())
+        {
             isHere = true;
             break;
         }
     }
-    if (!isHere) {
-        addrs_devAll.append(host);
-    }
-}
-
-//////////////////////////////////////////////////
-void NetworkScan::start()
-{
-    for (const QHostInfo& addr_devThis : get_addrs_devThis())
-    {
-        for (quint32 addrLastByte = 0; addrLastByte < 255; addrLastByte++)
-        {
-            quint32 addr = addr_devThis.addresses().first().toIPv4Address();
-            addr = (addr & ADDRSCAN_MASK) | addrLastByte;
-            searchedLast = QHostAddress(addr);
-            QHostInfo::lookupHost(QHostAddress(addr).toString(),
-                                  this, SLOT(scanNetwork_printResults(QHostInfo)));
-            //                    QHostInfo::lookupHost(QString("10.0.0.%1").arg(i, 0, 10), // todo select ip addr
-            //                                          this, SLOT(scanNetwork_printResults(QHostInfo)));
-
-        }
-    }
-}
-
-//////////////////////////////////////////////////
-void NetworkScan::scanNetwork_printResults(QHostInfo host)
-{
-    if (host.error() == QHostInfo::NoError) {
-
-        QList <QHostAddress> addrs = host.addresses();
-
-        if (!addrs.isEmpty()) {
-            //            QHostAddress addr = host.addresses().first();
-            QHostAddress a(host.hostName());
-            if (a.isNull()) {
-                // qDebug() << "Addr: " << addrs.first().toString() << "Name: " << host.hostName();
-                scanNetwork_addHost(host);
-            }
-
-            if (a ==searchedLast) {
-                emit finished();
-            }
-        }
-    } else {
-        qDebug() << "Lookup failed:" << host.errorString();
-    }
-
-    //    const auto addresses = host.addresses();
-    //    for (const QHostAddress &address : addresses) {
-    //        qDebug() << "Found address:" << address.toString();
-    //    }
-}
-
-
-//////////////////////////////////////////////////
-QList <QHostInfo> NetworkScan::get_addrs_devThis()
-{
-    QList <QHostInfo> myIPaddresses;
-    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-        if (address.protocol() == QAbstractSocket::IPv4Protocol) {
-            myIPaddresses.append(QHostInfo::fromName(address.toString()));
-        }
-    }
-    return myIPaddresses;
-}
-//////////////////////////////////////////////////
-QList <QHostInfo> NetworkScan::get_addrs_devAll()
-{
-    return addrs_devAll;
+    if (!isHere)
+        addrs->append(host);
 }
 
 //////////////////////////////////////////////////

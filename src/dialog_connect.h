@@ -25,11 +25,11 @@
 #define TITLE_TAB_SERIAL_VENDORIDENTIFIER          "Vendor identifier"
 #define TITLE_TAB_SERIAL_PRODUCTIDENTIFIER         "Product identifier"
 
-#define PERIOD_REFRESHDEVICES  600
+#define PERIOD_REFRESHDEVICES  1000
 
 #define NETWORKPROTOCOL_UDP             "UDP"
-#define NETWORKPROTOCOL_TCP_SERVER      "TCP Server"
-#define NETWORKPROTOCOL_TCP_CLIENT      "TCP Client"
+#define NETWORKPROTOCOL_TCP_SERVER      "TCP Server (LTE modem)"
+#define NETWORKPROTOCOL_TCP_CLIENT      "TCP Client (XPort)"
 
 #define TITLE_NAME      "Name"
 #define TITLE_ADDR      "Address"
@@ -43,7 +43,7 @@ enum {
 
 
 namespace Ui {
-class Dialog_connect;
+    class Dialog_connect;
 }
 
 class SerialWorker;
@@ -96,10 +96,12 @@ private:
     QString getSerialPortName(int);
     void table_network_init();
     void table_serial_init();
-    void table_addHost(QTableWidget* table, QHostInfo host);
     void table_serial_add(QSerialPortInfo);
 
     void table_updateHosts(QTableWidget* tableWidget, const QList <QHostInfo> hosts);
+    void table_addHost(QTableWidget* tableWidget, const QHostInfo host);
+    bool table_includesHost(QTableWidget* tableWidget, const QHostInfo host);
+    void table_addHostIfNotIncluded(QTableWidget* tableWidget, const QHostInfo host);
 
 
 private slots:
@@ -115,7 +117,6 @@ private slots:
     void loadParametersToUi();
     void EscPressed();
 
-    void networkScanFinished();
 
     void on_tableWidget_addr_tx_currentCellChanged(int row, int column);
     void on_tableWidget_addr_rx_currentCellChanged(int row, int column);
@@ -128,9 +129,16 @@ private slots:
     void pressedKeyLeft();
     void pressedKeyRight();
 
-
-
     void on_comboBox_networkProtocol_currentIndexChanged(int index);
+
+    void addrUpdate_devThis();
+    void addrUpdate_devAll();
+
+//    void addAddr_devThis(const QHostInfo host); todo rm
+
+
+
+
 
 signals:
 

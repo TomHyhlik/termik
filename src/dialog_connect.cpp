@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QShortcut>
 #include <QtDebug>
+#include <QElapsedTimer>
 
 #include "networkscan.h"
 #include "serialwparam.h"
@@ -35,21 +36,49 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     initColors();
     tab_port_init();
 
+    ui->tabWidget->setCurrentIndex(0);
+
     timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
     connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
 
     networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
-    connect(networkScan.data(), SIGNAL(finished()), this, SLOT(networkScanFinished()));
+    connect(networkScan.get(), &NetworkScan::devAll_finished, this, &Dialog_connect::addrUpdate_devAll);
+    connect(networkScan.get(), &NetworkScan::devThis_finished, this,  &Dialog_connect::addrUpdate_devThis);
+
     timer_updatePorts->start(PERIOD_REFRESHDEVICES);
-
     refreshDevices();
-    pressedKeyDown();
-    networkHostsFirstRefresh = true;
-
 
     /* todo rm */
-//    NetworkWParam::get().protocolType = 2;
+    NetworkWParam::get().protocolType = 0;
     ui->tabWidget->setCurrentIndex(1);
+    ui->checkBox_enableNetworkScan->setChecked(true);
+
+    pressedKeyDown();
+    //    networkHostsFirstRefresh = true;
+}
+
+
+///////////////////////////////////////////////////////////////////
+void Dialog_connect::addrUpdate_devThis()
+{
+//    qDebug() << "Finished scan dev THis";
+    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
+}
+
+///////////////////////////////////////////////////////////////////
+void Dialog_connect::addrUpdate_devAll()
+{
+//    qDebug() << "addrUpdate_devAll";
+    table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
+
+    /* focus on the last address in the table */
+    if (networkHostsFirstRefresh) {
+        networkHostsFirstRefresh = false;
+        if (ui->lineEdit_selectedAddr_rx->text().isEmpty())
+            ui->tableWidget_addr_rx->selectRow(ui->tableWidget_addr_rx->rowCount() -1);
+        if (ui->lineEdit_selectedAddr_tx->text().isEmpty())
+            ui->tableWidget_addr_tx->selectRow(ui->tableWidget_addr_tx->rowCount() -1);
+    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -63,7 +92,7 @@ void Dialog_connect::pressedKeyUp()
     case TAB_INDEX_NETWORK:
         if (ui->tableWidget_addr_tx->hasFocus())
             table_makeAction(ui->tableWidget_addr_tx, tableAction_up);
-//        else if (ui->tableWidget_addr_tx->hasFocus())
+        //        else if (ui->tableWidget_addr_tx->hasFocus())
         else
             table_makeAction(ui->tableWidget_addr_rx, tableAction_up);
 
@@ -82,7 +111,7 @@ void Dialog_connect::pressedKeyDown()
     case TAB_INDEX_NETWORK:
         if (ui->tableWidget_addr_tx->hasFocus())
             table_makeAction(ui->tableWidget_addr_tx, tableAction_down);
-//        else if (ui->tableWidget_addr_tx->hasFocus())
+        //        else if (ui->tableWidget_addr_tx->hasFocus())
         else
             table_makeAction(ui->tableWidget_addr_rx, tableAction_down);
 
@@ -187,143 +216,65 @@ void Dialog_connect::loadParametersToUi()
     ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, SerialWParam::get().stopBits));
     ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, SerialWParam::get().flowControl));
 
-//    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
-//    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
-        ui->lineEdit_selectedAddr_tx->setText(NetworkWParam::get().IpAddr_Tx.toString());
+    //    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
+    ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
+    //    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
+    ui->lineEdit_selectedAddr_tx->setText(NetworkWParam::get().IpAddr_Tx.toString());
 
     ui->spinBox_ipPort_Tx->setValue(NetworkWParam::get().port_Tx);
     ui->spinBox_ipPort_Rx->setValue(NetworkWParam::get().port_Rx);
 
     ui->comboBox_networkProtocol->setCurrentText(networkProtocol.value(NetworkWParam::get().protocolType));
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::table_network_init()
-{
-    QList <QString> titles;
-    titles << TITLE_ADDR << TITLE_NAME;
-
-    ui->tableWidget_addr_rx->setColumnCount(titles.size());
-    ui->tableWidget_addr_rx->setHorizontalHeaderLabels(titles);
-
-    ui->tableWidget_addr_tx->setColumnCount(titles.size());
-    ui->tableWidget_addr_tx->setHorizontalHeaderLabels(titles);
-}
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::table_serial_init()
-{
-    QList <QString> titles;
-    titles << TITLE_TAB_SERIAL_NAME << TITLE_TAB_SERIAL_DESCRIPTION
-           << TITLE_TAB_SERIAL_MANUFACTURER << TITLE_TAB_SERIAL_SERIALNUMBER
-           << TITLE_TAB_SERIAL_LOCATION << TITLE_TAB_SERIAL_VENDORIDENTIFIER
-           << TITLE_TAB_SERIAL_PRODUCTIDENTIFIER;
-
-    ui->tableWidget_serialPorts->setColumnCount(titles.size());
-    ui->tableWidget_serialPorts->setHorizontalHeaderLabels(titles);
-
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::blockAllsignals(bool state)
-{
-    ui->comboBox_baudRate->blockSignals(state);
-    ui->comboBox_parity->blockSignals(state);
-    ui->comboBox_dataBits->blockSignals(state);
-    ui->lineEdit_serialPortName->blockSignals(state);
-    ui->comboBox_stopBits->blockSignals(state);
-    ui->comboBox_flowControl->blockSignals(state);
-}
-
-///////////////////////////////////////////////////////////
-void Dialog_connect::initColors()
-{
-    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                        .arg(COLOR_WHITE).arg(COLOR_GRAY1));
-
-    ui->tab_serial->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                  .arg(COLOR_WHITE).arg(COLOR_GRAY2));
-    ui->tab_network->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                   .arg(COLOR_WHITE).arg(COLOR_GRAY2));
-
-    ui->comboBox_baudRate->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_dataBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_flowControl->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_parity->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_serialPortName->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_stopBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_networkProtocol->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    ui->spinBox_ipPort_Tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->spinBox_ipPort_Rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_serialPorts->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_addr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->tableWidget_addr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-
-#if PLATFORM_WINDOWS
-    ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                           .arg(COLOR_BLACK).arg(COLOR_BLACK));
-
-    ui->tableWidget_serialPorts->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-    ui->tableWidget_serialPorts->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-
-    ui->tableWidget_addr_rx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-    ui->tableWidget_addr_rx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-
-    ui->tableWidget_addr_tx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                       .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-    ui->tableWidget_addr_tx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                     .arg(COLOR_BLACK).arg(COLOR_GRAY0));
-
-#endif
-
-}
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::refreshDevices()
 {
     serialPort_nameRefresh();
-    networkScan->start();
-    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
+
+    if (ui->checkBox_enableNetworkScan->isChecked())
+        networkScan->startScan_addrs_devAll();
+
+    networkScan->startScan_addrs_devThis();
 }
 
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::table_addHost(QTableWidget* tableWidget, QHostInfo host)
+void Dialog_connect::table_addHost(QTableWidget* tableWidget, const QHostInfo host)
 {
     QStringList element;
     element << host.addresses().first().toString() << host.hostName();
     table_addItem(tableWidget, element);
 }
 
+bool Dialog_connect::table_includesHost(QTableWidget* tableWidget, const QHostInfo host)
+{
+    for (int i = 0; i < tableWidget->rowCount(); i++)
+    {
+        if (tableWidget->item(i, 0)->text()
+                == host.addresses().first().toString())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Dialog_connect::table_addHostIfNotIncluded(QTableWidget* tableWidget, const QHostInfo host)
+{
+    if (!table_includesHost(tableWidget, host))
+    {
+        table_addHost(tableWidget, host);
+    }
+}
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_updateHosts(QTableWidget* tableWidget,
                                        const QList <QHostInfo> hosts)
 {
-    bool isHere;
-
-    /* remove missing*/
+    /* remove missing */
     for (int i = 0; i < tableWidget->rowCount(); i++)
     {
+        bool isHere = false;
         for (const QHostInfo& host : hosts)
         {
             if (tableWidget->item(i, 0)->text()
@@ -333,48 +284,24 @@ void Dialog_connect::table_updateHosts(QTableWidget* tableWidget,
                 break;
             }
         }
-        if (!isHere) {
+        if (!isHere)
             tableWidget->removeRow(i);
-        }
     }
-    /* add new */
-    isHere= false;
+
+    /* add new from the list */
     for (const QHostInfo& host : hosts)
     {
-        for (int i = 0; i < tableWidget->rowCount(); i++)
-        {
-            if (tableWidget->item(i, 0)->text()
-                    == host.addresses().first().toString())
-            {
-                isHere = true;
-                break;
-            }
-        }
-        if (!isHere) {
-            table_addHost(tableWidget, host);
-        }
+        table_addHostIfNotIncluded(tableWidget, host);
     }
 }
 
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::networkScanFinished()
-{
-    table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
-
-    if (networkHostsFirstRefresh)
-    {
-        networkHostsFirstRefresh = false;
-        if (ui->lineEdit_selectedAddr_rx->text().isEmpty())
-            ui->tableWidget_addr_rx->selectRow(ui->tableWidget_addr_rx->rowCount() -1);
-        if (ui->lineEdit_selectedAddr_tx->text().isEmpty())
-            ui->tableWidget_addr_tx->selectRow(ui->tableWidget_addr_tx->rowCount() -1);
-    }
-
-}
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
+    QElapsedTimer t;
+    t.start();
+
     QList <QSerialPortInfo> currentAvailablePorts = QSerialPortInfo::availablePorts();
 
     /* delete ports which were plugged out */
@@ -404,6 +331,7 @@ void Dialog_connect::serialPort_nameRefresh()
             table_serial_add(currentAvailablePorts.at(j));
         }
     }
+
 }
 
 /////////////////////////////////////////////////////////////////
@@ -526,6 +454,114 @@ QString Dialog_connect::getSecondMapVal(QMap<int,QString> m, int val)
     }
     return nullptr;
 }
+
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_network_init()
+{
+    QList <QString> titles;
+    titles << TITLE_ADDR << TITLE_NAME;
+
+    ui->tableWidget_addr_rx->setColumnCount(titles.size());
+    ui->tableWidget_addr_rx->setHorizontalHeaderLabels(titles);
+
+    ui->tableWidget_addr_tx->setColumnCount(titles.size());
+    ui->tableWidget_addr_tx->setHorizontalHeaderLabels(titles);
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_serial_init()
+{
+    QList <QString> titles;
+    titles << TITLE_TAB_SERIAL_NAME << TITLE_TAB_SERIAL_DESCRIPTION
+           << TITLE_TAB_SERIAL_MANUFACTURER << TITLE_TAB_SERIAL_SERIALNUMBER
+           << TITLE_TAB_SERIAL_LOCATION << TITLE_TAB_SERIAL_VENDORIDENTIFIER
+           << TITLE_TAB_SERIAL_PRODUCTIDENTIFIER;
+
+    ui->tableWidget_serialPorts->setColumnCount(titles.size());
+    ui->tableWidget_serialPorts->setHorizontalHeaderLabels(titles);
+
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::blockAllsignals(bool state)
+{
+    ui->comboBox_baudRate->blockSignals(state);
+    ui->comboBox_parity->blockSignals(state);
+    ui->comboBox_dataBits->blockSignals(state);
+    ui->lineEdit_serialPortName->blockSignals(state);
+    ui->comboBox_stopBits->blockSignals(state);
+    ui->comboBox_flowControl->blockSignals(state);
+}
+
+///////////////////////////////////////////////////////////
+void Dialog_connect::initColors()
+{
+    this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                        .arg(COLOR_WHITE).arg(COLOR_GRAY1));
+
+    ui->tab_serial->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                  .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+    ui->tab_network->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                   .arg(COLOR_WHITE).arg(COLOR_GRAY2));
+
+    ui->comboBox_baudRate->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_dataBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_flowControl->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_parity->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_serialPortName->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_stopBits->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->comboBox_networkProtocol->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->spinBox_ipPort_Tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->spinBox_ipPort_Rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                         .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->tableWidget_serialPorts->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->tableWidget_addr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->tableWidget_addr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_selectedAddr_rx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
+
+
+#if PLATFORM_WINDOWS
+    ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                           .arg(COLOR_BLACK).arg(COLOR_BLACK));
+
+    ui->tableWidget_serialPorts->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                                   .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_serialPorts->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                                 .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+    ui->tableWidget_addr_rx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                               .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_addr_rx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                             .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+    ui->tableWidget_addr_tx->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                               .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+    ui->tableWidget_addr_tx->verticalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                             .arg(COLOR_BLACK).arg(COLOR_GRAY0));
+
+#endif
+
+}
+
 ///////////////////////////////////////////////////////////////////////
 Dialog_connect::~Dialog_connect()
 {
@@ -576,7 +612,7 @@ void Dialog_connect::on_buttonBox_rejected()
 ///         if the port name was not found, return -1
 int Dialog_connect::getProductIdentifier(QString portName)
 {
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
         if (info.portName() == portName) {
             return int(info.productIdentifier());
         }
@@ -586,7 +622,7 @@ int Dialog_connect::getProductIdentifier(QString portName)
 //////////////////////////////////////////////////////////////////////////////
 QString Dialog_connect::getSerialPortName(int productIdentifier)
 {
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
         if (info.productIdentifier() == productIdentifier) {
             return info.portName();
         }
@@ -637,9 +673,4 @@ void Dialog_connect::on_comboBox_networkProtocol_currentIndexChanged(int index)
         break;
     }
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-
 
