@@ -13,7 +13,7 @@
         "IP address Tx": "127.0.0.1",
         "Port Rx": 1111,
         "Port Tx": 1111,
-        "Protocol": 1
+        "Protocol": 0
     },
     "Script": {
         "Data format": 0,

@@ -112,7 +112,7 @@ public:
 
         for (const QHostInfo& addr_devThis : addrsDevThis)
         {
-            qDebug() << "looking at addr: " << addr_devThis.addresses().first().toString();
+//            qDebug() << "looking at addr: " << addr_devThis.addresses().first().toString();
 
             for (quint32 addrLastByte = 0; addrLastByte < 0xFF; addrLastByte++)
             {
