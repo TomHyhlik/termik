@@ -28,8 +28,8 @@
 #define PERIOD_REFRESHDEVICES  1000
 
 #define NETWORKPROTOCOL_UDP             "UDP"
-#define NETWORKPROTOCOL_TCP_SERVER      "TCP Server (LTE modem)"
-#define NETWORKPROTOCOL_TCP_CLIENT      "TCP Client (XPort)"
+#define NETWORKPROTOCOL_TCP_SERVER      "TCP Server"
+#define NETWORKPROTOCOL_TCP_CLIENT      "TCP Client"
 
 #define TITLE_NAME      "Name"
 #define TITLE_ADDR      "Address"
