@@ -87,6 +87,8 @@ private:
 
     void configurationSave();
 
+    void pressedKeyArrowWertical(int tableAction);
+
     void shortcuts_init();
     int getProductIdentifier(QString portName);
     QString getSerialPortName(int);

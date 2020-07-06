@@ -54,20 +54,18 @@ void Dialog_connect::addrUpdate_devAll()
 }
 
 /////////////////////////////////////////////////////////////////
-void Dialog_connect::pressedKeyUp()
+void Dialog_connect::pressedKeyArrowWertical(int tableAction)
 {
     switch (ui->tabWidget->currentIndex())
     {
     case TAB_INDEX_SERIAL:
-        table_makeAction(ui->tableWidget_serialPorts, tableAction_up);
+        table_makeAction(ui->tableWidget_serialPorts, tableAction);
         break;
     case TAB_INDEX_NETWORK:
         if (ui->tableWidget_addr_tx->hasFocus())
-            table_makeAction(ui->tableWidget_addr_tx, tableAction_up);
-        //        else if (ui->tableWidget_addr_tx->hasFocus())
+            table_makeAction(ui->tableWidget_addr_tx, tableAction);
         else
-            table_makeAction(ui->tableWidget_addr_rx, tableAction_up);
-
+            table_makeAction(ui->tableWidget_addr_rx, tableAction);
         break;
     }
 }
@@ -75,20 +73,12 @@ void Dialog_connect::pressedKeyUp()
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::pressedKeyDown()
 {
-    switch (ui->tabWidget->currentIndex())
-    {
-    case TAB_INDEX_SERIAL:
-        table_makeAction(ui->tableWidget_serialPorts, tableAction_down);
-        break;
-    case TAB_INDEX_NETWORK:
-        if (ui->tableWidget_addr_tx->hasFocus())
-            table_makeAction(ui->tableWidget_addr_tx, tableAction_down);
-        //        else if (ui->tableWidget_addr_tx->hasFocus())
-        else
-            table_makeAction(ui->tableWidget_addr_rx, tableAction_down);
+    pressedKeyArrowWertical(tableAction_down);
+}
 
-        break;
-    }
+void Dialog_connect::pressedKeyUp()
+{
+    pressedKeyArrowWertical(tableAction_up);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -100,7 +90,6 @@ void Dialog_connect::pressedKeyLeft()
     }
 }
 
-/////////////////////////////////////////////////////////////////
 void Dialog_connect::pressedKeyRight()
 {
     if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
@@ -171,8 +160,6 @@ void Dialog_connect::showEvent( QShowEvent* event )
     QWidget::showEvent(event);
 
     loadParametersToUi();
-
-    //    qDebug() << "Dialog_connect SHOW";
 }
 
 /////////////////////////////////////////////////////////////////
