@@ -11,6 +11,11 @@
 #include "mainwindow.h"
 #include "communication.h"
 
+
+////////////////////////////////////////////////// CONFIG BUILD
+#define NETWORKSCAN_ENABLE_DEFAULT  1
+//////////////////////////////////////////////////
+
 #define PORT_RANGE  65535
 #define TITLE_THIS_WINDOW   "Connect"
 #define TITLE_TAB_SERIAL    "Serial"
@@ -61,6 +66,9 @@ public:
 
 private:
     Ui::Dialog_connect *ui;
+
+    void initWindow();
+    void initScan();
 
     bool networkHostsFirstRefresh;
 

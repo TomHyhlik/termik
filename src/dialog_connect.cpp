@@ -17,7 +17,7 @@
 void table_addItem(QTableWidget* table, QStringList element);
 void table_clear(QTableWidget* table);
 
-
+///////////////////////////////////////////////////////////////////
 Dialog_connect::Dialog_connect(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog_connect)
@@ -27,48 +27,20 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     shortcuts_init();
     table_network_init();
     table_serial_init();
-    setWindowTitle(TITLE_THIS_WINDOW);
-    ui->tabWidget->setTabText(0, TITLE_TAB_SERIAL);
-    ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
-    ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
-    ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
-
+    initWindow();
     initColors();
-    tab_port_init();
-
-    ui->tabWidget->setCurrentIndex(0);
-
-    timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
-    connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
-
-    networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
-    connect(networkScan.get(), &NetworkScan::devAll_finished, this, &Dialog_connect::addrUpdate_devAll);
-    connect(networkScan.get(), &NetworkScan::devThis_finished, this,  &Dialog_connect::addrUpdate_devThis);
-
-    timer_updatePorts->start(PERIOD_REFRESHDEVICES);
-    refreshDevices();
-
-    /* todo rm */
-    NetworkWParam::get().protocolType = 0;
-    ui->tabWidget->setCurrentIndex(1);
-    ui->checkBox_enableNetworkScan->setChecked(true);
-
-    pressedKeyDown();
-    //    networkHostsFirstRefresh = true;
+    initScan();
 }
-
 
 ///////////////////////////////////////////////////////////////////
 void Dialog_connect::addrUpdate_devThis()
 {
-//    qDebug() << "Finished scan dev THis";
     table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
 }
 
 ///////////////////////////////////////////////////////////////////
 void Dialog_connect::addrUpdate_devAll()
 {
-//    qDebug() << "addrUpdate_devAll";
     table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
 
     /* focus on the last address in the table */
@@ -122,22 +94,18 @@ void Dialog_connect::pressedKeyDown()
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::pressedKeyLeft()
 {
-    switch (ui->tabWidget->currentIndex())
+    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
     {
-    case TAB_INDEX_NETWORK:
         ui->tableWidget_addr_rx->setFocus();
-        break;
     }
 }
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::pressedKeyRight()
 {
-    switch (ui->tabWidget->currentIndex())
+    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
     {
-    case TAB_INDEX_NETWORK:
         ui->tableWidget_addr_tx->setFocus();
-        break;
     }
 }
 
@@ -346,28 +314,9 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
             << QString("%1").arg(serialPort.vendorIdentifier())
             << QString("%1").arg(serialPort.productIdentifier());
 
-
     table_addItem(ui->tableWidget_serialPorts, element);
 }
 
-/////////////////////////////////////////////////////////////////
-/// \brief Dialog_connect::tab_port_init
-/// fill the comboboxes
-void Dialog_connect::tab_port_init()
-{
-    for (auto e :  map_baudRate.toStdMap())
-        ui->comboBox_baudRate->addItem(e.second);
-    for (auto e :  map_dataBits.toStdMap())
-        ui->comboBox_dataBits->addItem(e.second);
-    for (auto e :  map_parity.toStdMap())
-        ui->comboBox_parity->addItem(e.second);
-    for (auto e :  map_stopBits.toStdMap())
-        ui->comboBox_stopBits->addItem(e.second);
-    for (auto e :  map_flowControl.toStdMap())
-        ui->comboBox_flowControl->addItem(e.second);
-    for (auto e :  map_networkProtocol.toStdMap())
-        ui->comboBox_networkProtocol->addItem(e.second);
-}
 /////////////////////////////////////////////////////////////////
 int Dialog_connect::getFirstMapVal(QMap<int, QString> m, QString label)
 {
@@ -388,7 +337,6 @@ QString Dialog_connect::getSecondMapVal(QMap<int,QString> m, int val)
     }
     return nullptr;
 }
-
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::table_network_init()
@@ -469,9 +417,8 @@ void Dialog_connect::initColors()
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-    ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
-
+//    ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+//                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
 #if PLATFORM_WINDOWS
     ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
@@ -607,4 +554,46 @@ void Dialog_connect::on_comboBox_networkProtocol_currentIndexChanged(int index)
         break;
     }
 }
+//////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::initWindow()
+{
+    setWindowTitle(TITLE_THIS_WINDOW);
+    ui->tabWidget->setTabText(0, TITLE_TAB_SERIAL);
+    ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
+    ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
+    ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
 
+#if NETWORKSCAN_ENABLE_DEFAULT
+    ui->checkBox_enableNetworkScan->setChecked(true);
+#endif
+
+    for (auto e :  map_baudRate.toStdMap())
+        ui->comboBox_baudRate->addItem(e.second);
+    for (auto e :  map_dataBits.toStdMap())
+        ui->comboBox_dataBits->addItem(e.second);
+    for (auto e :  map_parity.toStdMap())
+        ui->comboBox_parity->addItem(e.second);
+    for (auto e :  map_stopBits.toStdMap())
+        ui->comboBox_stopBits->addItem(e.second);
+    for (auto e :  map_flowControl.toStdMap())
+        ui->comboBox_flowControl->addItem(e.second);
+    for (auto e :  map_networkProtocol.toStdMap())
+        ui->comboBox_networkProtocol->addItem(e.second);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::initScan()
+{
+    timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
+    connect(timer_updatePorts.data(), SIGNAL(timeout()), this, SLOT(refreshDevices()));
+
+    networkScan = QSharedPointer <NetworkScan> (new NetworkScan);
+    connect(networkScan.get(), &NetworkScan::devAll_finished, this, &Dialog_connect::addrUpdate_devAll);
+    connect(networkScan.get(), &NetworkScan::devThis_finished, this,  &Dialog_connect::addrUpdate_devThis);
+
+    networkHostsFirstRefresh = true;
+    timer_updatePorts->start(PERIOD_REFRESHDEVICES);
+    refreshDevices();
+}
+
+//////////////////////////////////////////////////////////////////////////////
