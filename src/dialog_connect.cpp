@@ -210,11 +210,11 @@ void Dialog_connect::showEvent( QShowEvent* event )
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::loadParametersToUi()
 {
-    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(baudRateS, SerialWParam::get().baudRate));
-    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(dataBitsS, SerialWParam::get().dataBits));
-    ui->comboBox_parity->setCurrentText(getSecondMapVal(parityS, SerialWParam::get().parity));
-    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(stopBitsS, SerialWParam::get().stopBits));
-    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(flowControlS, SerialWParam::get().flowControl));
+    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(map_baudRate, SerialWParam::get().baudRate));
+    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(map_dataBits, SerialWParam::get().dataBits));
+    ui->comboBox_parity->setCurrentText(getSecondMapVal(map_parity, SerialWParam::get().parity));
+    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(map_stopBits, SerialWParam::get().stopBits));
+    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(map_flowControl, SerialWParam::get().flowControl));
 
     //    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
     ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
@@ -224,7 +224,7 @@ void Dialog_connect::loadParametersToUi()
     ui->spinBox_ipPort_Tx->setValue(NetworkWParam::get().port_Tx);
     ui->spinBox_ipPort_Rx->setValue(NetworkWParam::get().port_Rx);
 
-    ui->comboBox_networkProtocol->setCurrentText(networkProtocol.value(NetworkWParam::get().protocolType));
+    ui->comboBox_networkProtocol->setCurrentText(map_networkProtocol.value(NetworkWParam::get().protocolType));
 }
 
 /////////////////////////////////////////////////////////////////
@@ -351,89 +351,23 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
 }
 
 /////////////////////////////////////////////////////////////////
+/// \brief Dialog_connect::tab_port_init
+/// fill the comboboxes
 void Dialog_connect::tab_port_init()
 {
-    /* fill maps of comboboxes */
-    fillBaudRate();
-    fillDataBits();
-    fillParity();
-    fillstopBits();
-    fillflowControl();
-    fillNetworkProtocol();
-
-    /* fill comboboxes */
-    for (auto e :  baudRateS.toStdMap() ) {
+    for (auto e :  map_baudRate.toStdMap())
         ui->comboBox_baudRate->addItem(e.second);
-    }
-    for (auto e :  dataBitsS.toStdMap() ) {
+    for (auto e :  map_dataBits.toStdMap())
         ui->comboBox_dataBits->addItem(e.second);
-    }
-    for (auto e :  parityS.toStdMap() ) {
+    for (auto e :  map_parity.toStdMap())
         ui->comboBox_parity->addItem(e.second);
-    }
-    for (auto e :  stopBitsS.toStdMap() ) {
+    for (auto e :  map_stopBits.toStdMap())
         ui->comboBox_stopBits->addItem(e.second);
-    }
-    for (auto e :  flowControlS.toStdMap() ) {
+    for (auto e :  map_flowControl.toStdMap())
         ui->comboBox_flowControl->addItem(e.second);
-    }
-    for (auto e :  networkProtocol.toStdMap() ) {
+    for (auto e :  map_networkProtocol.toStdMap())
         ui->comboBox_networkProtocol->addItem(e.second);
-    }
 }
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::fillBaudRate()
-{
-    baudRateS.insert(QSerialPort::Baud1200 , "1200");
-    baudRateS.insert(QSerialPort::Baud2400 , "2400");
-    baudRateS.insert(QSerialPort::Baud4800 , "4800");
-    baudRateS.insert(QSerialPort::Baud9600 , "9600");
-    baudRateS.insert(QSerialPort::Baud19200 , "19200");
-    baudRateS.insert(QSerialPort::Baud38400 , "38400");
-    baudRateS.insert(QSerialPort::Baud57600 , "57600");
-    baudRateS.insert(QSerialPort::Baud115200 , "115200");
-}
-/////////////////////////////////////////////////////////////////
-/// The number of data bits in each character
-void Dialog_connect::fillDataBits()
-{
-    dataBitsS.insert(QSerialPort::Data5 , "5");
-    dataBitsS.insert(QSerialPort::Data6 , "6");
-    dataBitsS.insert(QSerialPort::Data7 , "7");
-    dataBitsS.insert(QSerialPort::Data8 , "8");
-}
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::fillParity()
-{
-    parityS.insert(QSerialPort::NoParity , "none");
-    parityS.insert(QSerialPort::EvenParity , "even");
-    parityS.insert(QSerialPort::OddParity , "odd");
-    parityS.insert(QSerialPort::SpaceParity , "space");
-    parityS.insert(QSerialPort::MarkParity , "mark");
-}
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::fillstopBits()
-{
-    stopBitsS.insert(QSerialPort::OneStop , "1");
-    stopBitsS.insert(QSerialPort::OneAndHalfStop , "1.5");
-    stopBitsS.insert(QSerialPort::TwoStop , "2");
-}
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::fillflowControl()
-{
-    flowControlS.insert(QSerialPort::NoFlowControl , "none");
-    flowControlS.insert(QSerialPort::HardwareControl , "HW");
-    flowControlS.insert(QSerialPort::SoftwareControl , "SW");
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::fillNetworkProtocol()
-{
-    networkProtocol.insert(0 , NETWORKPROTOCOL_UDP);
-    networkProtocol.insert(1 , NETWORKPROTOCOL_TCP_CLIENT);
-    networkProtocol.insert(2 , NETWORKPROTOCOL_TCP_SERVER);
-}
-
 /////////////////////////////////////////////////////////////////
 int Dialog_connect::getFirstMapVal(QMap<int, QString> m, QString label)
 {
@@ -576,17 +510,17 @@ void Dialog_connect::on_buttonBox_accepted()
 {
     /* load the  port configuration to the sw class */
     SerialWParam::get().portName = ui->lineEdit_serialPortName->text();
-    SerialWParam::get().baudRate = getFirstMapVal(baudRateS, ui->comboBox_baudRate->currentText());
-    SerialWParam::get().dataBits = getFirstMapVal(dataBitsS, ui->comboBox_dataBits->currentText());
-    SerialWParam::get().parity = getFirstMapVal(parityS, ui->comboBox_parity->currentText());
-    SerialWParam::get().stopBits = getFirstMapVal(stopBitsS, ui->comboBox_stopBits->currentText());
-    SerialWParam::get().flowControl = getFirstMapVal(flowControlS, ui->comboBox_flowControl->currentText());
+    SerialWParam::get().baudRate = getFirstMapVal(map_baudRate, ui->comboBox_baudRate->currentText());
+    SerialWParam::get().dataBits = getFirstMapVal(map_dataBits, ui->comboBox_dataBits->currentText());
+    SerialWParam::get().parity = getFirstMapVal(map_parity, ui->comboBox_parity->currentText());
+    SerialWParam::get().stopBits = getFirstMapVal(map_stopBits, ui->comboBox_stopBits->currentText());
+    SerialWParam::get().flowControl = getFirstMapVal(map_flowControl, ui->comboBox_flowControl->currentText());
 
     NetworkWParam::get().IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
     NetworkWParam::get().IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
     NetworkWParam::get().port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     NetworkWParam::get().port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
-    NetworkWParam::get().protocolType = getFirstMapVal(networkProtocol, ui->comboBox_networkProtocol->currentText());
+    NetworkWParam::get().protocolType = getFirstMapVal(map_networkProtocol, ui->comboBox_networkProtocol->currentText());
 
     /* connect */
     switch (ui->tabWidget->currentIndex())

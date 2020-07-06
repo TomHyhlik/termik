@@ -38,12 +38,11 @@
 #define TAB_INDEX_NETWORK       1
 
 enum {
-  tableAction_up, tableAction_down
+    tableAction_up, tableAction_down
 };
 
-
 namespace Ui {
-    class Dialog_connect;
+class Dialog_connect;
 }
 
 class SerialWorker;
@@ -73,18 +72,7 @@ private:
     void blockAllsignals(bool state);
 
     void tab_port_init();
-    QMap<int,QString> baudRateS;
-    QMap<int,QString> dataBitsS;
-    QMap<int,QString> parityS;
-    QMap<int,QString> stopBitsS;
-    QMap<int,QString> flowControlS;
-    QMap<int,QString> networkProtocol;
-    void fillBaudRate();            // fill maps
-    void fillDataBits();
-    void fillParity();
-    void fillstopBits();
-    void fillflowControl();
-    void fillNetworkProtocol();
+
 
     QSharedPointer <QTimer> timer_updatePorts;
     QSharedPointer <NetworkScan> networkScan;
@@ -102,6 +90,56 @@ private:
     void table_addHost(QTableWidget* tableWidget, const QHostInfo host);
     bool table_includesHost(QTableWidget* tableWidget, const QHostInfo host);
     void table_addHostIfNotIncluded(QTableWidget* tableWidget, const QHostInfo host);
+
+
+    const QMap <int, QString> map_baudRate =
+    {
+        {QSerialPort::Baud1200 , "1200"},
+        {QSerialPort::Baud2400 , "2400"},
+        {QSerialPort::Baud4800 , "4800"},
+        {QSerialPort::Baud9600 , "9600"},
+        {QSerialPort::Baud19200 , "19200"},
+        {QSerialPort::Baud38400 , "38400"},
+        {QSerialPort::Baud57600 , "57600"},
+        {QSerialPort::Baud115200 , "115200"}
+    };
+    const QMap <int,QString> map_dataBits =
+    {
+        {QSerialPort::Data5 , "5"},
+        {QSerialPort::Data6 , "6"},
+        {QSerialPort::Data7 , "7"},
+        {QSerialPort::Data8 , "8"}
+    };
+    const QMap <int,QString> map_parity =
+    {
+        {QSerialPort::NoParity , "none"},
+        {QSerialPort::EvenParity , "even"},
+        {QSerialPort::OddParity , "odd"},
+        {QSerialPort::SpaceParity , "space"},
+        {QSerialPort::MarkParity , "mark"}
+
+    };
+
+    const QMap <int,QString> map_stopBits =
+    {
+        {QSerialPort::OneStop , "1"},
+        {QSerialPort::OneAndHalfStop , "1.5"},
+        {QSerialPort::TwoStop , "2"}
+
+    };
+    const QMap <int,QString> map_flowControl =
+    {
+        {QSerialPort::NoFlowControl , "none"},
+        {QSerialPort::HardwareControl , "HW"},
+        {QSerialPort::SoftwareControl , "SW"}
+
+    };
+    const QMap <int,QString> map_networkProtocol =
+    {
+        {0 , NETWORKPROTOCOL_UDP},
+        {1 , NETWORKPROTOCOL_TCP_CLIENT},
+        {2 , NETWORKPROTOCOL_TCP_SERVER}
+    };
 
 
 private slots:
@@ -134,7 +172,7 @@ private slots:
     void addrUpdate_devThis();
     void addrUpdate_devAll();
 
-//    void addAddr_devThis(const QHostInfo host); todo rm
+    //    void addAddr_devThis(const QHostInfo host); todo rm
 
 
 
