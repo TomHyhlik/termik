@@ -1,5 +1,5 @@
 # termik
-Thi is desktop GUI terminal app for data transmission via serial or network based on [Qt](https://www.qt.io/). The project can be compiled for Linux, Mac and Windows or whatever Qt supports.
+A desktop GUI terminal app for data transmission via serial or network based on [Qt](https://www.qt.io/). The project can be compiled for Linux, Mac and Windows or whatever Qt supports.
 
 I made this app, because none of the available terminals for data transmission does not suit my needs.
 
