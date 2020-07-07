@@ -7,7 +7,6 @@ class CommunicationWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit CommunicationWorker(QObject *parent = nullptr);
 
     virtual bool open() = 0;
     virtual void close() = 0;

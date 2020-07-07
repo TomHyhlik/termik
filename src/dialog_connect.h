@@ -86,8 +86,6 @@ private:
     void pressedKeyArrowWertical(int tableAction);
 
     void shortcuts_init();
-    int getProductIdentifier(QString portName);
-    QString getSerialPortName(int);
     void table_network_init();
     void table_serial_init();
     void table_serial_add(QSerialPortInfo);

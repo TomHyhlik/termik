@@ -66,9 +66,7 @@ void Dialog_connect::loadParametersToUi()
     ui->comboBox_stopBits->setCurrentText(map_stopBits.value(SerialWParam::get().stopBits));
     ui->comboBox_flowControl->setCurrentText(map_flowControl.value(SerialWParam::get().flowControl));
 
-    //    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
     ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
-    //    if (!NetworkWParam::get().IpAddr_Tx.toString().isEmpty())
     ui->lineEdit_selectedAddr_tx->setText(NetworkWParam::get().IpAddr_Tx.toString());
 
     ui->spinBox_ipPort_Tx->setValue(NetworkWParam::get().port_Tx);
@@ -145,7 +143,6 @@ void Dialog_connect::table_updateHosts(QTableWidget* tableWidget,
     }
 }
 
-
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::serialPort_nameRefresh()
 {
@@ -181,7 +178,6 @@ void Dialog_connect::serialPort_nameRefresh()
             table_serial_add(currentAvailablePorts.at(j));
         }
     }
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -307,7 +303,6 @@ void Dialog_connect::initColors()
 ///////////////////////////////////////////////////////////////////////
 Dialog_connect::~Dialog_connect()
 {
-    qDebug() << "\n Dialog_connect destroyed \n";
     delete ui;
 }
 
@@ -333,34 +328,11 @@ void Dialog_connect::on_buttonBox_accepted()
     emit tryConnect(communicationType(ui->tabWidget->currentIndex()));
     this->close();
 }
+
 /////////////////////////////////////////////////////////////////////
 void Dialog_connect::on_buttonBox_rejected()
 {
     this->close();
-}
-
-/////////////////////////////////////////////////////////////////////
-/// \brief Dialog_connect::getProductIdentifier
-///         search in available ports to the port and return it's productIdentifier
-///         if the port name was not found, return -1
-int Dialog_connect::getProductIdentifier(QString portName)
-{
-    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
-        if (info.portName() == portName) {
-            return int(info.productIdentifier());
-        }
-    }
-    return -1;
-}
-//////////////////////////////////////////////////////////////////////////////
-QString Dialog_connect::getSerialPortName(int productIdentifier)
-{
-    for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
-        if (info.productIdentifier() == productIdentifier) {
-            return info.portName();
-        }
-    }
-    return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -434,6 +406,8 @@ void Dialog_connect::initWindow()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+/// \brief Dialog_connect::initScan
+/// Setup periodical scan of serial and network devices
 void Dialog_connect::initScan()
 {
     timer_updatePorts = QSharedPointer <QTimer> (new QTimer);
@@ -444,8 +418,8 @@ void Dialog_connect::initScan()
     connect(networkScan.get(), &NetworkScan::devThis_finished, this,  &Dialog_connect::addrUpdate_devThis);
 
     networkHostsFirstRefresh = true;
-    timer_updatePorts->start(PERIOD_REFRESHDEVICES);
     refreshDevices();
+    timer_updatePorts->start(PERIOD_REFRESHDEVICES);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -551,3 +525,5 @@ void Dialog_connect::shortcuts_init()
     new QShortcut(QKeySequence(Qt::Key_Right), this, SLOT(pressedKeyRight()));
 
 }
+
+/////////////////////////////////////////////////////////////////
