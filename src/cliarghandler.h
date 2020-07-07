@@ -59,10 +59,28 @@ class CliArgHandler : public QObject
     Q_OBJECT
 
     QStringList arguments;
-    QStringList getValidArgs();
-
     communicationType setComType;
 
+    const QList <QString> validArgs =
+    {
+        {ARG_CONNECTIONTYPE},
+
+        {ARG_NETWORK_IPADDR},
+        {ARG_NETWORK_TXPORT},
+        {ARG_NETWORK_RXPORT},
+        {ARG_NETWORK_PROTOCOLTYPE},
+
+        {ARG_SERIAL_PORTNAME},
+        {ARG_SERIAL_BAUDRATE},
+        {ARG_SERIAL_DATABITS},
+        {ARG_SERIAL_PARITY},
+        {ARG_SERIAL_STOPBITS},
+        {ARG_SERIAL_FLOWCONTROL},
+
+        {ARG_PREFIX_SHORT},
+        {ARG_HELP},
+        {ARG_HELP_LONG},
+    };
 
 public:
     explicit CliArgHandler(QStringList val);

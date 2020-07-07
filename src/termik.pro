@@ -18,7 +18,6 @@ SOURCES += \
         appcfgparam.cpp \
         cliarghandler.cpp \
         communication.cpp \
-        communicworkerfactory.cpp \
         dataconverter.cpp \
         form_termio.cpp \
         uilog.cpp \

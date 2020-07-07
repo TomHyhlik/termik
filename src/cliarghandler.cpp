@@ -3,7 +3,6 @@
 #include "serialwparam.h"
 #include "networkwparam.h"
 
-
 //////////////////////////////////////////////////////////////////////
 CliArgHandler::CliArgHandler(QStringList val) : arguments(val)
 {
@@ -81,8 +80,6 @@ bool CliArgHandler::setParam(QString command, QString passedData)
 {
     bool ok = true;
 
-    QStringList validArgs = getValidArgs();
-
     switch (validArgs.indexOf(command))
     {
     case ARG_INDEX_NETWORK_IPADDR:
@@ -139,32 +136,6 @@ bool CliArgHandler::setParam(QString command, QString passedData)
     }
 
     return ok;
-}
-
-//////////////////////////////////////////////////////////////////////
-QStringList CliArgHandler::getValidArgs()
-{
-    QStringList validArgs;
-
-    validArgs.append(ARG_CONNECTIONTYPE);
-
-    validArgs.append(ARG_NETWORK_IPADDR);
-    validArgs.append(ARG_NETWORK_TXPORT);
-    validArgs.append(ARG_NETWORK_RXPORT);
-    validArgs.append(ARG_NETWORK_PROTOCOLTYPE);
-
-    validArgs.append(ARG_SERIAL_PORTNAME);
-    validArgs.append(ARG_SERIAL_BAUDRATE);
-    validArgs.append(ARG_SERIAL_DATABITS);
-    validArgs.append(ARG_SERIAL_PARITY);
-    validArgs.append(ARG_SERIAL_STOPBITS);
-    validArgs.append(ARG_SERIAL_FLOWCONTROL);
-
-    validArgs.append(ARG_PREFIX_SHORT);
-    validArgs.append(ARG_HELP);
-    validArgs.append(ARG_HELP_LONG);
-
-    return validArgs;
 }
 
 //////////////////////////////////////////////////////////////////////

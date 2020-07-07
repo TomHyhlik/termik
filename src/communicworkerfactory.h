@@ -1,23 +1,30 @@
 #ifndef COMMUNICWORKERFACTORY_H
 #define COMMUNICWORKERFACTORY_H
 
-#include <QObject>
-
-
 #include "serialworker.h"
 #include "networkworker.h"
 #include "communication.h"
 
-class CommunicWorkerFactory : public QObject
+class CommunicWorkerFactory
 {
-    Q_OBJECT
 public:
-    explicit CommunicWorkerFactory();
+    CommunicationWorker* create(communicationType type)
+    {
+        CommunicationWorker* out;
 
-    CommunicationWorker* create(communicationType type);
-
-signals:
-
+        switch (type)
+        {
+        case comType_serial:
+            out = new SerialWorker();
+            break;
+        case comType_network:
+            out = new NetworkWorker();
+            break;
+        case comType_none:
+            out = nullptr;
+        }
+        return out;
+    }
 };
 
 #endif // COMMUNICWORKERFACTORY_H
