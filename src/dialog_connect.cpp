@@ -59,6 +59,7 @@ void Dialog_connect::showEvent( QShowEvent* event )
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::loadParametersToUi()
 {
+    ui->lineEdit_serialPortName->setText(SerialWParam::get().portName);
     ui->comboBox_baudRate->setCurrentText(map_baudRate.value(SerialWParam::get().baudRate));
     ui->comboBox_dataBits->setCurrentText(map_dataBits.value(SerialWParam::get().dataBits));
     ui->comboBox_parity->setCurrentText(map_parity.value(SerialWParam::get().parity));
