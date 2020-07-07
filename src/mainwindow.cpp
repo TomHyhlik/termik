@@ -72,15 +72,6 @@ void MainWindow::hideHelp()
 }
 
 //////////////////////////////////////////////////////////////////////
-/// \brief MainWindow::currentAppConfig_save
-///     write app configuration to json file at app shutdown
-void MainWindow::currentAppConfig_save()
-{
-    SaveConfiguration saveCfg;
-    saveCfg.write();
-}
-
-//////////////////////////////////////////////////////////////////////
 /// \brief MainWindow::currentAppConfig_loadSaved
 ///     load app configuration from json file at app startup
 void MainWindow::currentAppConfig_loadSaved()
@@ -102,7 +93,7 @@ void MainWindow::currentAppConfig_loadSaved()
 
         /* todo: continue here, load the saveCfg.data.app to ui */
 
-        LOG("Configuration loaded from file");
+        LOG("Configuration loaded from json file");
     } else {
         LOG("No previous saved configuration found");
     }
@@ -113,11 +104,10 @@ void MainWindow::selectScript()
 {
     QString openLocation;
 
-    if (!RunScriptParam::get().fileName.isEmpty()) {
+    if (!RunScriptParam::get().fileName.isEmpty())
         openLocation = RunScriptParam::get().fileName;
-    } else {
+    else
         openLocation = LOCATION_DEFAULT;
-    }
 
     QString scriptFileName = QFileDialog::getOpenFileName(
                 this, RunScriptParam::get().fileName);
@@ -127,11 +117,10 @@ void MainWindow::selectScript()
         ui->lineEdit_script->setText(scriptFileName);
         ui->pushButton_script_run->setFocus();
     }
-
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::connectOrDisconnect()
+void MainWindow::connectionToggle()
 {
     communic->establishToggle();
 }
@@ -142,7 +131,9 @@ void MainWindow::connectOrDisconnect()
 ///     function called when the MainWindow is being closed
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    currentAppConfig_save();
+    SaveConfiguration saveCfg;
+    saveCfg.write();
+
     (void)event;
     LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
 }
@@ -155,7 +146,6 @@ void MainWindow::showConnectionSettings()
             SLOT(establish(communicationType)));
 
     dialog_connect->show();
-    /* the dialog_connect deletes itself, when closed */
 }
 
 /////////////////////////////////////////////////////////////////
@@ -177,9 +167,7 @@ int MainWindow::terminalInputHasFocus()
 void MainWindow::clearOutput()
 {
     for (int i = 0; i < TABWIDGET_TABCNT; i++)
-    {
         termIO[i].textEdit_out.clear();
-    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -194,14 +182,14 @@ void MainWindow::Tx_fromDataInput(int inputType)
     dataConv.setStrOfIndex(inputType, termInData);
     txData = dataConv.getByteArray();
 
-    on_Tx(txData);
+    Tx(txData);
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::on_Tx(QByteArray txData)
+void MainWindow::Tx(QByteArray txData)
 {
     if (!communic->isEstablished()) {
-        LOG_T(error, "Can't transmit. No connection established.");
+        LOG_T(error, "Can't transmit. No connection established");
         return;
     }
 
@@ -212,7 +200,8 @@ void MainWindow::on_Tx(QByteArray txData)
     if (AppCfgParam::get().suffix_tx_enabled)
         txData.append(AppCfgParam::get().suffix_tx);
 
-    communic->dataTransmit(txData);
+    if (!communic->dataTransmit(txData))
+        LOG_T(error, "Failed to transmit data");
 
     if (AppCfgParam::get().clearOutputLine)
         for (int i = 0; i < TABWIDGET_TABCNT; i++)
@@ -581,7 +570,7 @@ void MainWindow::on_pushButton_script_run_clicked()
 
     if (script == nullptr) {
         script = std::unique_ptr <RunScript> (new RunScript());
-        connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(on_Tx(QByteArray)));
+        connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(Tx(QByteArray)));
         connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
         connect(script.get(), SIGNAL(Uilog(int, QString)), &UiLog::get(), SLOT(write(int, QString)));
 

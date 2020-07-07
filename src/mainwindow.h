@@ -96,14 +96,11 @@ class MainWindow : public QMainWindow
     int lastTerminalData;
 
     void closeEvent(QCloseEvent *event);
-    void currentAppConfig_save();
 
     Form_termIO termIO[TABWIDGET_TABCNT];
 
-
     QTextEdit textEdit_out;
     QLineEdit lineEdit_in;
-
 
 public:
     explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
@@ -136,7 +133,7 @@ private slots:
     void pressedKey_down();
     void pressedKey_enter();
 
-    void on_Tx(QByteArray);
+    void Tx(QByteArray);
     void Tx_fromDataInput(int);
 
     void historyTxUpdate();
@@ -146,7 +143,7 @@ private slots:
 
     void currentAppConfig_loadSaved();
     void runScript_finished();
-    void connectOrDisconnect();
+    void connectionToggle();
 
     void on_checkBox_prefix_stateChanged(int arg1);
     void on_checkBox_suffix_stateChanged(int arg1);
