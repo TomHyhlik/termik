@@ -11,37 +11,28 @@ enum communicationType {
     comType_serial, comType_network, comType_none
 };
 
-
 class Communication : public QObject
 {
     Q_OBJECT
 
     communicationType lastComType;
-
-     std::unique_ptr <CommunicationWorker> communicWorker;
-
+    std::unique_ptr <CommunicationWorker> communicWorker;
 
 public:
     explicit Communication(QObject *parent = nullptr);
-
 
     void establishToggle();
     bool isEstablished();
     void suspend();
 
-//    communicationType getLastConnType() { return lastComType; } // todo rm, should not be needed
-
-
 public slots:
-
     void establish();
     void establish(communicationType);
+    void establishPrintResults(bool success, communicationType type);
     bool dataTransmit(QByteArray);
-
 
 private slots:
     void dataArrived(QByteArray);
-
 
 signals:
     void connected();
@@ -50,7 +41,6 @@ signals:
 
     void established_success();
     void established_failed();
-
 
 };
 

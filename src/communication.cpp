@@ -43,31 +43,32 @@ void Communication::establish()
 }
 //////////////////////////////////////////////////////////////////////
 void Communication::establish(communicationType type)
-{
-    bool EstablishedSuccessful = false;
+{            
+    CommunicWorkerFactory factory;
+    communicWorker = std::unique_ptr <CommunicationWorker> (factory.create(type));
+    if (communicWorker == nullptr) return;
 
     LOG("Attempt to establish communication");
 
-    switch (type)
-    {
-    case comType_serial:
-        communicWorker = std::unique_ptr <CommunicationWorker> (new SerialWorker());
-        EstablishedSuccessful = communicWorker->open();
-        break;
-    case comType_network:
-        communicWorker = std::unique_ptr <CommunicationWorker> (new NetworkWorker());
-        EstablishedSuccessful = communicWorker->open();
-        break;
-    case comType_none:
-        return;
-    }
+    bool establishedSuccessful = communicWorker->open();
+    establishPrintResults(establishedSuccessful, type);
 
-    connect(communicWorker.get(), &SerialWorker::received,
-            this, &Communication::dataArrived);
-
-    if (EstablishedSuccessful)
-    {
+    if (establishedSuccessful) {
+        connect(communicWorker.get(), &SerialWorker::received,
+                this, &Communication::dataArrived);
         lastComType = type;
+        emit established_success();
+    } else {
+        communicWorker = nullptr;
+        emit established_failed();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+void Communication::establishPrintResults(bool success, communicationType type)
+{
+    if (success)
+    {
         switch (type)
         {
         case comType_serial:
@@ -104,10 +105,7 @@ void Communication::establish(communicationType type)
     } else {
         LOG_T(error, "Failed to establish communication");
     }
-
-    EstablishedSuccessful ? emit established_success() : emit established_failed();
 }
-
 //////////////////////////////////////////////////////////////////////
 void Communication::suspend()
 {
