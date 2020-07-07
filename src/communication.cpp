@@ -1,5 +1,5 @@
 #include "communication.h"
-
+#include "communicworkerfactory.h"
 
 #include "serialworker.h"
 #include "networkworker.h"
@@ -51,11 +51,11 @@ void Communication::establish(communicationType type)
     switch (type)
     {
     case comType_serial:
-        communicWorker = std::unique_ptr <SerialWorker> (new SerialWorker());
+        communicWorker = std::unique_ptr <CommunicationWorker> (new SerialWorker());
         EstablishedSuccessful = communicWorker->open();
         break;
     case comType_network:
-        communicWorker = std::unique_ptr <NetworkWorker> (new NetworkWorker());
+        communicWorker = std::unique_ptr <CommunicationWorker> (new NetworkWorker());
         EstablishedSuccessful = communicWorker->open();
         break;
     case comType_none:

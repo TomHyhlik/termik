@@ -19,6 +19,7 @@ SOURCES += \
         cliarghandler.cpp \
         communication.cpp \
         communicationworker.cpp \
+    communicworkerfactory.cpp \
         dataconverter.cpp \
     form_termio.cpp \
         uilog.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
         cliarghandler.h \
         communication.h \
         communicationworker.h \
+    communicworkerfactory.h \
         dataconverter.h \
     form_termio.h \
         uilog.h \
