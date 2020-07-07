@@ -73,10 +73,6 @@ private:
     bool networkHostsFirstRefresh;
 
     void initColors();
-
-    int getFirstMapVal(QMap<int,QString> m, QString label);
-    QString getSecondMapVal(QMap<int,QString> m, int val);
-
     void blockAllsignals(bool state);
 
     void tab_port_init();

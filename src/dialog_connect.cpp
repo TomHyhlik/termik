@@ -32,110 +32,6 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     initScan();
 }
 
-///////////////////////////////////////////////////////////////////
-void Dialog_connect::addrUpdate_devThis()
-{
-    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
-}
-
-///////////////////////////////////////////////////////////////////
-void Dialog_connect::addrUpdate_devAll()
-{
-    table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
-
-    /* focus on the last address in the table */
-    if (networkHostsFirstRefresh) {
-        networkHostsFirstRefresh = false;
-        if (ui->lineEdit_selectedAddr_rx->text().isEmpty())
-            ui->tableWidget_addr_rx->selectRow(ui->tableWidget_addr_rx->rowCount() -1);
-        if (ui->lineEdit_selectedAddr_tx->text().isEmpty())
-            ui->tableWidget_addr_tx->selectRow(ui->tableWidget_addr_tx->rowCount() -1);
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::pressedKeyArrowWertical(int tableAction)
-{
-    switch (ui->tabWidget->currentIndex())
-    {
-    case TAB_INDEX_SERIAL:
-        table_makeAction(ui->tableWidget_serialPorts, tableAction);
-        break;
-    case TAB_INDEX_NETWORK:
-        if (ui->tableWidget_addr_tx->hasFocus())
-            table_makeAction(ui->tableWidget_addr_tx, tableAction);
-        else
-            table_makeAction(ui->tableWidget_addr_rx, tableAction);
-        break;
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::pressedKeyDown()
-{
-    pressedKeyArrowWertical(tableAction_down);
-}
-
-void Dialog_connect::pressedKeyUp()
-{
-    pressedKeyArrowWertical(tableAction_up);
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::pressedKeyLeft()
-{
-    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
-    {
-        ui->tableWidget_addr_rx->setFocus();
-    }
-}
-
-void Dialog_connect::pressedKeyRight()
-{
-    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
-    {
-        ui->tableWidget_addr_tx->setFocus();
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::table_makeAction(QTableWidget* tableWidget, int actionType)
-{
-    switch (actionType)
-    {
-    case tableAction_up:
-        if (tableWidget->currentRow() > 0)
-            tableWidget->selectRow(tableWidget->currentRow() - 1);
-        break;
-    case tableAction_down:
-        if (tableWidget->currentRow() < tableWidget->rowCount())
-            tableWidget->selectRow(tableWidget->currentRow() + 1);
-        break;
-    }
-}
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::lineEdit_updateToTableRow(QLineEdit* lineEdit, QTableWidget *table, int row)
-{
-    QString name = table->item(row, 0)->text();
-    lineEdit->setText(name);
-}
-
-/////////////////////////////////////////////////////////////////
-void Dialog_connect::shortcuts_init()
-{
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
-    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
-
-    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKeyUp()));
-    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKeyDown()));
-    new QShortcut(QKeySequence(Qt::Key_Left), this, SLOT(pressedKeyLeft()));
-    new QShortcut(QKeySequence(Qt::Key_Right), this, SLOT(pressedKeyRight()));
-
-}
-
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::EscPressed()
 {
@@ -148,7 +44,6 @@ void Dialog_connect::EscPressed()
 void Dialog_connect::closeEvent(QCloseEvent *event)
 {
     QWidget::closeEvent(event);
-
     this->deleteLater();
 }
 
@@ -158,18 +53,17 @@ void Dialog_connect::closeEvent(QCloseEvent *event)
 void Dialog_connect::showEvent( QShowEvent* event )
 {
     QWidget::showEvent(event);
-
     loadParametersToUi();
 }
 
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::loadParametersToUi()
 {
-    ui->comboBox_baudRate->setCurrentText(getSecondMapVal(map_baudRate, SerialWParam::get().baudRate));
-    ui->comboBox_dataBits->setCurrentText(getSecondMapVal(map_dataBits, SerialWParam::get().dataBits));
-    ui->comboBox_parity->setCurrentText(getSecondMapVal(map_parity, SerialWParam::get().parity));
-    ui->comboBox_stopBits->setCurrentText(getSecondMapVal(map_stopBits, SerialWParam::get().stopBits));
-    ui->comboBox_flowControl->setCurrentText(getSecondMapVal(map_flowControl, SerialWParam::get().flowControl));
+    ui->comboBox_baudRate->setCurrentText(map_baudRate.value(SerialWParam::get().baudRate));
+    ui->comboBox_dataBits->setCurrentText(map_dataBits.value(SerialWParam::get().dataBits));
+    ui->comboBox_parity->setCurrentText(map_parity.value(SerialWParam::get().parity));
+    ui->comboBox_stopBits->setCurrentText(map_stopBits.value(SerialWParam::get().stopBits));
+    ui->comboBox_flowControl->setCurrentText(map_flowControl.value(SerialWParam::get().flowControl));
 
     //    if (!NetworkWParam::get().IpAddr_Rx.toString().isEmpty())
     ui->lineEdit_selectedAddr_rx->setText(NetworkWParam::get().IpAddr_Rx.toString());
@@ -305,27 +199,6 @@ void Dialog_connect::table_serial_add(QSerialPortInfo serialPort)
 }
 
 /////////////////////////////////////////////////////////////////
-int Dialog_connect::getFirstMapVal(QMap<int, QString> m, QString label)
-{
-    for (auto e : m.toStdMap())
-    {
-        if (label == e.second)
-            return e.first;
-    }
-    return 0;
-}
-/////////////////////////////////////////////////////////////////
-QString Dialog_connect::getSecondMapVal(QMap<int,QString> m, int val)
-{
-    for (auto e : m.toStdMap())
-    {
-        if (val == e.first)
-            return e.second;
-    }
-    return nullptr;
-}
-
-/////////////////////////////////////////////////////////////////
 void Dialog_connect::table_network_init()
 {
     QList <QString> titles;
@@ -444,28 +317,19 @@ void Dialog_connect::on_buttonBox_accepted()
 {
     /* load the  port configuration to the sw class */
     SerialWParam::get().portName = ui->lineEdit_serialPortName->text();
-    SerialWParam::get().baudRate = getFirstMapVal(map_baudRate, ui->comboBox_baudRate->currentText());
-    SerialWParam::get().dataBits = getFirstMapVal(map_dataBits, ui->comboBox_dataBits->currentText());
-    SerialWParam::get().parity = getFirstMapVal(map_parity, ui->comboBox_parity->currentText());
-    SerialWParam::get().stopBits = getFirstMapVal(map_stopBits, ui->comboBox_stopBits->currentText());
-    SerialWParam::get().flowControl = getFirstMapVal(map_flowControl, ui->comboBox_flowControl->currentText());
+    SerialWParam::get().baudRate = map_baudRate.key(ui->comboBox_baudRate->currentText());
+    SerialWParam::get().dataBits = map_dataBits.key(ui->comboBox_dataBits->currentText());
+    SerialWParam::get().parity = map_parity.key(ui->comboBox_parity->currentText());
+    SerialWParam::get().stopBits = map_stopBits.key(ui->comboBox_stopBits->currentText());
+    SerialWParam::get().flowControl = map_flowControl.key(ui->comboBox_flowControl->currentText());
 
     NetworkWParam::get().IpAddr_Rx = QHostAddress(ui->lineEdit_selectedAddr_rx->text());
     NetworkWParam::get().IpAddr_Tx = QHostAddress(ui->lineEdit_selectedAddr_tx->text());
     NetworkWParam::get().port_Rx = quint16(ui->spinBox_ipPort_Rx->value());
     NetworkWParam::get().port_Tx = quint16(ui->spinBox_ipPort_Tx->value());
-    NetworkWParam::get().protocolType = getFirstMapVal(map_networkProtocol, ui->comboBox_networkProtocol->currentText());
+    NetworkWParam::get().protocolType = map_networkProtocol.key(ui->comboBox_networkProtocol->currentText());
 
-    /* connect */
-    switch (ui->tabWidget->currentIndex())
-    {
-    case 0:
-        emit tryConnect(comType_serial);
-        break;
-    case 1:
-        emit tryConnect(comType_network);
-        break;
-    }
+    emit tryConnect(communicationType(ui->tabWidget->currentIndex()));
     this->close();
 }
 /////////////////////////////////////////////////////////////////////
@@ -501,12 +365,12 @@ QString Dialog_connect::getSerialPortName(int productIdentifier)
 //////////////////////////////////////////////////////////////////////////////
 void Dialog_connect::focus_1()
 {
-    ui->tabWidget->setCurrentIndex(0);
+    ui->tabWidget->setCurrentIndex(TAB_INDEX_SERIAL);
 }
 //////////////////////////////////////////////////////////////////////////////
 void Dialog_connect::focus_2()
 {
-    ui->tabWidget->setCurrentIndex(1);
+    ui->tabWidget->setCurrentIndex(TAB_INDEX_NETWORK);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -584,3 +448,105 @@ void Dialog_connect::initScan()
 }
 
 //////////////////////////////////////////////////////////////////////////////
+void Dialog_connect::addrUpdate_devThis()
+{
+    table_updateHosts(ui->tableWidget_addr_rx, networkScan->get_addrs_devThis());
+}
+
+///////////////////////////////////////////////////////////////////
+void Dialog_connect::addrUpdate_devAll()
+{
+    table_updateHosts(ui->tableWidget_addr_tx, networkScan->get_addrs_devAll());
+
+    /* focus on the last address in the table */
+    if (networkHostsFirstRefresh) {
+        networkHostsFirstRefresh = false;
+        if (ui->lineEdit_selectedAddr_rx->text().isEmpty())
+            ui->tableWidget_addr_rx->selectRow(ui->tableWidget_addr_rx->rowCount() -1);
+        if (ui->lineEdit_selectedAddr_tx->text().isEmpty())
+            ui->tableWidget_addr_tx->selectRow(ui->tableWidget_addr_tx->rowCount() -1);
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyArrowWertical(int tableAction)
+{
+    switch (ui->tabWidget->currentIndex())
+    {
+    case TAB_INDEX_SERIAL:
+        table_makeAction(ui->tableWidget_serialPorts, tableAction);
+        break;
+    case TAB_INDEX_NETWORK:
+        if (ui->tableWidget_addr_tx->hasFocus())
+            table_makeAction(ui->tableWidget_addr_tx, tableAction);
+        else
+            table_makeAction(ui->tableWidget_addr_rx, tableAction);
+        break;
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyDown()
+{
+    pressedKeyArrowWertical(tableAction_down);
+}
+
+void Dialog_connect::pressedKeyUp()
+{
+    pressedKeyArrowWertical(tableAction_up);
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::pressedKeyLeft()
+{
+    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
+    {
+        ui->tableWidget_addr_rx->setFocus();
+    }
+}
+
+void Dialog_connect::pressedKeyRight()
+{
+    if (ui->tabWidget->currentIndex() == TAB_INDEX_NETWORK)
+    {
+        ui->tableWidget_addr_tx->setFocus();
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::table_makeAction(QTableWidget* tableWidget, int actionType)
+{
+    switch (actionType)
+    {
+    case tableAction_up:
+        if (tableWidget->currentRow() > 0)
+            tableWidget->selectRow(tableWidget->currentRow() - 1);
+        break;
+    case tableAction_down:
+        if (tableWidget->currentRow() < tableWidget->rowCount())
+            tableWidget->selectRow(tableWidget->currentRow() + 1);
+        break;
+    }
+}
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::lineEdit_updateToTableRow(QLineEdit* lineEdit, QTableWidget *table, int row)
+{
+    QString name = table->item(row, 0)->text();
+    lineEdit->setText(name);
+}
+
+/////////////////////////////////////////////////////////////////
+void Dialog_connect::shortcuts_init()
+{
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(EscPressed()));
+
+    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKeyUp()));
+    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKeyDown()));
+    new QShortcut(QKeySequence(Qt::Key_Left), this, SLOT(pressedKeyLeft()));
+    new QShortcut(QKeySequence(Qt::Key_Right), this, SLOT(pressedKeyRight()));
+
+}

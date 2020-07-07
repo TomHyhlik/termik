@@ -8,7 +8,7 @@
 #include "communicationworker.h"
 
 enum communicationType {
-    comType_none, comType_serial, comType_network
+    comType_serial, comType_network, comType_none
 };
 
 
