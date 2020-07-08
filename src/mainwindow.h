@@ -103,7 +103,7 @@ class MainWindow : public QMainWindow
     QLineEdit lineEdit_in;
 
 public:
-    explicit MainWindow(QStringList arguments,QWidget *parent = nullptr);
+    explicit MainWindow(int argc, char** argv, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:   

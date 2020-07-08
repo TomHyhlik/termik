@@ -4,23 +4,23 @@
 #include "networkwparam.h"
 
 //////////////////////////////////////////////////////////////////////
-CliArgHandler::CliArgHandler(QStringList val) : arguments(val)
+CliArgHandler::CliArgHandler(int argc, char** argv)
 {
     setComType = comType_none;
 
     /* the first argument is the cmd of calling the app */
-    arguments.removeFirst();
+    int currentArg = 1;
 
     /* now look at the pairs of arguments */
-    while (!arguments.isEmpty())
+    while (currentArg < argc)
     {
-        QString command = arguments.takeFirst();
+        QString command(argv[currentArg++]);
         /* check if the command starts with "-" */
         if (command.at(0) == ARG_PREFIX_SHORT) {
             command.remove(0, 1); // remove "-" at the beginning
             /* read the passed data to the argument */
-            if (!arguments.isEmpty()) {
-                QString passedData = arguments.takeFirst();
+            if (currentArg < argc) {
+                QString passedData(argv[currentArg++]);
                 if (setParam(command, passedData)) {
                     qDebug() << "Setting" << command << " to " << passedData;
                 } else {

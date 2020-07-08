@@ -31,7 +31,6 @@
 
 ////////////////////////////////////////////////
 
-
 enum {
     ARG_INDEX_CONNECTIONTYPE,
     ARG_INDEX_NETWORK_IPADDR,
@@ -53,12 +52,10 @@ enum {
 #define ARG_ERROR       "ERROR: Failed to handle arguments."
 
 ////////////////////////////////////////////////
-
 class CliArgHandler : public QObject
 {
     Q_OBJECT
 
-    QStringList arguments;
     communicationType setComType;
 
     const QList <QString> validArgs =
@@ -83,7 +80,7 @@ class CliArgHandler : public QObject
     };
 
 public:
-    explicit CliArgHandler(QStringList val);
+    explicit CliArgHandler(int argc, char** argv);
 
 
     communicationType getComType() { return setComType; }

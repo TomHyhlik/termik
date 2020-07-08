@@ -20,7 +20,7 @@
 
 
 /////////////////////////////////////////////////////////////////
-MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
+MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -33,11 +33,10 @@ MainWindow::MainWindow(QStringList arguments, QWidget *parent) :
     init_appParams();
     currentAppConfig_loadSaved();
 
-    /* parse CLI arguments */
-    CliArgHandler cliArgHandler(arguments);
-    if (cliArgHandler.getComType() != comType_none) {
+    CliArgHandler cliArgHandler(argc, argv);
+    if (cliArgHandler.getComType() != comType_none)
         communic->establish(cliArgHandler.getComType());
-    }
+
 }
 
 /////////////////////////////////////////////////////////////////

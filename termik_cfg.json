@@ -11,8 +11,8 @@
     "Network": {
         "IP address Rx": "127.0.0.1",
         "IP address Tx": "127.0.0.1",
-        "Port Rx": 1111,
-        "Port Tx": 1111,
+        "Port Rx": 77,
+        "Port Tx": 123,
         "Protocol": 0
     },
     "Script": {
