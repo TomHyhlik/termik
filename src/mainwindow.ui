@@ -155,20 +155,30 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_script">
       <item>
-       <widget class="QLabel" name="label_script">
+       <widget class="QPushButton" name="pushButton_scriptOpen">
         <property name="text">
-         <string>Script:</string>
+         <string>Open script file</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit_script"/>
-      </item>
-      <item>
-       <widget class="QComboBox" name="comboBox_script_dataType"/>
+       <widget class="QComboBox" name="comboBox_script_dataType">
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_script_repeat">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>repeat</string>
         </property>
@@ -176,13 +186,25 @@
       </item>
       <item>
        <widget class="QSpinBox" name="spinBox_script_period">
+        <property name="maximumSize">
+         <size>
+          <width>70</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="maximum">
          <number>99999</number>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_script_run">
+       <widget class="QPushButton" name="pushButton_scriptRun">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Run</string>
         </property>
