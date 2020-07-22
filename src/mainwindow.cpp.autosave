@@ -352,7 +352,6 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
     if (AppCfgParam::get().autoclerTermOut)
         for (int i = 0; i < TABWIDGET_TABCNT; i++)
             shortenTextEdit(&termIO[i].textEdit_out);
-
 }
 
 /////////////////////////////////////////////////////////////////

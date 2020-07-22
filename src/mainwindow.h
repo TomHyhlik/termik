@@ -84,7 +84,10 @@ enum addLine{
     before, after, beforeAndAfter
 };
 
-
+const QList <QString> title_dataFormat
+{
+    TITLE_DATA_ASCII, TITLE_DATA_HEX
+};
 
 /////////////////////////////////////////////////////////
 namespace Ui {
