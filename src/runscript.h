@@ -29,7 +29,6 @@ public:
 
 signals:
     void Tx(QByteArray data);
-    void log(int, QString);
 
 public slots:
 

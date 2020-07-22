@@ -80,15 +80,15 @@ void MainWindow::currentAppConfig_loadSaved()
 
         /* load script parameters */
         if (!saveCfg.data.script.fileName.isEmpty()) {
-            ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+            ui->lineEdit_scriptPath->setText(saveCfg.data.script.fileName);
         }
 
         /* RunScript settings */
-        ui->comboBox_script_dataType->setCurrentIndex(saveCfg.data.script.dFormat);
-        ui->lineEdit_script->setText(saveCfg.data.script.fileName);
+        ui->comboBox_scriptDataFormat->setCurrentIndex(saveCfg.data.script.dFormat);
+        ui->lineEdit_scriptPath->setText(saveCfg.data.script.fileName);
 
-        ui->checkBox_script_repeat->setChecked(saveCfg.data.script.repeat);
-        ui->spinBox_script_period->setValue(saveCfg.data.script.timeout);
+        ui->checkBox_scriptRepeatEnable->setChecked(saveCfg.data.script.repeat);
+        ui->spinBox_scriptTransmissionPeriod->setValue(saveCfg.data.script.timeout);
 
         /* todo: continue here, load the saveCfg.data.app to ui */
 
@@ -112,9 +112,8 @@ void MainWindow::selectScript()
                 this, RunScriptParam::get().fileName);
 
     if (!scriptFileName.isEmpty()) {
-        showScriptUi();
-        ui->lineEdit_script->setText(scriptFileName);
-        ui->pushButton_script_run->setFocus();
+        ui->lineEdit_scriptPath->setText(scriptFileName);
+        ui->lineEdit_scriptPath->setFocus();
     }
 }
 
@@ -188,7 +187,7 @@ void MainWindow::Tx_fromDataInput(int inputType)
 void MainWindow::Tx(QByteArray txData)
 {
     if (!communic->isEstablished()) {
-        LOG_T(error, "Can't transmit. No connection established");
+        LOG_T(error, STATMESSAGE_ERR_NOTCONNECTED);
         return;
     }
 
@@ -232,6 +231,7 @@ void MainWindow::pressedKey_down()
 
         if (history_out_ptr > 0)
             history_out_ptr--;
+
     }
 }
 /////////////////////////////////////////////////////////////////
@@ -256,25 +256,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-/////////////////////////////////////////////////////////////////
-void MainWindow::showScriptUi()
-{
-    ui->label_script->show();
-    ui->lineEdit_script->show();
-    ui->comboBox_script_dataType->show();
-    ui->checkBox_script_repeat->show();
-    ui->pushButton_script_run->show();
-    ui->spinBox_script_period->show();
-}
-void MainWindow::hideScriptUi()
-{
-    ui->label_script->hide();
-    ui->lineEdit_script->hide();
-    ui->comboBox_script_dataType->hide();
-    ui->checkBox_script_repeat->hide();
-    ui->pushButton_script_run->hide();
-    ui->spinBox_script_period->hide();
-}
 /////////////////////////////////////////////////////////////////
 void MainWindow::focus_0()
 {
@@ -439,23 +420,22 @@ void MainWindow::pressedKey_esc()
     hideHelp();
     hideSettings();
     terminalInputSetFocus();
-    hideScriptUi();
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::hideSettings()
 {
-    ui->groupBox_settings->hide();
+    ui->tabWidget_settings->hide();
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::showSettings()
 {
-    ui->groupBox_settings->show();
+    ui->tabWidget_settings->show();
 }
 /////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowSettings()
 {
-    if (ui->groupBox_settings->isVisible()) {
+    if (ui->tabWidget_settings->isVisible()) {
         hideSettings();
     } else {
         showSettings();
@@ -529,7 +509,7 @@ void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
         outputFile = nullptr;
     }
 }
-void MainWindow::on_checkBox_script_repeat_stateChanged(int arg1)
+void MainWindow::on_checkBox_scriptRepeatEnable_stateChanged(int arg1)
 {
     RunScriptParam::get().repeat = (arg1 == Qt::Checked) ? true : false;
 }
@@ -553,7 +533,7 @@ void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
     AppCfgParam::get().prefix_tx = dataConv.getByteArray();
 }
 
-void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
+void MainWindow::on_spinBox_scriptTransmissionPeriod_valueChanged(int arg1)
 {
     if (script == nullptr) {
         RunScriptParam::get().timeout = arg1;
@@ -562,46 +542,37 @@ void MainWindow::on_spinBox_script_period_valueChanged(int arg1)
     }
 }
 
-void MainWindow::on_pushButton_script_run_clicked()
+void MainWindow::on_pushButton_scriptRun_clicked()
 {
-    if (!communic->isEstablished())
+    if (!communic->isEstablished()) {
+        LOG_T(error, STATMESSAGE_ERR_NOTCONNECTED);
         return;
+    }
 
     if (script == nullptr) {
+        LOG("Start to run script");
         script = std::unique_ptr <RunScript> (new RunScript());
-        connect(script.get(), SIGNAL(Tx(QByteArray)), this, SLOT(Tx(QByteArray)));
-        connect(script.get(), SIGNAL(finished()), this, SLOT(runScript_finished()));
-        connect(script.get(), SIGNAL(Uilog(int, QString)), &UiLog::get(), SLOT(write(int, QString)));
+        connect(script.get(), &RunScript::Tx, this, &MainWindow::Tx);
+        connect(script.get(), &RunScript::finished, this, &MainWindow::runScript_finished) ;
 
         script->start();
 
-        ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_STOP);
-        ui->pushButton_script_run->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+        ui->pushButton_scriptRun->setText(TITLE_BUTTON_SCRIPT_STOP);
+        ui->pushButton_scriptRun->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                  .arg(COLOR_WHITE).arg(COLOR_RED));
     } else {
         script->stop();
+        LOG("Running script forced to stop");
     }
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::runScript_finished()
 {
-    ui->pushButton_script_run->setText(TITLE_BUTTON_SCRIPT_RUN);
-    ui->pushButton_script_run->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+    ui->pushButton_scriptRun->setText(TITLE_BUTTON_SCRIPT_RUN);
+    ui->pushButton_scriptRun->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                              .arg(COLOR_WHITE).arg(COLOR_GREEN));
     script = nullptr;
-    LOG("");
-}
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::on_comboBox_script_dataType_editTextChanged(const QString &arg1)
-{
-    if (arg1 == TITLE_DATA_HEX) {
-        RunScriptParam::get().dFormat = data_hex;
-    }
-    else if (arg1 == TITLE_DATA_ASCII) {
-        RunScriptParam::get().dFormat = data_ascii;
-    }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -611,7 +582,8 @@ void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::on_comboBox_script_dataType_currentTextChanged(const QString &arg1)
+/// \todo remake with index of
+void MainWindow::on_comboBox_scriptDataFormat_currentTextChanged(const QString &arg1)
 {
     if (arg1 == TITLE_DATA_ASCII) {
         RunScriptParam::get().dFormat = data_ascii;
@@ -619,12 +591,6 @@ void MainWindow::on_comboBox_script_dataType_currentTextChanged(const QString &a
     else if (arg1 == TITLE_DATA_HEX) {
         RunScriptParam::get().dFormat = data_hex;
     }
-}
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::on_lineEdit_script_textChanged(const QString &arg1)
-{
-    RunScriptParam::get().fileName = arg1;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -673,20 +639,29 @@ void MainWindow::init_colors()
                                        .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-    ui->lineEdit_script->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
-    ui->comboBox_script_dataType->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+    ui->pushButton_scriptOpen->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+    ui->comboBox_scriptDataFormat->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
 
     ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
+    ui->spinBox_scriptTransmissionPeriod->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
+    ui->lineEdit_scriptPath->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::init_ui()
 {
     UiLog::get().setOutput(ui->statusBar);
+
+    connect(ui->pushButton_scriptOpen, &QPushButton::clicked, this,
+            &MainWindow::selectScript);
 
     runScript_finished();
 
@@ -696,25 +671,23 @@ void MainWindow::init_ui()
 
     setWindowTitle(MAINWINDOWTITLE);
 
-    ui->comboBox_script_dataType->addItem(TITLE_DATA_ASCII);
-    ui->comboBox_script_dataType->addItem(TITLE_DATA_HEX);
-    ui->spinBox_script_period->setValue(SCRIPTTIMEOUT_DEFAULT);
+    ui->comboBox_scriptDataFormat->addItem(TITLE_DATA_ASCII);
+    ui->comboBox_scriptDataFormat->addItem(TITLE_DATA_HEX);
+    ui->spinBox_scriptTransmissionPeriod->setValue(SCRIPTTIMEOUT_DEFAULT);
 
     ui->checkBox_timeLog->setChecked(true);
     ui->checkBox_prefix->setChecked(false);
     ui->checkBox_suffix->setChecked(true);
     ui->checkBox_clearOutputLine->setChecked(true);
-    ui->checkBox_script_repeat->setChecked(true);
+    ui->checkBox_scriptRepeatEnable->setChecked(true);
     ui->lineEdit_suffix->setText(QString(QByteArray(SUFFIX_DEFAULT).toHex().toUpper()));
     ui->spinBox_autoclear_maxCharCnt->setValue(AUTOCLEAR_VAL_DEFAULT);
-    ui->spinBox_script_period->setValue(SCRIPT_TXPERIOD_DEFAULT);
+    ui->spinBox_scriptTransmissionPeriod->setValue(SCRIPT_TXPERIOD_DEFAULT);
 
     ui->checkBox_autoclear->setChecked(true);
     ui->checkBox_autoclear->setChecked(false);
-    ui->spinBox_script_period->setValue(10);
 
     hideHelp();
-    hideScriptUi();
     hideSettings();
     focus_0();
 }
@@ -727,6 +700,12 @@ void MainWindow::init_communication()
             this, SLOT(terminalOutUpdate(int, QByteArray)));
     connect(communic, SIGNAL(established_success()), this, SLOT(terminalInputSetFocus()));
     connect(communic, SIGNAL(established_failed()), this, SLOT(showConnectionSettings()));
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::on_lineEdit_scriptPath_textChanged(const QString &arg1)
+{
+    RunScriptParam::get().fileName = arg1;
 }
 
 /////////////////////////////////////////////////////////////////

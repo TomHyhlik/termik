@@ -19,17 +19,17 @@ void RunScript::run()
 {
     isRunning = true;
 
-    log(info, QString("Reading file content: %1")
+    LOG(QString("Reading file content: %1")
         .arg(RunScriptParam::get().fileName));
 
     QList <QByteArray> fileContent;
 
     if (!readFileContent(&fileContent)) {
-        log(error, QString("Failed to read the file content"));
+        LOG_T(error, QString("Failed to read the file content"));
         return;
     }
 
-    log(info, "Transmitting the script...");
+    LOG("Transmitting the script...");
 
     do {
         for (const QByteArray& line : fileContent) {

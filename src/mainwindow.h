@@ -74,6 +74,8 @@
 #define LOCATION_DEFAULT    "~/"
 
 
+#define STATMESSAGE_ERR_NOTCONNECTED "Can't transmit. No connection established"
+
 enum dataToDisplay {
      data_Rx, data_Tx
 };
@@ -126,9 +128,6 @@ private slots:
     void showHelp();
     void hideHelp();
 
-    void showScriptUi();
-    void hideScriptUi();
-
     void pressedKey_up();
     void pressedKey_down();
     void pressedKey_enter();
@@ -152,18 +151,19 @@ private slots:
     void on_checkBox_timeLog_stateChanged(int arg1);    
     void on_checkBox_clearOutputLine_stateChanged(int arg1);
     void on_checkBox_outputSave_stateChanged(int arg1);
-    void on_spinBox_script_period_valueChanged(int arg1);
-    void on_pushButton_script_run_clicked();
-    void on_comboBox_script_dataType_editTextChanged(const QString &arg1);
-    void on_checkBox_script_repeat_stateChanged(int arg1);
+    void on_spinBox_scriptTransmissionPeriod_valueChanged(int arg1);
+    void on_pushButton_scriptRun_clicked();
+    void on_checkBox_scriptRepeatEnable_stateChanged(int arg1);
     void on_pushButton_save_clicked();
     void on_tabWidget_currentChanged(int index);
     void on_lineEdit_save_textChanged(const QString &arg1);
     void on_checkBox_autoclear_stateChanged(int arg1);
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
-    void on_comboBox_script_dataType_currentTextChanged(const QString &arg1);
-    void on_lineEdit_script_textChanged(const QString &arg1);
+    void on_comboBox_scriptDataFormat_currentTextChanged(const QString &arg1);
 
+
+
+    void on_lineEdit_scriptPath_textChanged(const QString &arg1);
 
 public slots:
 
@@ -172,7 +172,7 @@ private:
     Ui::MainWindow *ui;
     Communication* communic;
     std::unique_ptr <OutputFile> outputFile = nullptr;
-    std::unique_ptr <RunScript> script;
+    std::unique_ptr <RunScript> script = nullptr;
 
     QElapsedTimer sinceLastTermOutUpdate;
 
