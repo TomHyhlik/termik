@@ -17,7 +17,6 @@
 #include "outputfile.h"
 #include "form_termio.h"
 
-
 #define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
 
 #define DIGIT_NUM_HEX   2
@@ -65,11 +64,6 @@
 #define TITLE_HELPTABLE_DESCRIPTION     "Description"
 
 #define TABWIDGET_TABCNT        3
-
-#define TABWIDGET_INDEX_ASCII   0
-#define TABWIDGET_INDEX_HEX     1
-#define TABWIDGET_INDEX_DEC     2
-
 
 #define LOCATION_DEFAULT    "~/"
 
@@ -123,6 +117,8 @@ private slots:
     void focus_0();
     void focus_1();
     void focus_2();
+    void focus_termIO(int index);
+
 
     void toggleShowSettings();
     void showSettings();

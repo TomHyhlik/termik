@@ -259,20 +259,23 @@ MainWindow::~MainWindow()
 /////////////////////////////////////////////////////////////////
 void MainWindow::focus_0()
 {
-    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_ASCII);
-    termIO[TABWIDGET_INDEX_ASCII].lineEdit_in.setFocus();
+    focus_termIO(data_ascii);
 }
 void MainWindow::focus_1()
 {
-    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_HEX);
-    termIO[TABWIDGET_INDEX_HEX].lineEdit_in.setFocus();
+    focus_termIO(data_hex);
 }
 void MainWindow::focus_2()
 {
-    ui->tabWidget->setCurrentIndex(TABWIDGET_INDEX_DEC);
-    termIO[TABWIDGET_INDEX_DEC].lineEdit_in.setFocus();
+    focus_termIO(data_dec);
 }
 
+/////////////////////////////////////////////////////////////////
+void MainWindow::focus_termIO(int index)
+{
+    ui->tabWidget->setCurrentIndex(index);
+    termIO[index].lineEdit_in.setFocus();
+}
 /////////////////////////////////////////////////////////////////
 void MainWindow::terminalOut_addPreamble(int dataKind)
 {
@@ -352,7 +355,6 @@ void MainWindow::terminalOutUpdate(int dataKind, QByteArray data)
     if (AppCfgParam::get().autoclerTermOut)
         for (int i = 0; i < TABWIDGET_TABCNT; i++)
             shortenTextEdit(&termIO[i].textEdit_out);
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -656,9 +658,9 @@ void MainWindow::init_ui()
 
     runScript_finished();
 
-    ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[TABWIDGET_INDEX_ASCII]);
-    ui->verticalLayout_tabwidget_hex->addWidget(&termIO[TABWIDGET_INDEX_HEX]);
-    ui->verticalLayout_tabwidget_dec->addWidget(&termIO[TABWIDGET_INDEX_DEC]);
+    ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[data_ascii]);
+    ui->verticalLayout_tabwidget_hex->addWidget(&termIO[data_hex]);
+    ui->verticalLayout_tabwidget_dec->addWidget(&termIO[data_dec]);
 
     setWindowTitle(MAINWINDOWTITLE);
 
