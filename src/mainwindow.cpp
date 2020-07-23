@@ -257,26 +257,6 @@ MainWindow::~MainWindow()
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::focus_0()
-{
-    focus_termIO(data_ascii);
-}
-void MainWindow::focus_1()
-{
-    focus_termIO(data_hex);
-}
-void MainWindow::focus_2()
-{
-    focus_termIO(data_dec);
-}
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::focus_termIO(int index)
-{
-    ui->tabWidget->setCurrentIndex(index);
-    termIO[index].lineEdit_in.setFocus();
-}
-/////////////////////////////////////////////////////////////////
 void MainWindow::terminalOut_addPreamble(int dataKind)
 {
     if (AppCfgParam::get().timeLogEnabled)
@@ -501,12 +481,9 @@ void MainWindow::on_checkBox_clearOutputLine_stateChanged(int arg1)
 }
 void MainWindow::on_checkBox_outputSave_stateChanged(int arg1)
 {
-    if (arg1 == Qt::Checked) {
-        outputFile = std::unique_ptr <OutputFile>
-                (new OutputFile(AppCfgParam::get().outputFileDir));
-    } else {
-        outputFile = nullptr;
-    }
+    outputFile = (arg1 == Qt::Checked) ?
+                std::unique_ptr <OutputFile> (new OutputFile(AppCfgParam::get().outputFileDir))
+              : nullptr;
 }
 void MainWindow::on_checkBox_scriptRepeatEnable_stateChanged(int arg1)
 {
@@ -516,7 +493,25 @@ void MainWindow::on_checkBox_autoclear_stateChanged(int arg1)
 {
     AppCfgParam::get().autoclerTermOut = (arg1 == Qt::Checked) ? true : false;
 }
+void MainWindow::focus_0()
+{
+    focus_termIO(data_ascii);
+}
+void MainWindow::focus_1()
+{
+    focus_termIO(data_hex);
+}
+void MainWindow::focus_2()
+{
+    focus_termIO(data_dec);
+}
 
+/////////////////////////////////////////////////////////////////
+void MainWindow::focus_termIO(int index)
+{
+    ui->tabWidget->setCurrentIndex(index);
+    termIO[index].lineEdit_in.setFocus();
+}
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_lineEdit_suffix_textChanged(const QString &arg1)
 {
@@ -534,11 +529,8 @@ void MainWindow::on_lineEdit_prefix_textChanged(const QString &arg1)
 
 void MainWindow::on_spinBox_scriptTransmissionPeriod_valueChanged(int arg1)
 {
-    if (script == nullptr) {
-        RunScriptParam::get().timeout = arg1;
-    } else {
-        script->setTimeout(arg1);
-    }
+    if (script != nullptr)  script->setTimeout(arg1);
+    else    RunScriptParam::get().timeout = arg1;
 }
 
 void MainWindow::on_pushButton_scriptRun_clicked()
@@ -558,7 +550,7 @@ void MainWindow::on_pushButton_scriptRun_clicked()
 
         ui->pushButton_scriptRun->setText(TITLE_BUTTON_SCRIPT_STOP);
         ui->pushButton_scriptRun->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                 .arg(COLOR_WHITE).arg(COLOR_RED));
+                                                .arg(COLOR_WHITE).arg(COLOR_RED));
     } else {
         script->stop();
         LOG("Running script forced to stop");
@@ -570,7 +562,7 @@ void MainWindow::runScript_finished()
 {
     ui->pushButton_scriptRun->setText(TITLE_BUTTON_SCRIPT_RUN);
     ui->pushButton_scriptRun->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                             .arg(COLOR_WHITE).arg(COLOR_GREEN));
+                                            .arg(COLOR_WHITE).arg(COLOR_GREEN));
     script = nullptr;
 }
 
@@ -583,7 +575,7 @@ void MainWindow::on_lineEdit_save_textChanged(const QString &arg1)
 /////////////////////////////////////////////////////////////////
 void MainWindow::on_comboBox_scriptDataFormat_currentTextChanged(const QString &arg1)
 {
-        RunScriptParam::get().dFormat = (dataFormat)title_dataFormat.indexOf(arg1);
+    RunScriptParam::get().dFormat = (dataFormat)title_dataFormat.indexOf(arg1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -633,18 +625,18 @@ void MainWindow::init_colors()
     ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->pushButton_scriptOpen->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+                                             .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->comboBox_scriptDataFormat->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 
     ui->spinBox_autoclear_maxCharCnt->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                     .arg(COLOR_WHITE).arg(COLOR_BLACK));
     ui->spinBox_scriptTransmissionPeriod->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                                        .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->lineEdit_scriptPath->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                    .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                           .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
 }
 
