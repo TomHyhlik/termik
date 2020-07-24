@@ -36,7 +36,7 @@ void setupShortcuts(QWidget *uiThis)
 {
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), uiThis, SLOT(on_pushButton_scriptRun_clicked()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), uiThis, SLOT(close()));
-//    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), uiThis, SLOT(showFindUi()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), uiThis, SLOT(showFastCommands()));
     new QShortcut(QKeySequence(Qt::Key_Escape), uiThis, SLOT(pressedKey_esc()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), uiThis, SLOT(moveCursorToEnd()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), uiThis, SLOT(clearOutput()));
@@ -59,6 +59,10 @@ void setupShortcuts(QWidget *uiThis)
     new QShortcut(QKeySequence(Qt::Key_Up), uiThis, SLOT(pressedKey_up()));
     new QShortcut(QKeySequence(Qt::Key_Down), uiThis, SLOT(pressedKey_down()));
     new QShortcut(QKeySequence(Qt::Key_F1), uiThis, SLOT(toggleShowHelp()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_N), uiThis, SLOT(fastCmds_addCmd()));
+
+
 }
 /////////////////////////////////////////////////////////////////
 

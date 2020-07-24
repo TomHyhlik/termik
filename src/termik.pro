@@ -19,6 +19,8 @@ SOURCES += \
         cliarghandler.cpp \
         communication.cpp \
         dataconverter.cpp \
+    fastcmdshandler.cpp \
+    form_fastcmd.cpp \
         form_termio.cpp \
         uilog.cpp \
         main.cpp \
@@ -46,6 +48,8 @@ HEADERS += \
         communicationworker.h \
         communicworkerfactory.h \
         dataconverter.h \
+    fastcmdshandler.h \
+    form_fastcmd.h \
         form_termio.h \
         uilog.h \
         mainwindow.h \
@@ -69,6 +73,7 @@ HEADERS += \
 
 
 FORMS += \
+        form_fastcmd.ui \
         form_termio.ui \
         mainwindow.ui \
         dialog_connect.ui

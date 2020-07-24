@@ -119,13 +119,13 @@ private slots:
     void focus_2();
     void focus_termIO(int index);
 
-
     void toggleShowSettings();
     void showSettings();
     void hideSettings();
     void toggleShowHelp();
     void showHelp();
     void hideHelp();
+    void showFastCommands();
 
     void pressedKey_up();
     void pressedKey_down();
@@ -159,10 +159,13 @@ private slots:
     void on_checkBox_autoclear_stateChanged(int arg1);
     void on_spinBox_autoclear_maxCharCnt_valueChanged(int arg1);
     void on_comboBox_scriptDataFormat_currentTextChanged(const QString &arg1);
-
-
-
     void on_lineEdit_scriptPath_textChanged(const QString &arg1);
+
+
+    void fastCmds_addCmd();
+
+
+
 
 public slots:
 
@@ -195,6 +198,7 @@ private:
     void terminalOut_addPreamble(int);
     QString getDataColor(int);
     QString terminalOutGetPreamble(int);
+
 
 
 };

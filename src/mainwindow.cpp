@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <memory>
+#include <QPushButton>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -17,7 +18,7 @@
 
 #include "communication.h"
 #include "serialwparam.h"
-
+#include "form_fastcmd.h"
 
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
@@ -37,16 +38,79 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     if (cliArgHandler.getComType() != comType_none)
         communic->establish(cliArgHandler.getComType());
 
+
+
+
+
+    ui->listWidget_fastCmds->hide();
+
+    QPushButton* addNewFastCmd = new QPushButton();
+    addNewFastCmd->setText("+");
+    QListWidgetItem *item = new QListWidgetItem();
+    connect(addNewFastCmd, &QPushButton::clicked,
+            this, &MainWindow::fastCmds_addCmd);
+
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->setMargin(0);
+
+    layout->addWidget(addNewFastCmd);
+
+    QWidget *widget = new QWidget();
+
+    widget->setLayout(layout);
+
+    item->setSizeHint(QSize(0, 40));
+
+    ui->listWidget_fastCmds->addItem(item);
+    ui->listWidget_fastCmds->setItemWidget(item,widget);
+
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::fastCmds_addCmd()
+{
+    Form_fastCmd* cmdUi = new Form_fastCmd();
+    cmdUi->lineEdit_cmd.setText(tr("Some cmd"));
+    connect(cmdUi, &Form_fastCmd::send,
+            this, &MainWindow::Tx);
+
+    QListWidgetItem *item = new QListWidgetItem();
+    item->setText("lol");
+
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->setMargin(0);
+
+    layout->addWidget(cmdUi);
+
+    QWidget *widget = new QWidget();
+
+    widget->setLayout(layout);
+    item->setSizeHint(QSize(0, 40));
+
+    if (ui->listWidget_fastCmds->count() > 0) {
+        ui->listWidget_fastCmds->insertItem(ui->listWidget_fastCmds->count() - 1, item);
+        ui->listWidget_fastCmds->setItemWidget(item,widget);
+    } else {
+        ui->listWidget_fastCmds->addItem(item);
+        ui->listWidget_fastCmds->setItemWidget(item,widget);
+    }
+
+    cmdUi->lineEdit_cmd.setFocus();
+    ui->listWidget_fastCmds->show();
+
+//    QListWidgetItem* item2 =
+//            ui->listWidget_fastCmds->itemAt(0, ui->listWidget_fastCmds->count());
+//    Form_fastCmd widget2 = <dynamic_cast> (Form_fastCmd*)( ui->listWidget_fastCmds->itemWidget(item2) );
+//    widget2->getLabelId();/*Add these to LblNames class first*/
+//    widget2->getLabelText();
+
 }
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowHelp()
 {
-    if (ui->tableWidget_shortcuts->isVisible()) {
-        hideHelp();
-    } else {
-        showHelp();
-    }
+    if (ui->tableWidget_shortcuts->isVisible()) hideHelp();
+    else    showHelp();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -402,6 +466,7 @@ void MainWindow::pressedKey_esc()
     hideHelp();
     hideSettings();
     terminalInputSetFocus();
+    ui->listWidget_fastCmds->hide();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -691,6 +756,12 @@ void MainWindow::init_communication()
 void MainWindow::on_lineEdit_scriptPath_textChanged(const QString &arg1)
 {
     RunScriptParam::get().fileName = arg1;
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::showFastCommands()
+{
+    ui->listWidget_fastCmds->show();
 }
 
 /////////////////////////////////////////////////////////////////
