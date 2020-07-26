@@ -9,6 +9,7 @@
 #include "serialwparam.h"
 #include "runscriptparam.h"
 #include "dataconverter.h"
+#include "uilog.h"
 
 SaveConfiguration::SaveConfiguration(QObject *parent) : QObject(parent)
 {
@@ -27,7 +28,8 @@ bool SaveConfiguration::read()
                 return true;
             }
         } else {
-            qDebug() <<"ERROR: Failed to read configuration from termik_cfg.json";
+            LOG_T(error, tr("Failed to read configuration from %1")
+                  .arg(SAVECFG_FILENAME));
         }
     }
     return false;
@@ -51,12 +53,12 @@ bool SaveConfiguration::write()
         file.flush();
         file.close();
 
-        qDebug() << "Configuration saved to: " << filename;
+        LOG(tr("Configuration saved to: %1").arg(filename));
 
         return true;
     }
 
-    qDebug() << "Failet to save configuration to: " << filename;
+    LOG(tr("Failed to save configuration to: %1").arg(filename));
 
     return false;
 }
@@ -104,7 +106,7 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
 
         return true;
     } else {
-        qDebug() <<"ERROR: Invalid JSON format, the file is corrupted";
+        LOG_T(error, "Invalid JSON format, the file is corrupted");
         return false;
     }
 }
