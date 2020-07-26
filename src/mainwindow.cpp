@@ -36,25 +36,6 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     CliArgHandler cliArgHandler(argc, argv);
     if (cliArgHandler.getComType() != comType_none)
         communic->establish(cliArgHandler.getComType());
-
-
-    for (int i = 0; i < TABWIDGET_TABCNT; i++) {
-        connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
-                this, &MainWindow::pressedKey_enter);
-    }
-
-
-    ui->listWidget_fastCmds->hide();
-
-    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
-    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
-            &MainWindow::Tx);
-
-    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
-            &MainWindow::Tx);
-    connect(this, &MainWindow::fastCmds_addCmd,
-            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
-
 }
 
 /////////////////////////////////////////////////////////////////
@@ -671,6 +652,18 @@ void MainWindow::init_ui()
     ui->verticalLayout_tabwidget_hex->addWidget(&termIO[data_hex]);
     ui->verticalLayout_tabwidget_dec->addWidget(&termIO[data_dec]);
 
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+        connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
+                this, &MainWindow::pressedKey_enter);
+
+
+    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
+    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
+            &MainWindow::Tx);
+    connect(this, &MainWindow::fastCmds_addCmd,
+            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
+
+
     setWindowTitle(MAINWINDOWTITLE);
 
     ui->comboBox_scriptDataFormat->addItem(TITLE_DATA_ASCII);
@@ -692,6 +685,7 @@ void MainWindow::init_ui()
     hideHelp();
     hideSettings();
     focus_0();
+    ui->listWidget_fastCmds->hide();
 }
 
 /////////////////////////////////////////////////////////////////

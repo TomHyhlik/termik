@@ -41,8 +41,6 @@ int FastCmdsHandler::hasFocus()
         } else {
             qDebug() << "Item: " << i << "is NULL";
         }
-
-
     }
 //    item->lineEdit_cmd.setText("necum");
 
