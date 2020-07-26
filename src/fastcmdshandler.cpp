@@ -14,39 +14,30 @@ FastCmdsHandler::FastCmdsHandler(QListWidget* val)
     for (int i = 0; i < 2; i++)
         fastCmds_addCmd();
 
-
     for (int i = 0; i < listWidget->count()-1; i++) {
-        qDebug() << "CMD" << i << ": " << cmdAt(i);
+        Form_fastCmd* cmdForm = at(i);
+        if (cmdForm != nullptr) {
+            qDebug() << "CMD" << i << ": " << cmdForm->lineEdit_cmd.text();
+        }
     }
-
 
 }
 
 /////////////////////////////////////////////////////////////////
-QString FastCmdsHandler::cmdAt(int i)
+Form_fastCmd* FastCmdsHandler::at(int i)
 {
-        QListWidgetItem* item = listWidget->item(i);
+    QWidget *w = qobject_cast <QWidget*> (listWidget->itemWidget(listWidget->item(i)));
+    Form_fastCmd* fastCmd = w->findChild <Form_fastCmd*> (OBJNAME);
 
-        if (item != nullptr)
-        {
-//            Form_fastCmd* fastCmd = dynamic_cast <Form_fastCmd*> (listWidget->itemWidget(item));
-//            Form_fastCmd *fastCmd = nullptr;//(Form_fastCmd*)listWidget->itemWidget(item);
-            QWidget *w = qobject_cast<QWidget *>(listWidget->itemWidget(item));
+    if (fastCmd != nullptr) {
+        if (fastCmd->lineEdit_cmd.hasFocus())
+            qDebug() << "data: " << fastCmd->lineEdit_cmd.text();
+            return fastCmd;
+    } else {
+        qDebug() << "fastCmd: " << i << "is NULL";
+    }
 
-            Form_fastCmd* fastCmd = w->findChild<Form_fastCmd*>(OBJNAME);
-
-            if (fastCmd != nullptr) {
-                if (fastCmd->lineEdit_cmd.hasFocus())
-                    qDebug() << "data: " << fastCmd->lineEdit_cmd.text();
-                    return fastCmd->lineEdit_cmd.text();
-            } else {
-                qDebug() << "fastCmd: " << i << "is NULL";
-            }
-        } else {
-            qDebug() << "Item: " << i << "is NULL";
-        }
-
-    return "";
+    return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////

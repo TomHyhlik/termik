@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QListWidget>
 
+#include "form_fastcmd.h"
+
 
 #define OBJNAME "ObjName"
 
@@ -19,7 +21,7 @@ class FastCmdsHandler : public QObject
 public:
     explicit FastCmdsHandler(QListWidget* val);
 
-    QString cmdAt(int i);
+    Form_fastCmd* at(int i);
 
 public slots:
     void fastCmds_addCmd();
