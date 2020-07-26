@@ -26,15 +26,16 @@ public:
     QPushButton pushButton_send;
     QPushButton pushButton_showSettings;
 
-
     Ui::Form_fastCmd *ui;
+
+
 
 private slots:
     void sendPressed();
 
 
 signals:
-    void send(QByteArray);
+    void Tx(QByteArray);
 
 
 

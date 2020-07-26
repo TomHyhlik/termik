@@ -2,6 +2,7 @@
 #include "ui_form_fastcmd.h"
 
 #include "mainwindow.h"
+#include "dataconverter.h"
 
 #include <QPushButton>
 
@@ -20,17 +21,17 @@ Form_fastCmd::Form_fastCmd(QWidget *parent) :
     comboBox_dataFormat.addItem(TITLE_DATA_ASCII);
     comboBox_dataFormat.addItem(TITLE_DATA_HEX);
 
-//    pushButton_showSettings.setFixedSize(QSize(20, 25));
+    //    pushButton_showSettings.setFixedSize(QSize(20, 25));
 
     /* pushbuttons */
     pushButton_send.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+                                  .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     pushButton_showSettings.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_GRAY0));
+                                          .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     comboBox_dataFormat.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                                      .arg(COLOR_WHITE).arg(COLOR_BLACK));
     lineEdit_cmd.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                       .arg(COLOR_WHITE).arg(COLOR_BLACK));
+                               .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
     ui->horizontalLayout->addWidget(&lineEdit_cmd);
     ui->horizontalLayout->addWidget(&comboBox_dataFormat);
@@ -39,11 +40,19 @@ Form_fastCmd::Form_fastCmd(QWidget *parent) :
     connect(&pushButton_send, &QPushButton::clicked,
             this, &Form_fastCmd::sendPressed);
 
+    connect(&lineEdit_cmd, &QLineEdit::returnPressed,
+            this, &Form_fastCmd::sendPressed);
 
 }
+
 void Form_fastCmd::sendPressed()
 {
-    emit send(QByteArray(lineEdit_cmd.text().toUtf8()));
+    dataConverter conv;
+    conv.setStrOfIndex(
+                title_dataFormat.indexOf(comboBox_dataFormat.currentText()),
+                lineEdit_cmd.text());
+
+    emit Tx(conv.getByteArray());
 }
 
 Form_fastCmd::~Form_fastCmd()

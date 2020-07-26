@@ -6,22 +6,27 @@
 
 
 
-class fastCmdsHandler : public QObject
+class FastCmdsHandler : public QObject
 {
     Q_OBJECT
 
 
     QListWidget *listWidget;
 
+    void addPlusButtonAtTheEnd();
 
 public:
-    explicit fastCmdsHandler(QListWidget* val);
+    explicit FastCmdsHandler(QListWidget* val);
 
+    int hasFocus();
+
+public slots:
+    void fastCmds_addCmd();
 
 
 
 signals:
-
+    void Tx(QByteArray);
 
 
 };

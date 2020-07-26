@@ -16,6 +16,7 @@
 #include "uilog.h"
 #include "outputfile.h"
 #include "form_termio.h"
+#include "fastcmdshandler.h"
 
 #define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
 
@@ -101,6 +102,8 @@ class MainWindow : public QMainWindow
     QTextEdit textEdit_out;
     QLineEdit lineEdit_in;
 
+    FastCmdsHandler* fastCmdsHandler;
+
 public:
     explicit MainWindow(int argc, char** argv, QWidget *parent = nullptr);
     ~MainWindow();
@@ -162,10 +165,6 @@ private slots:
     void on_lineEdit_scriptPath_textChanged(const QString &arg1);
 
 
-    void fastCmds_addCmd();
-
-
-
 
 public slots:
 
@@ -199,6 +198,9 @@ private:
     QString getDataColor(int);
     QString terminalOutGetPreamble(int);
 
+
+signals:
+    void fastCmds_addCmd();
 
 
 };

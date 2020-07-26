@@ -3,7 +3,6 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <memory>
-#include <QPushButton>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -39,70 +38,22 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
         communic->establish(cliArgHandler.getComType());
 
 
-
+    for (int i = 0; i < TABWIDGET_TABCNT; i++) {
+        connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
+                this, &MainWindow::pressedKey_enter);
+    }
 
 
     ui->listWidget_fastCmds->hide();
 
-    QPushButton* addNewFastCmd = new QPushButton();
-    addNewFastCmd->setText("+");
-    QListWidgetItem *item = new QListWidgetItem();
-    connect(addNewFastCmd, &QPushButton::clicked,
-            this, &MainWindow::fastCmds_addCmd);
+    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
+    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
+            &MainWindow::Tx);
 
-    QHBoxLayout *layout = new QHBoxLayout();
-    layout->setMargin(0);
-
-    layout->addWidget(addNewFastCmd);
-
-    QWidget *widget = new QWidget();
-
-    widget->setLayout(layout);
-
-    item->setSizeHint(QSize(0, 40));
-
-    ui->listWidget_fastCmds->addItem(item);
-    ui->listWidget_fastCmds->setItemWidget(item,widget);
-
-}
-
-/////////////////////////////////////////////////////////////////
-void MainWindow::fastCmds_addCmd()
-{
-    Form_fastCmd* cmdUi = new Form_fastCmd();
-    cmdUi->lineEdit_cmd.setText(tr("Some cmd"));
-    connect(cmdUi, &Form_fastCmd::send,
-            this, &MainWindow::Tx);
-
-    QListWidgetItem *item = new QListWidgetItem();
-    item->setText("lol");
-
-    QHBoxLayout *layout = new QHBoxLayout();
-    layout->setMargin(0);
-
-    layout->addWidget(cmdUi);
-
-    QWidget *widget = new QWidget();
-
-    widget->setLayout(layout);
-    item->setSizeHint(QSize(0, 40));
-
-    if (ui->listWidget_fastCmds->count() > 0) {
-        ui->listWidget_fastCmds->insertItem(ui->listWidget_fastCmds->count() - 1, item);
-        ui->listWidget_fastCmds->setItemWidget(item,widget);
-    } else {
-        ui->listWidget_fastCmds->addItem(item);
-        ui->listWidget_fastCmds->setItemWidget(item,widget);
-    }
-
-    cmdUi->lineEdit_cmd.setFocus();
-    ui->listWidget_fastCmds->show();
-
-//    QListWidgetItem* item2 =
-//            ui->listWidget_fastCmds->itemAt(0, ui->listWidget_fastCmds->count());
-//    Form_fastCmd widget2 = <dynamic_cast> (Form_fastCmd*)( ui->listWidget_fastCmds->itemWidget(item2) );
-//    widget2->getLabelId();/*Add these to LblNames class first*/
-//    widget2->getLabelText();
+    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
+            &MainWindow::Tx);
+    connect(this, &MainWindow::fastCmds_addCmd,
+            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
 
 }
 
@@ -273,9 +224,10 @@ void MainWindow::Tx(QByteArray txData)
 /////////////////////////////////////////////////////////////////
 void MainWindow::pressedKey_enter()
 {            
-    int index = terminalInputHasFocus();
-    if (index != -1)
-        Tx_fromDataInput(index);
+    int terminalInput = terminalInputHasFocus();
+    if (terminalInput != -1) {
+        Tx_fromDataInput(terminalInput);
+    }
 }
 
 /////////////////////////////////////////////////////////////////

@@ -17,7 +17,6 @@ class dataConverter
 {
     QByteArray pureData;
 
-
 public:
     dataConverter();
 
