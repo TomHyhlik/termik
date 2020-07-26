@@ -18,7 +18,9 @@ class dataConverter
     QByteArray pureData;
 
 public:
-    dataConverter();
+    dataConverter() {};
+    dataConverter(QByteArray val)
+        : pureData(val) {}
 
     void setStrAscii(QString arg);
     void setStrHex(QString);

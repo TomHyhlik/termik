@@ -1,10 +1,5 @@
 #include "dataconverter.h"
 
-dataConverter::dataConverter()
-{
-
-}
-
 /////////////////////////////////////////////////////////////////
 void dataConverter::setStrAscii(QString arg)
 {
