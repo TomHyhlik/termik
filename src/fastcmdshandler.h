@@ -5,6 +5,7 @@
 #include <QListWidget>
 
 
+#define OBJNAME "ObjName"
 
 class FastCmdsHandler : public QObject
 {
@@ -18,7 +19,7 @@ class FastCmdsHandler : public QObject
 public:
     explicit FastCmdsHandler(QListWidget* val);
 
-    int hasFocus();
+    QString cmdAt(int i);
 
 public slots:
     void fastCmds_addCmd();

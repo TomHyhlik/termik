@@ -9,32 +9,36 @@
 FastCmdsHandler::FastCmdsHandler(QListWidget* val)
     : listWidget(val)
 {
-
-
     addPlusButtonAtTheEnd();
+
+    for (int i = 0; i < 2; i++)
+        fastCmds_addCmd();
+
+
+    for (int i = 0; i < listWidget->count()-1; i++) {
+        qDebug() << "CMD" << i << ": " << cmdAt(i);
+    }
+
+
 }
 
 /////////////////////////////////////////////////////////////////
-int FastCmdsHandler::hasFocus()
+QString FastCmdsHandler::cmdAt(int i)
 {
-    return listWidget->currentRow();
-
-    for (int i = 0; i < listWidget->count()-1; i++)
-    {
-//        QListWidgetItem* item = listWidget->itemAt(0,i);
         QListWidgetItem* item = listWidget->item(i);
 
         if (item != nullptr)
         {
 //            Form_fastCmd* fastCmd = dynamic_cast <Form_fastCmd*> (listWidget->itemWidget(item));
 //            Form_fastCmd *fastCmd = nullptr;//(Form_fastCmd*)listWidget->itemWidget(item);
-            Form_fastCmd *fastCmd = qobject_cast<Form_fastCmd *>(listWidget->itemWidget(item));
+            QWidget *w = qobject_cast<QWidget *>(listWidget->itemWidget(item));
 
+            Form_fastCmd* fastCmd = w->findChild<Form_fastCmd*>(OBJNAME);
 
             if (fastCmd != nullptr) {
                 if (fastCmd->lineEdit_cmd.hasFocus())
                     qDebug() << "data: " << fastCmd->lineEdit_cmd.text();
-                    return i;
+                    return fastCmd->lineEdit_cmd.text();
             } else {
                 qDebug() << "fastCmd: " << i << "is NULL";
             }
@@ -42,19 +46,7 @@ int FastCmdsHandler::hasFocus()
             qDebug() << "Item: " << i << "is NULL";
         }
 
-
-    }
-//    item->lineEdit_cmd.setText("necum");
-
-//    Form_fastCmd widget = <dynamic_cast>(Form_fastCmd*)(listWidget->itemWidget(item));
-//    widget->getLabelId();/*Add these to LblNames class first*/
-//    widget->getLabelText();
-
-
-
-    //    Form_fastCmd *widget = <dynamic_cast> (Form_fastCmd*)(listWidget->itemWidget(item));
-
-    return -1;
+    return "";
 }
 
 /////////////////////////////////////////////////////////////////
@@ -64,6 +56,10 @@ void FastCmdsHandler::fastCmds_addCmd()
     cmdUi->lineEdit_cmd.setText(tr("Some cmd"));
     connect(cmdUi, &Form_fastCmd::Tx,
             this, &FastCmdsHandler::Tx);
+
+
+     cmdUi->setObjectName(OBJNAME);
+
 
     QListWidgetItem *item = new QListWidgetItem();
     item->setText("lol");
