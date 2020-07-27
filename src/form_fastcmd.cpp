@@ -6,6 +6,7 @@
 
 #include <QPushButton>
 
+/////////////////////////////////////////////////////////////////
 Form_fastCmd::Form_fastCmd(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Form_fastCmd)
@@ -33,18 +34,28 @@ Form_fastCmd::Form_fastCmd(QWidget *parent) :
     lineEdit_cmd.setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+    ui->horizontalLayout->addWidget(&lineEdit_name);
     ui->horizontalLayout->addWidget(&lineEdit_cmd);
     ui->horizontalLayout->addWidget(&comboBox_dataFormat);
     ui->horizontalLayout->addWidget(&pushButton_send);
 
     connect(&pushButton_send, &QPushButton::clicked,
             this, &Form_fastCmd::sendPressed);
-
     connect(&lineEdit_cmd, &QLineEdit::returnPressed,
             this, &Form_fastCmd::sendPressed);
 
 }
 
+/////////////////////////////////////////////////////////////////
+FastCmdData Form_fastCmd::getData()
+{
+    FastCmdData data;
+    data.cmd = lineEdit_cmd.text();
+    data.format = comboBox_dataFormat.currentIndex();
+    return data;
+}
+
+/////////////////////////////////////////////////////////////////
 void Form_fastCmd::sendPressed()
 {
     dataConverter conv;
@@ -55,7 +66,10 @@ void Form_fastCmd::sendPressed()
     emit Tx(conv.getByteArray());
 }
 
+/////////////////////////////////////////////////////////////////
 Form_fastCmd::~Form_fastCmd()
 {
     delete ui;
 }
+
+/////////////////////////////////////////////////////////////////

@@ -13,7 +13,6 @@ class FastCmdsHandler : public QObject
 {
     Q_OBJECT
 
-
     QListWidget *listWidget;
 
     void addPlusButtonAtTheEnd();
@@ -21,11 +20,11 @@ class FastCmdsHandler : public QObject
 public:
     explicit FastCmdsHandler(QListWidget* val);
 
-    Form_fastCmd* at(int i);
+    Form_fastCmd* cmdAt(int i);
+    int count() { return listWidget->count()-1; }
 
 public slots:
     void fastCmds_addCmd();
-
 
 
 signals:

@@ -143,6 +143,7 @@ private slots:
     void terminalOutUpdate(int, QByteArray);
 
     void currentAppConfig_loadSaved();
+    void fastCmds_save();
     void runScript_finished();
     void connectionToggle();
 

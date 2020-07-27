@@ -18,6 +18,7 @@
 #include "communication.h"
 #include "serialwparam.h"
 #include "form_fastcmd.h"
+#include "savefastcmds.h"
 
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
@@ -54,9 +55,18 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
             &MainWindow::Tx);
     connect(this, &MainWindow::fastCmds_addCmd,
             fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
-
 }
 
+/////////////////////////////////////////////////////////////////
+void MainWindow::fastCmds_save()
+{
+    SaveFastCmds saveFastCmds;
+
+    for (int i = 0; i < fastCmdsHandler->count(); i++)
+        saveFastCmds.addCmdData(fastCmdsHandler->cmdAt(i)->getData());
+
+    saveFastCmds.write();
+}
 /////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowHelp()
 {
@@ -146,6 +156,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     SaveConfiguration saveCfg;
     saveCfg.write();
+
+    fastCmds_save();
 
     (void)event;
     LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));

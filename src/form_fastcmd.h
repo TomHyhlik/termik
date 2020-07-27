@@ -12,6 +12,15 @@ namespace Ui {
 class Form_fastCmd;
 }
 
+
+struct FastCmdData
+{
+    QString name;
+    QString cmd;
+    int format;
+};
+
+
 class Form_fastCmd : public QWidget
 {
     Q_OBJECT
@@ -20,15 +29,20 @@ public:
     explicit Form_fastCmd(QWidget *parent = nullptr);
     ~Form_fastCmd();
 
-    QLineEdit lineEdit_cmd;
+    Ui::Form_fastCmd *ui;
 
+    QLineEdit lineEdit_name;
+    QLineEdit lineEdit_cmd;
     QComboBox comboBox_dataFormat;
     QPushButton pushButton_send;
     QPushButton pushButton_showSettings;
 
-    Ui::Form_fastCmd *ui;
+//    QString getDataCmd() { return data.cmd; }
+//    int getDataFormat() { return data.format; }
+//    void setDataCmd(QString cmd) { data.cmd = cmd; }
+//    void setDataFormat(int format) { data.format = format; }
 
-
+    FastCmdData getData();
 
 private slots:
     void sendPressed();
@@ -36,9 +50,6 @@ private slots:
 
 signals:
     void Tx(QByteArray);
-
-
-
 
 
 };
