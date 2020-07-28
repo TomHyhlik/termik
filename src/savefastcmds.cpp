@@ -33,12 +33,20 @@ bool SaveFastCmds::jsonData_parse(QByteArray parsingData)
 
         QJsonObject jObj = jDoc.object();
 
-//        QJsonObject jObj_script = jObj.value(QString(JSONTITLE_SCRIPT)).toObject();
-//        RunScriptParam::get().fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
-//        RunScriptParam::get().repeat = jObj_script.value(JSONTITLE_SCRIPT_REPEAT).toBool();
-//        RunScriptParam::get().timeout = jObj_script.value(JSONTITLE_SCRIPT_TIMEOUT).toInt();
-//        RunScriptParam::get().dFormat = dataFormat(jObj_script.value(JSONTITLE_SCRIPT_DATAFORMAT).toInt());
+        for (int i = 0; i < 20; i++)
+        {
+            QJsonObject jObj_script = jObj.value(QString(JSONTITLE_FCMD_ID).arg(i)).toObject();
+            if (jObj_script.isEmpty()) {
+                qDebug() << "CMD: " << i << "HERE";
+            }
+            else
+            {
+                qDebug() << "CMD: " << i << "NOT HERE";
 
+            }
+//            RunScriptParam::get().fileName = jObj_script.value(JSONTITLE_SCRIPT_FILENAME).toString();
+
+        }
         return true;
     } else {
         return false;
@@ -52,13 +60,11 @@ QByteArray SaveFastCmds::jsonData_make()
     int ctr = 0;
     for (const FastCmdData &fastCmdData: cmdDataList)
     {
-
         QJsonObject jObj_cmd;
-        jObj_cmd.insert("name", QJsonValue::fromVariant(fastCmdData.name));
-        jObj_cmd.insert("data", QJsonValue::fromVariant(fastCmdData.cmd));
-        jObj_cmd.insert("format", QJsonValue::fromVariant(fastCmdData.format));
-
-        jObj.insert(QString("Cmd_%1").arg(ctr++), jObj_cmd);
+        jObj_cmd.insert(JSONTITLE_FCMD_NAME, QJsonValue::fromVariant(fastCmdData.name));
+        jObj_cmd.insert(JSONTITLE_FCMD_DATA, QJsonValue::fromVariant(fastCmdData.cmd));
+        jObj_cmd.insert(JSONTITLE_FCMD_FORMAT, QJsonValue::fromVariant(fastCmdData.format));
+        jObj.insert(QString(JSONTITLE_FCMD_ID).arg(ctr++), jObj_cmd);
     }
 
     QJsonDocument doc(jObj);

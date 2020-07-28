@@ -9,8 +9,10 @@
 
 #define SAVEFASTCMDS_FILENAME "./termik_fastCmds.json"
 
-
-
+#define JSONTITLE_FCMD_NAME     "Name"
+#define JSONTITLE_FCMD_DATA     "Data"
+#define JSONTITLE_FCMD_FORMAT   "Format"
+#define JSONTITLE_FCMD_ID       "Cmd_%1"
 
 class SaveFastCmds : public SaveToJson
 {

@@ -1,42 +1,27 @@
 {
     "Cmd_0": {
-        "data": "",
-        "format": 0,
-        "name": ""
+        "Data": "",
+        "Format": 0,
+        "Name": ""
     },
     "Cmd_1": {
-        "data": "",
-        "format": 0,
-        "name": ""
+        "Data": "dsafs",
+        "Format": 0,
+        "Name": ""
     },
     "Cmd_2": {
-        "data": "",
-        "format": 0,
-        "name": ""
+        "Data": "",
+        "Format": 0,
+        "Name": ""
     },
     "Cmd_3": {
-        "data": "",
-        "format": 0,
-        "name": ""
+        "Data": "",
+        "Format": 0,
+        "Name": ""
     },
     "Cmd_4": {
-        "data": "sdfdasfsd",
-        "format": 0,
-        "name": ""
-    },
-    "Cmd_5": {
-        "data": "",
-        "format": 0,
-        "name": ""
-    },
-    "Cmd_6": {
-        "data": "",
-        "format": 0,
-        "name": ""
-    },
-    "Cmd_7": {
-        "data": "necum",
-        "format": 0,
-        "name": ""
+        "Data": "",
+        "Format": 0,
+        "Name": ""
     }
 }

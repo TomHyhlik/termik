@@ -104,7 +104,6 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
 
         return true;
     } else {
-        qDebug() <<"ERROR: Invalid JSON format, the file is corrupted";
         return false;
     }
 }
