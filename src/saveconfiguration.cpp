@@ -41,20 +41,14 @@ bool SaveConfiguration::write()
     const QString filename = SAVECFG_FILENAME;
     QFile file(filename);
 
-    if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-
+    if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
         file.resize(0);
-
         QByteArray jsonData = jsonData_make();
-
         QTextStream dataStream(&file);
         dataStream << jsonData;
-
         file.flush();
         file.close();
-
-        LOG(tr("Configuration saved to: %1").arg(filename));
-
         return true;
     }
 
@@ -86,7 +80,6 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
         NetworkWParam::get().port_Rx = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PORTRX)).toInt());
         NetworkWParam::get().protocolType = quint16(jObj_network.value(QString(JSONTITLE_NETWORK_PROTOCOL)).toInt());
 
-
         QJsonObject jObj_app = jObj.value(QString(JSONTITLE_APP)).toObject();
 //        data.app.connectionType = jObj_app.value(QString(JSONTITLE_APP_CONNECTIONTYPE)).toBool(); // todo
         data.app.timeLogEnabled = jObj_app.value(QString(JSONTITLE_APP_TIMELOGENABLED)).toBool();
@@ -106,7 +99,6 @@ bool SaveConfiguration::jsonData_parse(QByteArray parsingData)
 
         return true;
     } else {
-        LOG_T(error, "Invalid JSON format, the file is corrupted");
         return false;
     }
 }

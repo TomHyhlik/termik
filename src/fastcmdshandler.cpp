@@ -9,73 +9,52 @@
 FastCmdsHandler::FastCmdsHandler(QListWidget* val)
     : listWidget(val)
 {
-
-
     addPlusButtonAtTheEnd();
 }
 
 /////////////////////////////////////////////////////////////////
-int FastCmdsHandler::hasFocus()
+Form_fastCmd* FastCmdsHandler::cmdAt(int i)
 {
-    return listWidget->currentRow();
-
-    for (int i = 0; i < listWidget->count()-1; i++)
-    {
-//        QListWidgetItem* item = listWidget->itemAt(0,i);
-        QListWidgetItem* item = listWidget->item(i);
-
-        if (item != nullptr)
-        {
-//            Form_fastCmd* fastCmd = dynamic_cast <Form_fastCmd*> (listWidget->itemWidget(item));
-//            Form_fastCmd *fastCmd = nullptr;//(Form_fastCmd*)listWidget->itemWidget(item);
-            Form_fastCmd *fastCmd = qobject_cast<Form_fastCmd *>(listWidget->itemWidget(item));
-
-
-            if (fastCmd != nullptr) {
-                if (fastCmd->lineEdit_cmd.hasFocus())
-                    qDebug() << "data: " << fastCmd->lineEdit_cmd.text();
-                    return i;
-            } else {
-                qDebug() << "fastCmd: " << i << "is NULL";
-            }
-        } else {
-            qDebug() << "Item: " << i << "is NULL";
-        }
-    }
-//    item->lineEdit_cmd.setText("necum");
-
-//    Form_fastCmd widget = <dynamic_cast>(Form_fastCmd*)(listWidget->itemWidget(item));
-//    widget->getLabelId();/*Add these to LblNames class first*/
-//    widget->getLabelText();
-
-
-
-    //    Form_fastCmd *widget = <dynamic_cast> (Form_fastCmd*)(listWidget->itemWidget(item));
-
-    return -1;
+    QWidget *w = qobject_cast <QWidget*> (listWidget->itemWidget(listWidget->item(i)));
+    Form_fastCmd* fastCmd = w->findChild <Form_fastCmd*> (OBJNAME);
+    return fastCmd;
 }
 
 /////////////////////////////////////////////////////////////////
-void FastCmdsHandler::fastCmds_addCmd()
+void FastCmdsHandler::fastCmds_addCmd(FastCmdData cmdData)
 {
     Form_fastCmd* cmdUi = new Form_fastCmd();
-    cmdUi->lineEdit_cmd.setText(tr("Some cmd"));
+
+    cmdUi->lineEdit_cmd.setText(cmdData.cmd);
+    cmdUi->lineEdit_name.setText(cmdData.name);
+
+//    cmdUi->comboBox_dataFormat.setCurrentText(cmdData.format); todo
+
+    addForm(cmdUi);
+}
+
+/////////////////////////////////////////////////////////////////
+void FastCmdsHandler::fastCmds_addCmdBlank()
+{
+    Form_fastCmd* cmdUi = new Form_fastCmd();
+    cmdUi->lineEdit_name.setText(tr("Cmd_%1").arg(count()));
+    addForm(cmdUi);
+}
+
+/////////////////////////////////////////////////////////////////
+void FastCmdsHandler::addForm(Form_fastCmd* cmdUi)
+{
     connect(cmdUi, &Form_fastCmd::Tx,
             this, &FastCmdsHandler::Tx);
-
+    cmdUi->setObjectName(OBJNAME);
     QListWidgetItem *item = new QListWidgetItem();
-    item->setText("lol");
-
+//    item->setText("lol");
     QHBoxLayout *layout = new QHBoxLayout();
     layout->setMargin(0);
-
     layout->addWidget(cmdUi);
-
     QWidget *widget = new QWidget();
-
     widget->setLayout(layout);
     item->setSizeHint(QSize(0, 40));
-
     if (listWidget->count() > 0) {
         listWidget->insertItem(listWidget->count() - 1, item);
         listWidget->setItemWidget(item, widget);
@@ -83,29 +62,24 @@ void FastCmdsHandler::fastCmds_addCmd()
         listWidget->addItem(item);
         listWidget->setItemWidget(item,widget);
     }
-
     cmdUi->lineEdit_cmd.setFocus();
     listWidget->show();
 }
+
 /////////////////////////////////////////////////////////////////
 void FastCmdsHandler::addPlusButtonAtTheEnd()
 {
-    QPushButton* addNewFastCmd = new QPushButton();
-    addNewFastCmd->setText("+");
+    QPushButton* pushButton_addNewCmd = new QPushButton();
+    pushButton_addNewCmd->setText("+");
     QListWidgetItem *item = new QListWidgetItem();
-    connect(addNewFastCmd, &QPushButton::clicked,
-            this, &FastCmdsHandler::fastCmds_addCmd);
-
+    connect(pushButton_addNewCmd, &QPushButton::clicked,
+            this, &FastCmdsHandler::fastCmds_addCmdBlank);
     QHBoxLayout *layout = new QHBoxLayout();
     layout->setMargin(0);
-
-    layout->addWidget(addNewFastCmd);
-
+    layout->addWidget(pushButton_addNewCmd);
     QWidget *widget = new QWidget();
-
     widget->setLayout(layout);
     item->setSizeHint(QSize(0, 40));
-
     listWidget->addItem(item);
     listWidget->setItemWidget(item, widget);
 }

@@ -39,6 +39,9 @@ SOURCES += \
         serialwparam.cpp \
         protocol_tcp_client.cpp \
         protocol_tcp_server.cpp \
+        savetojson.cpp \
+        savefastcmds.cpp \
+
 
 
 HEADERS += \
@@ -69,6 +72,8 @@ HEADERS += \
         utils_tabWidget.h \
         protocol_tcp_client.h \
         protocol_tcp_server.h \
+        savetojson.h \
+        savefastcmds.h \
 
 
 

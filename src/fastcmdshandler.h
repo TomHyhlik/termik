@@ -4,24 +4,29 @@
 #include <QObject>
 #include <QListWidget>
 
+#include "form_fastcmd.h"
 
+
+#define OBJNAME "ObjName"
 
 class FastCmdsHandler : public QObject
 {
     Q_OBJECT
 
-
     QListWidget *listWidget;
 
     void addPlusButtonAtTheEnd();
+    void addForm(Form_fastCmd*);
 
 public:
     explicit FastCmdsHandler(QListWidget* val);
 
-    int hasFocus();
+    Form_fastCmd* cmdAt(int i);
+    int count() { return listWidget->count()-1; }
 
 public slots:
-    void fastCmds_addCmd();
+    void fastCmds_addCmdBlank();
+    void fastCmds_addCmd(FastCmdData cmdData);
 
 
 

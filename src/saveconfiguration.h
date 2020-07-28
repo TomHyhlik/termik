@@ -12,7 +12,6 @@
 #include "appcfgparam.h"
 
 
-
 #define SAVECFG_FILENAME "./termik_cfg.json"
 
 #define JSONTITLE_SERIAL                "Serial"

@@ -18,6 +18,7 @@
 #include "communication.h"
 #include "serialwparam.h"
 #include "form_fastcmd.h"
+#include "savefastcmds.h"
 
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
@@ -32,10 +33,35 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     setupShortcuts(this);
     init_appParams();
     currentAppConfig_loadSaved();
+    fastCmds_load();
 
     CliArgHandler cliArgHandler(argc, argv);
     if (cliArgHandler.getComType() != comType_none)
         communic->establish(cliArgHandler.getComType());
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::fastCmds_load()
+{
+    SaveFastCmds saveFastCmds;
+    if (saveFastCmds.read())
+    {
+        for (const FastCmdData cmd : saveFastCmds.cmdDataList)
+        {
+            fastCmdsHandler->fastCmds_addCmd(cmd);
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::fastCmds_save()
+{
+    SaveFastCmds saveFastCmds;
+
+    for (int i = 0; i < fastCmdsHandler->count(); i++)
+        saveFastCmds.cmdDataList.append(fastCmdsHandler->cmdAt(i)->getData());
+
+    saveFastCmds.write();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -56,9 +82,8 @@ void MainWindow::showHelp()
     ui->tableWidget_shortcuts->setHorizontalHeaderLabels(
     {TITLE_HELPTABLE_SHORTCUT, TITLE_HELPTABLE_DESCRIPTION});
 
-    for (const auto &shortcut : SHORTCUTS_CONTENT_MAINWINDOW) {
+    for (const auto &shortcut : SHORTCUTS_CONTENT_MAINWINDOW)
         table_addItem(ui->tableWidget_shortcuts, shortcut);
-    }
 }
 void MainWindow::hideHelp()
 {
@@ -87,10 +112,6 @@ void MainWindow::currentAppConfig_loadSaved()
         ui->spinBox_scriptTransmissionPeriod->setValue(saveCfg.data.script.timeout);
 
         /* todo: continue here, load the saveCfg.data.app to ui */
-
-        LOG("Configuration loaded from json file");
-    } else {
-        LOG("No previous saved configuration found");
     }
 }
 
@@ -127,6 +148,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     SaveConfiguration saveCfg;
     saveCfg.write();
+
+    fastCmds_save();
 
     (void)event;
     LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
@@ -646,6 +669,12 @@ void MainWindow::init_ui()
     connect(ui->pushButton_scriptOpen, &QPushButton::clicked, this,
             &MainWindow::selectScript);
 
+    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
+    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
+            &MainWindow::Tx);
+    connect(this, &MainWindow::fastCmds_addCmd,
+            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmdBlank);
+
     runScript_finished();
 
     ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[data_ascii]);
@@ -655,14 +684,6 @@ void MainWindow::init_ui()
     for (int i = 0; i < TABWIDGET_TABCNT; i++)
         connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
                 this, &MainWindow::pressedKey_enter);
-
-
-    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
-    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
-            &MainWindow::Tx);
-    connect(this, &MainWindow::fastCmds_addCmd,
-            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
-
 
     setWindowTitle(MAINWINDOWTITLE);
 
@@ -681,11 +702,11 @@ void MainWindow::init_ui()
 
     ui->checkBox_autoclear->setChecked(true);
     ui->checkBox_autoclear->setChecked(false);
+    ui->listWidget_fastCmds->hide();
 
     hideHelp();
     hideSettings();
     focus_0();
-    ui->listWidget_fastCmds->hide();
 }
 
 /////////////////////////////////////////////////////////////////
