@@ -33,28 +33,24 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     setupShortcuts(this);
     init_appParams();
     currentAppConfig_loadSaved();
+    fastCmds_load();
 
     CliArgHandler cliArgHandler(argc, argv);
     if (cliArgHandler.getComType() != comType_none)
         communic->establish(cliArgHandler.getComType());
+}
 
-
-    for (int i = 0; i < TABWIDGET_TABCNT; i++) {
-        connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
-                this, &MainWindow::pressedKey_enter);
+/////////////////////////////////////////////////////////////////
+void MainWindow::fastCmds_load()
+{
+    SaveFastCmds saveFastCmds;
+    if (saveFastCmds.read())
+    {
+        for (const FastCmdData cmd : saveFastCmds.cmdDataList)
+        {
+            fastCmdsHandler->fastCmds_addCmd(cmd);
+        }
     }
-
-
-    ui->listWidget_fastCmds->hide();
-
-    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
-    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
-            &MainWindow::Tx);
-
-    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
-            &MainWindow::Tx);
-    connect(this, &MainWindow::fastCmds_addCmd,
-            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmd);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -63,10 +59,11 @@ void MainWindow::fastCmds_save()
     SaveFastCmds saveFastCmds;
 
     for (int i = 0; i < fastCmdsHandler->count(); i++)
-        saveFastCmds.addCmdData(fastCmdsHandler->cmdAt(i)->getData());
+        saveFastCmds.cmdDataList.append(fastCmdsHandler->cmdAt(i)->getData());
 
     saveFastCmds.write();
 }
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowHelp()
 {
@@ -116,10 +113,6 @@ void MainWindow::currentAppConfig_loadSaved()
         ui->spinBox_scriptTransmissionPeriod->setValue(saveCfg.data.script.timeout);
 
         /* todo: continue here, load the saveCfg.data.app to ui */
-
-        LOG("Configuration loaded from json file");
-    } else {
-        LOG("No previous saved configuration found");
     }
 }
 
@@ -677,11 +670,22 @@ void MainWindow::init_ui()
     connect(ui->pushButton_scriptOpen, &QPushButton::clicked, this,
             &MainWindow::selectScript);
 
+    fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
+    connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
+            &MainWindow::Tx);
+    connect(this, &MainWindow::fastCmds_addCmd,
+            fastCmdsHandler, &FastCmdsHandler::fastCmds_addCmdBlank);
+
     runScript_finished();
 
     ui->verticalLayout_tabwidget_ascii->addWidget(&termIO[data_ascii]);
     ui->verticalLayout_tabwidget_hex->addWidget(&termIO[data_hex]);
     ui->verticalLayout_tabwidget_dec->addWidget(&termIO[data_dec]);
+
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+        connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
+                this, &MainWindow::pressedKey_enter);
+
 
     setWindowTitle(MAINWINDOWTITLE);
 
@@ -700,6 +704,7 @@ void MainWindow::init_ui()
 
     ui->checkBox_autoclear->setChecked(true);
     ui->checkBox_autoclear->setChecked(false);
+    ui->listWidget_fastCmds->hide();
 
     hideHelp();
     hideSettings();

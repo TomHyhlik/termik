@@ -5,7 +5,7 @@
         "Name": ""
     },
     "Cmd_1": {
-        "Data": "dsafs",
+        "Data": "",
         "Format": 0,
         "Name": ""
     },
@@ -15,12 +15,7 @@
         "Name": ""
     },
     "Cmd_3": {
-        "Data": "",
-        "Format": 0,
-        "Name": ""
-    },
-    "Cmd_4": {
-        "Data": "",
+        "Data": "sdfgsfg",
         "Format": 0,
         "Name": ""
     }

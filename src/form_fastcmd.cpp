@@ -51,6 +51,7 @@ FastCmdData Form_fastCmd::getData()
 {
     FastCmdData data;
     data.cmd = lineEdit_cmd.text();
+    data.name = lineEdit_name.text();
     data.format = comboBox_dataFormat.currentIndex();
     return data;
 }

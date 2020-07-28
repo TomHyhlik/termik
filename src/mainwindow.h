@@ -144,6 +144,7 @@ private slots:
 
     void currentAppConfig_loadSaved();
     void fastCmds_save();
+    void fastCmds_load();
     void runScript_finished();
     void connectionToggle();
 

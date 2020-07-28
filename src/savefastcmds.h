@@ -14,11 +14,13 @@
 #define JSONTITLE_FCMD_FORMAT   "Format"
 #define JSONTITLE_FCMD_ID       "Cmd_%1"
 
+
+#define FCMD_MAXCNT     1000
+
+
 class SaveFastCmds : public SaveToJson
 {
     Q_OBJECT
-
-    QList <FastCmdData> cmdDataList;
 
     bool jsonData_parse(QByteArray) override;
     QByteArray jsonData_make() override;
@@ -26,10 +28,7 @@ class SaveFastCmds : public SaveToJson
 public:
 
     SaveFastCmds();
-
-    void addCmdData(FastCmdData cmdData);
-
-
+    QList <FastCmdData> cmdDataList;
 
 
 signals:
