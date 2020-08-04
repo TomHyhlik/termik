@@ -43,7 +43,7 @@ void setupShortcuts(QWidget *uiThis)
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), uiThis, SLOT(toggleShowSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), uiThis, SLOT(showConnectionSettings()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), uiThis, SLOT(connectionToggle()));
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), uiThis, SLOT(selectScript()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), uiThis, SLOT(openScript()));
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), uiThis, SLOT(focus_0()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), uiThis, SLOT(focus_1()));

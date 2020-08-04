@@ -26,27 +26,22 @@
 
 #define RXDATAEVENT_TIMEOUT 50
 
-#define SUFFIX_DEFAULT      "\r\n"
+#define SUFFIX_DEFAULT      "\n"
 
 #define TIME_FORMAT "dd.MM.yyyy, hh:mm:ss"
 
-#define AUTOCLEAR_VAL_DEFAULT   100
-
+#define AUTOCLEAR_VAL_DEFAULT   1000
 #define SCRIPT_TXPERIOD_DEFAULT 1000
 
 #define COLOR_BLACK     "black"
 #define COLOR_WHITE     "white"
-
 #define COLOR_DATA_RX      "DeepSkyBlue"
 #define COLOR_DATA_TX      "lime"
 #define COLOR_ERROR     "Tomato"
 #define COLOR_PREAMBLE      "#949494"
-
 #define COLOR_GREEN     "#005000"//"green"
 #define COLOR_RED       "#500000"//"red"
-
 #define COLOR_TOPLINE   "#A0A0A0"
-
 #define COLOR_GRAY0     "#404040"
 #define COLOR_GRAY1     "#303030"
 #define COLOR_GRAY2     "#202020"
@@ -57,14 +52,15 @@
 
 #define TITLE_DATA_ASCII    "ASCII"
 #define TITLE_DATA_HEX      "HEX"
-
 #define TITLE_BUTTON_SCRIPT_RUN "Run"
 #define TITLE_BUTTON_SCRIPT_STOP "Stop"
-
 #define TITLE_HELPTABLE_SHORTCUT        "Shortcut"
 #define TITLE_HELPTABLE_DESCRIPTION     "Description"
 
 #define TABWIDGET_TABCNT        3
+
+#define TABWIDGET_SETTINGS_INDEX_GENERAL     0
+#define TABWIDGET_SETTINGS_INDEX_SCRIPT      1
 
 #define LOCATION_DEFAULT    "~/"
 
@@ -138,7 +134,7 @@ private slots:
     void Tx_fromDataInput(int);
 
     void historyTxUpdate();
-    void selectScript();
+    void openScript();
 
     void terminalOutUpdate(int, QByteArray);
 

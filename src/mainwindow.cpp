@@ -116,7 +116,7 @@ void MainWindow::currentAppConfig_loadSaved()
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::selectScript()
+void MainWindow::openScript()
 {
     QString openLocation;
 
@@ -127,6 +127,9 @@ void MainWindow::selectScript()
 
     QString scriptFileName = QFileDialog::getOpenFileName(
                 this, RunScriptParam::get().fileName);
+
+    showSettings();
+    ui->tabWidget_settings->setCurrentIndex(TABWIDGET_SETTINGS_INDEX_SCRIPT);
 
     if (!scriptFileName.isEmpty()) {
         ui->lineEdit_scriptPath->setText(scriptFileName);
@@ -667,7 +670,7 @@ void MainWindow::init_ui()
     UiLog::get().setOutput(ui->statusBar);
 
     connect(ui->pushButton_scriptOpen, &QPushButton::clicked, this,
-            &MainWindow::selectScript);
+            &MainWindow::openScript);
 
     fastCmdsHandler = new FastCmdsHandler(ui->listWidget_fastCmds);
     connect(fastCmdsHandler, &FastCmdsHandler::Tx, this,
