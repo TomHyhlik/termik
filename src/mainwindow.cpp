@@ -161,7 +161,7 @@ void MainWindow::showConnectionSettings()
     Dialog_connect* dialog_connect = new Dialog_connect(this);
     connect(dialog_connect, SIGNAL(tryConnect(communicationType)), communic,
             SLOT(establish(communicationType)));
-
+    dialog_connect->setComType(communic->getLastComType());
     dialog_connect->show();
 }
 

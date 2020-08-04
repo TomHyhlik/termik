@@ -32,6 +32,13 @@ Dialog_connect::Dialog_connect(QWidget *parent) :
     initScan();
 }
 
+///////////////////////////////////////////////////////////////////
+void Dialog_connect::setComType(communicationType type)
+{
+    if (type != comType_none)
+        ui->tabWidget->setCurrentIndex(int(type));
+}
+
 /////////////////////////////////////////////////////////////////
 void Dialog_connect::EscPressed()
 {

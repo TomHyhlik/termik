@@ -24,6 +24,7 @@ public:
     void establishToggle();
     bool isEstablished();
     void suspend();
+    communicationType getLastComType() { return lastComType; }
 
 public slots:
     void establish();

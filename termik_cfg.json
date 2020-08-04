@@ -26,7 +26,7 @@
         "Data bits": 8,
         "Flow control": 0,
         "Parity": 0,
-        "Port name": "",
+        "Port name": "tty.usbmodem14203",
         "Stop bits": 1
     }
 }

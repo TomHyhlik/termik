@@ -17,7 +17,6 @@ public:
     static AppCfgParam& get() { return s_Instance; }
 
 
-
     bool timeLogEnabled;
 
     bool suffix_tx_enabled;
@@ -28,8 +27,6 @@ public:
 
     bool timeInfoEnabled;
     bool clearOutputLine;
-
-//    bool saveTerminalOutToFile;   // todo rm
 
     bool autoclerTermOut;
     int autoclerTermOut_maxChars;

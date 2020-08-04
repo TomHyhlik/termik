@@ -167,7 +167,6 @@ private slots:
     void on_lineEdit_scriptPath_textChanged(const QString &arg1);
 
 
-
 public slots:
 
 

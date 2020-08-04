@@ -63,6 +63,7 @@ class Dialog_connect : public QDialog
 public:
     explicit Dialog_connect(QWidget *parent = nullptr);
     ~Dialog_connect();
+    void setComType(communicationType);
 
 private:
     Ui::Dialog_connect *ui;
@@ -159,7 +160,6 @@ private slots:
     void loadParametersToUi();
     void EscPressed();
 
-
     void on_tableWidget_addr_tx_currentCellChanged(int row, int column);
     void on_tableWidget_addr_rx_currentCellChanged(int row, int column);
     void on_tableWidget_serialPorts_currentCellChanged(int row, int column);
@@ -175,11 +175,6 @@ private slots:
 
     void addrUpdate_devThis();
     void addrUpdate_devAll();
-
-    //    void addAddr_devThis(const QHostInfo host); todo rm
-
-
-
 
 
 signals:
