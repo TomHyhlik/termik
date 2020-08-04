@@ -301,7 +301,6 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
                 outputFile->writeData_hex(preamble);
             }
         }
-
     }
 }
 
