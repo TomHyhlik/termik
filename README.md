@@ -18,4 +18,9 @@ I made this app, because none of the available terminals for data transmission d
 
 ## usage
 Everything is done using shortcuts which is shown after pressing F1.
-Transmit data in the terminal is done by pressing Enter.
+Transmit data in the terminal is done by pressing Enter
+
+
+## todo
+network scan finishes too early, misses some IP addresses
+.
