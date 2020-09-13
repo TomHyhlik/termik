@@ -661,6 +661,7 @@ void MainWindow::init_colors()
     ui->lineEdit_scriptPath->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
+
 }
 
 /////////////////////////////////////////////////////////////////

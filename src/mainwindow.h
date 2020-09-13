@@ -18,6 +18,14 @@
 #include "form_termio.h"
 #include "fastcmdshandler.h"
 
+enum {
+    PLAT_LINUX, PLAT_MAC, PLAT_WINDOWS
+};
+
+////////////////////////////////////////////////////////////
+#define PLATFORM    PLAT_WINDOWS
+
+
 #define STR_STYLESHEET_COLOR_BCKGCOLOR  "color: %1; background-color: %2"
 
 #define DIGIT_NUM_HEX   2

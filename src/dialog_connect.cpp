@@ -281,12 +281,10 @@ void Dialog_connect::initColors()
     ui->lineEdit_selectedAddr_tx->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                 .arg(COLOR_WHITE).arg(COLOR_BLACK));
 
-//    ui->tabWidget->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-//                                 .arg(COLOR_WHITE).arg(COLOR_GRAY3));
 
-#if PLATFORM_WINDOWS
-    ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
-                                           .arg(COLOR_BLACK).arg(COLOR_BLACK));
+#if PLATFORM == PLATFORM_WINDOWS
+//    ui->tabWidget->tabBar()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
+//                                           .arg(COLOR_BLACK).arg(COLOR_BLACK));
 
     ui->tableWidget_serialPorts->horizontalHeader()->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                                                    .arg(COLOR_BLACK).arg(COLOR_GRAY0));
