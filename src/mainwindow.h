@@ -125,6 +125,8 @@ private slots:
     void focus_1();
     void focus_2();
     void focus_termIO(int index);
+    void uiResize_minus();
+    void uiResize_plus();
 
     void toggleShowSettings();
     void showSettings();

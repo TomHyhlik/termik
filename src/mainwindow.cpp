@@ -20,6 +20,8 @@
 #include "form_fastcmd.h"
 #include "savefastcmds.h"
 
+#include <stdlib.h>
+
 /////////////////////////////////////////////////////////////////
 MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
     QMainWindow(parent),
@@ -528,6 +530,33 @@ void MainWindow::focus_2()
 {
     focus_termIO(data_dec);
 }
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::uiResize_minus()
+{
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+    {
+        QTextCursor cursor = termIO[i].textEdit_out.textCursor();
+        QFont f1 = termIO[i].textEdit_out.font();
+        f1.setPointSize(f1.pointSize() - 1);
+        termIO[i].textEdit_out.setFont(f1);
+        termIO[i].textEdit_out.setTextCursor(cursor);
+    }
+}
+
+
+void MainWindow::uiResize_plus()
+{
+    for (int i = 0; i < TABWIDGET_TABCNT; i++)
+    {
+        QTextCursor cursor = termIO[i].textEdit_out.textCursor();
+        QFont f1 = termIO[i].textEdit_out.font();
+        f1.setPointSize(f1.pointSize() + 1);
+        termIO[i].textEdit_out.setFont(f1);
+        termIO[i].textEdit_out.setTextCursor(cursor);
+    }
+}
+
 
 /////////////////////////////////////////////////////////////////
 void MainWindow::focus_termIO(int index)

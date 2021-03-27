@@ -25,6 +25,9 @@ const QList <QList <QString>> SHORTCUTS_CONTENT_MAINWINDOW =
 
     { "CTRL + S" , "Open location where the terminal output shall be saved"},
 
+
+
+
     { "Esc"      , "Hide evrything"},
     { "CTRL + Q" , "Quit uiThis app"},
     { "F1"       , "Open help"}
@@ -63,6 +66,9 @@ void setupShortcuts(QWidget *uiThis)
     new QShortcut(QKeySequence(Qt::Key_F1), uiThis, SLOT(toggleShowHelp()));
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_N), uiThis, SIGNAL(fastCmds_addCmd()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), uiThis, SLOT(uiResize_minus()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), uiThis, SLOT(uiResize_plus()));
 
 
 }
