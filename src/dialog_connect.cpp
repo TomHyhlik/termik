@@ -391,6 +391,7 @@ void Dialog_connect::initWindow()
     ui->tabWidget->setTabText(1, TITLE_TAB_NETWORK);
     ui->spinBox_ipPort_Tx->setMaximum(PORT_RANGE);
     ui->spinBox_ipPort_Rx->setMaximum(PORT_RANGE);
+    ui->tabWidget->setCurrentIndex(TAB_INDEX_SERIAL);
 
 #if NETWORKSCAN_ENABLE_DEFAULT
     ui->checkBox_enableNetworkScan->setChecked(true);
