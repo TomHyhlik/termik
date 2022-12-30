@@ -314,19 +314,22 @@ QString MainWindow::terminalOutGetPreamble(int dataKind)
 
     QString preamble;
     preamble.append("\n");
-    preamble.append(time);
 
     switch (dataKind)
     {
     case data_Rx:
-        preamble.append(" [Rx] - ");
+        preamble.append("[Rx]-");
         break;
     case data_Tx:
-        preamble.append(" [Tx] - ");
+        preamble.append("[Tx]-");
         break;
     default:
-        preamble.append("  ");
+        preamble.append("");
     }
+
+    preamble.append(time);
+    preamble.append(" - ");
+
     return preamble;
 }
 

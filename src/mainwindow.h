@@ -41,7 +41,7 @@ enum {
 
 #define SUFFIX_DEFAULT      "\n"
 
-#define TIME_FORMAT "dd.MM.yyyy, hh:mm:ss"
+#define TIME_FORMAT "yyyy/MM/dd-hh:mm:ss.zzz"
 
 #define AUTOCLEAR_VAL_DEFAULT   1000
 #define SCRIPT_TXPERIOD_DEFAULT 1000
