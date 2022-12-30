@@ -18,7 +18,7 @@ void UiLog::write(int type, QString messageData)
 
     case note:
         timeout = LOGTIMEOUT_NOTE;
-        messageData.prepend("NOTE: ");
+        messageData.prepend("");
         break;
 
     case info:

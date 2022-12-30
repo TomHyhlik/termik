@@ -75,7 +75,6 @@ enum {
 
 #define LOCATION_DEFAULT    "~/"
 
-
 #define STATMESSAGE_ERR_NOTCONNECTED "Can't transmit. No connection established"
 
 
