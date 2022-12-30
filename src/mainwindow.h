@@ -23,6 +23,11 @@ enum {
 };
 
 ////////////////////////////////////////////////////////////
+#define VERSION_CODE            "0.1.0"
+
+#define MAINWINDOWTITLE         "Termik"
+
+
 #define PLATFORM    PLAT_WINDOWS
 
 
@@ -56,8 +61,6 @@ enum {
 #define COLOR_GRAY3     "#101010"
 #define COLOR_GRAY4     "#050505"
 
-#define MAINWINDOWTITLE "Termik"
-
 #define TITLE_DATA_ASCII    "ASCII"
 #define TITLE_DATA_HEX      "HEX"
 #define TITLE_BUTTON_SCRIPT_RUN "Run"
@@ -74,6 +77,10 @@ enum {
 
 
 #define STATMESSAGE_ERR_NOTCONNECTED "Can't transmit. No connection established"
+
+
+
+
 
 enum dataToDisplay {
      data_Rx, data_Tx

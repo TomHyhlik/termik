@@ -157,7 +157,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     fastCmds_save();
 
     (void)event;
-    LOG(QString("\nClosing %1\n").arg(MAINWINDOWTITLE));
+    LOG(QString("\nExitting...\n"));
 }
 
 /////////////////////////////////////////////////////////////////
@@ -717,7 +717,7 @@ void MainWindow::init_ui()
         connect(&termIO[i].lineEdit_in, &QLineEdit::returnPressed,
                 this, &MainWindow::pressedKey_enter);
 
-    setWindowTitle(MAINWINDOWTITLE);
+    setWindowTitle(QString("%1 v%2").arg(MAINWINDOWTITLE).arg(VERSION_CODE));
 
     ui->comboBox_scriptDataFormat->addItem(TITLE_DATA_ASCII);
     ui->comboBox_scriptDataFormat->addItem(TITLE_DATA_HEX);
