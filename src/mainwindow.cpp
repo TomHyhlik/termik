@@ -69,8 +69,8 @@ void MainWindow::fastCmds_save()
 /////////////////////////////////////////////////////////////////
 void MainWindow::toggleShowHelp()
 {
-    if (ui->tableWidget_shortcuts->isVisible()) hideHelp();
-    else    showHelp();
+    if (ui->tableWidget_shortcuts->isVisible()) { hideHelp(); }
+    else    { showHelp(); }
 }
 
 /////////////////////////////////////////////////////////////////
@@ -87,6 +87,8 @@ void MainWindow::showHelp()
     for (const auto &shortcut : SHORTCUTS_CONTENT_MAINWINDOW)
         table_addItem(ui->tableWidget_shortcuts, shortcut);
 }
+
+/////////////////////////////////////////////////////////////////
 void MainWindow::hideHelp()
 {
     table_clear(ui->tableWidget_shortcuts);
@@ -99,8 +101,8 @@ void MainWindow::hideHelp()
 void MainWindow::currentAppConfig_loadSaved()
 {
     SaveConfiguration saveCfg;
-    if (saveCfg.read()) {
-
+    if (saveCfg.read())
+    {
         /* load script parameters */
         if (!saveCfg.data.script.fileName.isEmpty()) {
             ui->lineEdit_scriptPath->setText(saveCfg.data.script.fileName);
@@ -123,9 +125,13 @@ void MainWindow::openScript()
     QString openLocation;
 
     if (!RunScriptParam::get().fileName.isEmpty())
+    {
         openLocation = RunScriptParam::get().fileName;
+    }
     else
+    {
         openLocation = LOCATION_DEFAULT;
+    }
 
     QString scriptFileName = QFileDialog::getOpenFileName(
                 this, RunScriptParam::get().fileName);
