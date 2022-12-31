@@ -297,16 +297,47 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
         {
             lastTerminalData = dataKind;
 
-            QString preamble = terminalOutGetPreamble(dataKind);
+            QString preamble_base = terminalOutGetPreamble(dataKind);
+            QString preamble_current;
 
-            /* put the preamble into text edits */
+            /* put the preamble into text edits and text files */
             for (int i = 0; i < TABWIDGET_TABCNT; i++)
-                writeToTextedit(&termIO[i].textEdit_out, COLOR_PREAMBLE, preamble);
+            {
+                preamble_current = preamble_base;
 
-            /* put the preamble into text file */
-            if (outputFile) {
-                outputFile->writeData_ascii(preamble);
-                outputFile->writeData_hex(preamble);
+                /* Remove additional space character in the ascii textEdit */
+                switch (i)
+                {
+                   case data_ascii:
+                    {
+                        QTextCursor cur = termIO[i].textEdit_out.textCursor();
+                        cur.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor, 1);
+                        /* Check if the last character has ASCII value bellow the space character */
+                        if ((int)cur.selectedText().toStdString().c_str()[0] < 32)
+                        {
+                            termIO[i].textEdit_out.textCursor().removeSelectedText();
+                            preamble_current.remove(0, 1);
+                        }
+                        break;
+                    }
+                }
+
+                /* Write the preamble to the textEdit */
+                writeToTextedit(&termIO[i].textEdit_out, COLOR_PREAMBLE, preamble_current);
+
+                /* Write the preamble to the file */
+                if (outputFile)
+                {
+                    switch (i)
+                    {
+                       case data_ascii:
+                        outputFile->writeData_ascii(preamble_current);
+                        break;
+                    case data_hex:
+                        outputFile->writeData_hex(preamble_current);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -315,10 +346,10 @@ void MainWindow::terminalOut_addPreamble(int dataKind)
 /////////////////////////////////////////////////////////////////
 QString MainWindow::terminalOutGetPreamble(int dataKind)
 {
+    QString preamble;
     QDateTime dt = QDateTime::currentDateTime();
     QString time = dt.toString(TIME_FORMAT);
 
-    QString preamble;
     preamble.append("\n");
 
     switch (dataKind)
