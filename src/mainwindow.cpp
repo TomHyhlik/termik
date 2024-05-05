@@ -42,13 +42,14 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
         communic->establish(cliArgHandler.getComType());
 }
 
+
 /////////////////////////////////////////////////////////////////
 void MainWindow::fastCmds_load()
 {
     SaveFastCmds saveFastCmds;
     if (saveFastCmds.read())
     {
-        for (const FastCmdData cmd : saveFastCmds.cmdDataList)
+        for (const FastCmdData& cmd : saveFastCmds.cmdDataList)
         {
             fastCmdsHandler->fastCmds_addCmd(cmd);
         }
