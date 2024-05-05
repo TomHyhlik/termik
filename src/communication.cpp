@@ -46,7 +46,10 @@ void Communication::establish(communicationType type)
 {            
     CommunicWorkerFactory factory;
     communicWorker = std::unique_ptr <CommunicationWorker> (factory.create(type));
-    if (communicWorker == nullptr) return;
+    if (communicWorker == nullptr)
+    {
+        LOG_T(error, "Failed to create communication class instance");
+    }
 
     LOG("Attempt to establish communication");
 
@@ -72,7 +75,7 @@ void Communication::establishPrintResults(bool success, communicationType type)
         switch (type)
         {
         case comType_serial:
-            LOG_T(note, QString("Opened Serial posrt: %1")
+            LOG_T(note, QString("Opened Serial port: %1")
                   .arg(SerialWParam::get().portName));
             break;
         case comType_network:
