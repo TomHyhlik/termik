@@ -29,11 +29,12 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    init_ui();
-    init_communication();
-    init_colors();
-    setupShortcuts(this);
-    init_appParams();
+    InitUi();
+    InitCommunicationWorker();
+    InitColors();
+    InitShortcuts();
+    InitAppParams();
+    
     currentAppConfig_loadSaved();
     fastCmds_load();
 
@@ -671,7 +672,7 @@ void MainWindow::on_comboBox_scriptDataFormat_currentTextChanged(const QString &
 }
 
 //////////////////////////////////////////////////////////////////////
-void MainWindow::init_appParams()
+void MainWindow::InitAppParams()
 {
     AppCfgParam::get().timeInfoEnabled = false;
     AppCfgParam::get().timeLogEnabled = true;
@@ -679,9 +680,9 @@ void MainWindow::init_appParams()
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::init_colors()
+void MainWindow::InitColors()
 {
-    /* MainWindow background */
+    /* MainWindow background cikirs */
     this->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                         .arg(COLOR_WHITE).arg(COLOR_GRAY2));
 
@@ -711,7 +712,7 @@ void MainWindow::init_colors()
                                             .arg(COLOR_WHITE).arg(COLOR_BLACK));
     }
 
-    /* pushbuttons */
+    /* PushButton colors */
     ui->pushButton_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                        .arg(COLOR_WHITE).arg(COLOR_GRAY0));
     ui->lineEdit_save->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
@@ -729,12 +730,10 @@ void MainWindow::init_colors()
 
     ui->lineEdit_scriptPath->setStyleSheet(QString(STR_STYLESHEET_COLOR_BCKGCOLOR)
                                            .arg(COLOR_WHITE).arg(COLOR_BLACK));
-
-
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::init_ui()
+void MainWindow::InitUi()
 {
     UiLog::get().setOutput(ui->statusBar);
 
@@ -782,7 +781,40 @@ void MainWindow::init_ui()
 }
 
 /////////////////////////////////////////////////////////////////
-void MainWindow::init_communication()
+void MainWindow::InitShortcuts()
+{
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this, SLOT(on_pushButton_scriptRun_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q), this, SLOT(close()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_F), this, SLOT(showFastCommands()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(pressedKey_esc()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_L), this, SLOT(moveCursorToEnd()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_L), this, SLOT(clearOutput()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_Comma), this, SLOT(toggleShowSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_P), this, SLOT(showConnectionSettings()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_P), this, SLOT(showConnectionSettings()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D), this, SLOT(connectionToggle()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_O), this, SLOT(openScript()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_1), this, SLOT(focus_0()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_2), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_3), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_1), this, SLOT(focus_0()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_2), this, SLOT(focus_1()));
+    new QShortcut(QKeySequence(Qt::ALT + Qt::Key_3), this, SLOT(focus_2()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(on_pushButton_save_clicked()));
+    new QShortcut(QKeySequence(Qt::Key_Up), this, SLOT(pressedKey_up()));
+    new QShortcut(QKeySequence(Qt::Key_Down), this, SLOT(pressedKey_down()));
+    new QShortcut(QKeySequence(Qt::Key_F1), this, SLOT(toggleShowHelp()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_N), this, SIGNAL(fastCmds_addCmd()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this, SLOT(uiResize_minus()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this, SLOT(uiResize_plus()));
+}
+/////////////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////
+void MainWindow::InitCommunicationWorker()
 {
     communic = new Communication(this);
     connect(communic, SIGNAL(displayData(int, QByteArray)),

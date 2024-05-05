@@ -68,7 +68,6 @@ HEADERS += \
         saveconfiguration.h \
         serialworker.h \
         serialwparam.h \
-        shortcuts.h \
         utils_tabWidget.h \
         protocol_tcp_client.h \
         protocol_tcp_server.h \

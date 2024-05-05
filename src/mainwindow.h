@@ -79,8 +79,6 @@ enum {
 
 
 
-
-
 enum dataToDisplay {
      data_Rx, data_Tx
 };
@@ -113,6 +111,25 @@ class MainWindow : public QMainWindow
     QLineEdit lineEdit_in;
 
     FastCmdsHandler* fastCmdsHandler;
+
+    const QList <QList <QString>> SHORTCUTS_CONTENT_MAINWINDOW =
+    {
+        { "CTRL + P" , "Show connection settongs"},
+        { "CTRL + D" , "Connect/Disconnect toggle"},
+        { "CTRL + ," , "Show main settongs"},
+        { "CTRL + O" , "Open a file \"script\"to run in terminal later"},
+        { "CTRL + R" , "Run/Stop transmission of the selected \"script\""},
+        { "CTRL + L" , "Move cursor to the end of the terminal output"},
+        { "CTRL + SHIFT + L" , "Clear terminal output"},
+        { "CTRL + 1" , "Set focus to ASCII tab"},
+        { "CTRL + 2" , "Set focus to Hex tab"},
+        { "CTRL + 3" , "Set focus to DEC tab"},
+        { "CTRL + S" , "Open location where the terminal output shall be saved"},
+        { "Esc"      , "Hide evrything"},
+        { "CTRL + Q" , "Quit uiThis app"},
+        { "F1"       , "Open help"}
+    };
+
 
 public:
     explicit MainWindow(int argc, char** argv, QWidget *parent = nullptr);
@@ -179,7 +196,7 @@ private slots:
     void on_lineEdit_scriptPath_textChanged(const QString &arg1);
 
 
-public slots:
+public slots:   
 
 
 private:
@@ -193,10 +210,11 @@ private:
     QList <QByteArray> history_out;
     int history_out_ptr;
 
-    void init_appParams();
-    void init_colors();
-    void init_ui();
-    void init_communication();
+    void InitAppParams();
+    void InitColors();
+    void InitUi();
+    void InitCommunicationWorker();
+    void InitShortcuts();
 
     void TxHistory_add(QByteArray data);
 
