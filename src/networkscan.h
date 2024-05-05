@@ -103,17 +103,14 @@ class ScanAddrDevAll : public ScanAddr
 
 public:
 
-        ScanAddrDevAll(QList <QHostInfo> addrsThis)
-            : addrsDevThis(addrsThis) {}
+    ScanAddrDevAll(QList <QHostInfo> addrsThis)
+        : addrsDevThis(addrsThis) {}
 
     void run() override
     {
-
-
         for (const QHostInfo& addr_devThis : addrsDevThis)
         {
 //            qDebug() << "looking at addr: " << addr_devThis.addresses().first().toString();
-
             for (quint32 addrLastByte = 0; addrLastByte < 0xFF; addrLastByte++)
             {
                 quint32 addr = addr_devThis.addresses().first().toIPv4Address();
@@ -121,6 +118,7 @@ public:
                 searchedLast = QHostAddress(addr);
                 QHostInfo::lookupHost(QHostAddress(addr).toString(),
                                       this, SLOT(lookupHost_result(QHostInfo)));
+                this->msleep(1);
             }
         }
     }
@@ -128,7 +126,6 @@ public:
 
     ~ScanAddrDevAll()
     {
-//        qDebug() << "Destroyed ScanAddrDevAll";
     }
 
 

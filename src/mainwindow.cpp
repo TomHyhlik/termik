@@ -3,7 +3,7 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <memory>
-
+#include <QShortcut>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "string.h"
@@ -12,7 +12,6 @@
 #include "saveconfiguration.h"
 #include "cliarghandler.h"
 #include "uilog.h"
-#include "shortcuts.h"
 #include "utils_tabWidget.h"
 
 #include "communication.h"
